@@ -1,0 +1,6 @@
+source("scripts//k600_model.R")
+print('k model done')
+source("scripts//scripts//monte_carlo_analysis.R")
+print('MC simulations done')
+source("scripts//Figures_pepsi.R")
+print('Validation figures done. Hopefully you had the validation results stored in the project!!')

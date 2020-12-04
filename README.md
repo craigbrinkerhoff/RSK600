@@ -1,6 +1,6 @@
 # Remote sensing the gas transfer velocity using SWOT observations
 
-See the 'outline' RMarkdown file, which explains this project in detail. In short, this project deals with devolping an empirical model for the normalized gas transfer velocity k600, and a subsequent algorithm which uses Bayesian inference to remotely sense k600 in preperation for the launch of the NASA/CNES/UKSA/CSA SWOT mission. This project is a work in progress.
+See the 'outline.html' RMarkdown file, which explains this project in detail. In short, this project deals with devolping an empirical model for the normalized gas transfer velocity k600, and a subsequent algorithm which uses Bayesian inference to remotely sense k600 in preperation for the launch of the NASA/CNES/UKSA/CSA SWOT mission. This project is a work in progress.
 
 ##To run
 1) run main.R

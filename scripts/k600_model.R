@@ -13,9 +13,8 @@ theme_set(theme_cowplot())
 options(scipen = 999)
 
 #Ulseth etal 2019------------------------------------------------------------
-ulseth_data <- read.csv('inputs//k600//Ulseth_etal_2019.csv') #contains data from 5 studies, including the infamous raymond etal 2012
+ulseth_data <- read.csv('inputs//k600//Ulseth_etal_2019.csv', fileEncoding="UTF-8-BOM") #contains data from 5 studies, including the infamous raymond etal 2012
 ulseth_data <- ulseth_data[,-8]
-colnames(ulseth_data)[colnames(ulseth_data) == 'ï..k600'] <- 'k600'
 ulseth_data$data <- ifelse(ulseth_data$data == 'This Study', 'Ulseth et al. 2019', as.character(ulseth_data$data))
 ulseth_data$data <- ifelse(ulseth_data$data == 'Raymond et al. 2012', 'Raymond et al. 2012 [5 studies]', as.character(ulseth_data$data))
 

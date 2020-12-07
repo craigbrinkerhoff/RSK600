@@ -1,7 +1,7 @@
 ---
 title: "Remote sensing the gas transfer velocity using SWOT observations"
 author: "Craig Brinkerhoff"
-date: "December 4, 2020"
+date: "`r Sys.Date()`"
 output:
  # pdf_document:
 #    latex_engine: xelatex
@@ -31,16 +31,19 @@ options(tinytex.verbose = TRUE)
 1)	Formulate a new empirical scaling model to predict k600 using only RS-able geomorphology
 2)	Build algorithm to run the new empirical model using SWOT observations
 3)	?????????
-    a.	Biogeochemists might be interested in a Merritt style test of this algorithm at field-scale (to circumvent velocity measurements…)
-    b.	Pepsi2-style comparisons across temporal sampling?
-    c. MORE
+    a. Biogeochemists might be interested in a Merritt style test of this algorithm at field-scale (to circumvent velocity measurements…)
+    b. Pepsi2-style comparisons across temporal sampling?
+    c. Some sort of k600 timeseries analysis? But these are all simulated k so I dunno.
+    d. MORE
 
 ## Goal 1
 #### Theory
 1) Raymond 2012 show that k600 can be scaled using hydraulics b/c k600 generally correlates with the turbulent dissipation rate (eD = gSV)
 2) Ulseth et al 2019 show two distinct scaling regimes for k600 with eD using an expanded dataset including steeper streams than those in Raymond 2012.
-3) Here, we take the Ulseth et al. 2019 dataset and develop a k600~eD scaling function that accounts for this regime shift but is entirely remotely sensible (i.e. not velocity dependent)
-	  a. k_600=a(gSV)b where a and b are differentially determined by river size. Thus, from a river’s width and slope alone (i.e. SWOT observations) we can choose the most reasonable scaling function.
+3) Here, we take the Ulseth et al. 2019 dataset and develop a k600~eD scaling function that accounts for this regime shift and the fact that scaling relationships differ as a f(river size). BUT, we only use SWOT observables to determine which scaling relationship to use.
+    a. i.e. river width and slope alone must be used to choose which scaling model to use.
+	    i. $k_{600}=a(gSV)^{b}$ where a and b are differentially determined by river size.
+	  b. Small rivers had to be broken into high/low slope to maintain all linear regression assumptions.
 	  
 ![**Figure 1** *eD~k600 scaling by river width/slope. This is how we are able to scale k600 using just SWOT observables*](outputs//k600//width_eD_theory.jpg)
 
@@ -50,33 +53,37 @@ options(tinytex.verbose = TRUE)
 
 
 #### Quantifying Uncertainity in Model Estimates
-1) We then quantified the total uncertainity implicit in the model output. Uncertainty can stem from three sources: 1) error in using Manning's equation to approximate flow velocity, 2) error in using a k600~eD scaling model to approximate k600, and 3) error implicit in our remote sensing algorithm. This third error source will be explicitly accounted (via Bayesian inference) in the RS algorithm output, however we also wanted to quantify total uncertainty from the model being used in the RS algorithm, i.e. from the other two sources. To do this, we used Monte Carlo simulations to propogate uncertanites through the entire model.
-    a. 8,000 sets of river hydraulic measurements from across the United States were taken from the Brinkerhoff etal (2019) dataset. For each one I ran a 10,000 run Monte Carlo simulation (sampling from the three parameters a, b, and "Manning's velocity") and obtained 8,000 different distributions quantifying model estimate uncertainity. Log uncertainity for the "Manning's velocity"" was assigned 0.25 following Hagemann et al. (2017).
+1) In order to remotely sense k600, we need a way to approximate flow velocity as it is not easily RS-able. We use a variant of Manning's equation, THE classic open channel flow depth~velocity relation, to do this (Durand et al. 2014; Hagemann et al. 2017 used to do the same thing from getting discharge from SWOT data).
+	  a. $k_{600}=a(gSV)^{b}$ Original Model
+	  b. $k_{600}=a(gS[\frac{1}{n} d^{2/3} S^{1/2}])^{b}$ Classical Manning's equation introduced
+	  c. $k_{600}=a(gS[\frac{1}{n} (A_{0}+dA)^{2/3} W^{-2/3} S^{1/2}])^{b}$ Durand et al. (2014) formulation of Manning's equation. (The handling of n and A0 in a RS framework will be addressed under Goal 2).
+2) We then quantified the total uncertainity implicit in the model output. Uncertainty can stem from three sources: 1) error from Manning's equation, 2) error in using a k600~eD scaling model, and 3) error implicit in our remote sensing algorithm. This third error source will be explicitly accounted for (via Bayesian inference) in the RS algorithm output, however we also wanted to quantify total uncertainty from the model being used in the RS algorithm, i.e. from the other two sources. To do this, we used Monte Carlo simulations to propogate uncertanites through the entire model.
+    a. 8,000 sets of river hydraulic measurements from across the United States were taken from the Brinkerhoff etal (2019) dataset. For each one I ran a 10,000 run Monte Carlo simulation (randomly sampling from the three parameters a, b, and "Manning's velocity") and obtained 8,000 different distributions quantifying model estimate uncertainity. Log uncertainity for the "Manning's velocity"" was assigned 0.25 following Hagemann et al. (2017)'s value for Manning's equation uncertainity.
 
-![**Figure 3** *Model Uncertainity estimates: a) histogram of SDs for all 8,000 MC simulations b) Three example MC simulations of 10,000 samples each c) will be a map of the 8,000 sets of hydraulic measurements*](outputs//MonteCarlo//MCsimulations.jpg)
+![**Figure 3** *Model uncertainity estimates: a) histogram of SDs for all 8,000 MC simulations b) Three example MC simulations of 10,000 samples each c) Map of the 8,000 sets of hydraulic measurements used for this analysis*](outputs//MonteCarlo//MCsimulations.jpg)
 
 ## Goal 2
 1) We propose the BIGER (Bayesian Inference/Inversion of Gas Evasion Rate) algorithm to remotely sense k600 from river width/height alone.
 2) We implement the k600~eD model from Q1 as a Bayesian likelihood function following methods developed for ungauged RSQ (Hagemann et al. 2017). Below is the derivation of the likelihood function used in the Bayesian inference model.
-	  a. $k_{600}=a(gSV)^{b}$
-	  b. $k_{600}=a(gS[\frac{1}{n} d^{2/3} S^{1/2}])^{b}$
-	  c. $k_{600}=a(gS[\frac{1}{n} (A_{0}+dA)^{2/3} W^{-2/3} S^{1/2}])^{b}$
-	  d. $k_{600}(\frac{1}{n}(A_0+dA)^{2/3})^{-b}=a(g W^{2/3}S^{3/2})^{b}$
-	    i. Model parameters on left-hand side (need priors), data on right-hand side
-	    ii. priors on k600, n, A0
-	      -geoBAM  Brinkerhoff etal 2020
-	      -k600 priors obtained similarly using Ulseth etal 2019
-3) For the sake of validating the algorithm, we assume that the scaling model is ‘truth’ and see if we can infer these values using only SWOT observables (river width and height)
-    a. Therefore, in the validation setup, posterior uncertainty is only Manning’s uncertainty (0.25) and not the total model uncertainty obtained in the MC simulations earlier. However, this total uncertainity would be implemented if running the algorithm for basic science objectives.
+	  a. $k_{600}=a(gS[\frac{1}{n} (A_{0}+dA)^{2/3} W^{-2/3} S^{1/2}])^{b}$
+	  b. $k_{600}(\frac{1}{n}(A_0+dA)^{2/3})^{-b}=a(g W^{2/3}S^{3/2})^{b}$
+	    i. Model parameters are now on left-hand side (i.e. need priors) and the data (i.e. SWOT observables) are on right-hand side. This allows us to, given the constant rhs value, sample from the left in the same manner that a traditional Bayesian sampling model samples from a set of model parameters (see Hagemann etal 2017 & Durand etal 2014). Therefore, the 'model parameters' are k600, n, and A0. In a Bayesian framework, these need priors assigned to them.
+	    ii. Brinkerhoff etal 2020 priors are used for n and A0. k600 priors are obtained similarly using Ulseth etal 2019 as the training data. <b> ELABORATE </b>
+3) For the sake of validating the algorithm, we assume that the scaling model is ‘truth’ and see if we can infer these values using only SWOT observables (river width and height/slope).
+    a. Therefore, in the validation setup, posterior uncertainty is only Manning’s uncertainty (0.25) and not the total model uncertainty obtained in the MC simulations earlier. However, this total uncertainity would be implemented if running the algorithm for general science objectives.
     b. We validated on 10-day pepsi 2 data. Plotted are means and 95% CIs of the posterior k600 values versus the ‘observed’ k600 calculated from observed velocity and slope for all timesteps across all 32 rivers
 
 ![**Figure 4** *Validation of remote sensing algorithm for 32 rivers with 10day sampling intervals*](outputs//validation//validation.jpg)
 
-Below are boxplots of performance metrics for the 32 rivers, i.e. how well do individual rivers do? NRMSE, RRMSE, and rBIAS are optimally zero while KGE is optimally 1. A KGE greater than -0.41 indicates our model outperforms a mean estimate, akin to an NSE of 0 for the hydroglogists out there (Knoben etal 2019).
+4. Below are boxplots of performance metrics for the 32 rivers, i.e. how well do individual rivers do? NRMSE, RRMSE, and rBIAS are optimally zero while KGE is optimally 1. A KGE greater than -0.41 indicates our model outperforms a mean estimate, akin to an NSE of 0 for the hydrologists out there (Knoben etal 2019). Also see Knoben et al (2019) for why NSE completely blows up for k600.
+    a. The result is great KGEs, NRMSEs, and RRMSEs (espically for aboslutely no in situ information) however a pretty high rBIAS. This bias is borne out in the scatterplot earlier.
 
 ![**Figure 5** *Pepsi validation by river*](outputs//validation//validation_by_river.jpg)
 
-The result is great KGEs, NRMSEs, and RRMSEs (espically for aboslutely no in situ information) however a pretty high rBIAS. This bias is borne out in the scatterplot earlier.
+5. Below are timeseries plots of observed versus modeled k600 for three rivers randomly sampled from the three tertiles of the by-river kge scores. a) is a 'good' river, b is a 'reasonabley performing' river, and c is a 'bad' performing river.
+
+![**Figure 6** *Pepsi validation timeseries for three rivers, where the model results include the posterior means and 95% CIs: a) randomly selected from upper tertile of kge scores b) randomly selected from middle tertile, c) randomly selected from worse tertile*](outputs//validation//validation_timeseries.jpg)
+
 
 ##Goal 3
 Who knows! Any interesting questions you can think of?

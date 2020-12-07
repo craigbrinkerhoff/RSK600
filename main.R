@@ -5,9 +5,11 @@
 source("scripts//k600_model.R")
 rm(list = ls())
 print('k model done')
+
 source("scripts//monte_carlo_analysis.R")
 rm(list = ls())
 print('MC simulations done')
+
 source("scripts//Figures_pepsi.R")
 rm(list = ls())
 print('Validation figures done. Hopefully you had the validation results stored in the project!!')

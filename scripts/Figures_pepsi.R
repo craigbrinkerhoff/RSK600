@@ -3,10 +3,9 @@
 #Produce figures for pepsi validation for RSK600 algorithm
 
 library(tidyr)
-library(ggplot2)
+library(tidyverse)
 library(cowplot)
 library(RColorBrewer)
-library(dplyr)
 library(colorspace)
 library(ggtext)
 theme_set(theme_cowplot())
@@ -26,7 +25,7 @@ valPlot <- ggplot(full_output, aes(x=(kobs), y=(kest_mean))) +
  # geom_point(size=5, pch=21, color='black', fill='#1b9e77') +
   geom_pointrange(aes(ymin = kest_low, ymax = kest_high), fatten=10, fill='#1b9e77', pch=21, color='black') +
   geom_smooth(size=2, color='black', method='lm', se=F)+
-  xlab('Observed k [m/dy]') +
+  xlab('Scaling Model k [m/dy]') +
   ylab('Remotely Sensed k [m/dy]') +
     scale_y_log10(
       breaks = scales::trans_breaks("log10", function(x) 10^x),
@@ -67,50 +66,53 @@ plotSWOTreaches <- ggplot(plot_stats, aes(x=key, y=value, fill=key)) +
   ylab('Value') +
   coord_cartesian(ylim = c(-1,1))+
   scale_fill_brewer(palette = 'Dark2', name='') +
-  theme(legend.position = 'none')
+  theme(legend.position = "none",
+        axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'))
 ggsave('outputs//validation//validation_by_river.jpg', plotSWOTreaches, width=8, height=8)
 
-# 
+ 
 # #example timeseries plot------------------------------------------------------------------------------------
-# set.seed(213)
-# 
-# kge_bins <- quantile(stats_by_reach$kge, c(0.33, 0.66))
-# kge_bad <- filter(stats_by_reach$kge <= kge_bins[1]) %>% select(SWOTreach)
-# kge_good <- filter(stats_by_reach, test == 2 & kge >= kge_bins[2]) %>% select(SWOTreach)
-# kge_eh <- filter(stats_by_reach, test == 2 & kge > kge_bins[1] & kge < kge_bins[2]) %>% select(SWOTreach)
-# 
-# badRiver <- filter(full_output, SWOTreach == sample(kge_bad$SWOTreach, 1))
-# badRiverPlot <- ggplot(full_output, aes(x=index, y=modelFCO2_mean, color=factor(SWOTreach))) +
-#   geom_point(aes(x=index, y=obsFCO2), size=5, shape=23, fill='pink', color='black') + #validation
-#   geom_line(aes(x=index, y=obsFCO2), size=1, color='pink') + #validation
-#   geom_line(size=1) + #Posterior
-#   geom_point(size=5)+ #Posterior
-#   geom_line(aes(index,priorFCO2), size=2, color='#3690c0') + #Prior
-#   ylab('Potential CO2 Flux [g/m2/dy]') +
-#   xlab('Timestep') +
-#   theme(legend.position = "none")
-# badRiverPlot
-# 
-# ehRiver <- filter(full_output, SWOTreach == sample(kge_eh$SWOTreach, 1))
-# ehRiverPlot <- ggplot(ehRiver, aes(x=index, y=modelFCO2_mean, color=factor(SWOTreach))) +
-#   geom_point(aes(x=index, y=obsFCO2), size=5, shape=23, fill='pink', color='black') + #validation
-#   geom_line(aes(x=index, y=obsFCO2), size=1, color='pink') + #validation
-#   geom_line(size=1) + #Posterior
-#   geom_point(size=5)+ #Posterior
-#   geom_line(aes(index,priorFCO2), size=2, color='#3690c0') + #Prior
-#   ylab('Potential CO2 Flux [g/m2/dy]') +
-#   xlab('Timestep') +
-#   theme(legend.position = "none")
-# ehRiverPlot
-# 
-# goodRiver <- filter(full_output, SWOTreach == sample(kge_good$SWOTreach, 1))
-# goodRiverPlot <- ggplot(goodRiver, aes(x=index, y=modelFCO2_mean, color=factor(SWOTreach))) +
-#   geom_point(aes(x=index, y=obsFCO2), size=5, shape=23, fill='pink', color='black') + #validation
-#   geom_line(aes(x=index, y=obsFCO2), size=1, color='pink') + #validation
-#   geom_line(size=1) + #Posterior
-#   geom_point(size=5)+ #Posterior
-#   geom_line(aes(index,priorFCO2), size=2, color='#3690c0') + #Prior
-#   ylab('Potential CO2 Flux [g/m2/dy]') +
-#   xlab('Timestep') +
-#   theme(legend.position = "none")
-# goodRiverPlot
+set.seed(215)
+
+kge_bins <- quantile(stats_by_reach$kge, c(0.33, 0.66))
+kge_bad <- filter(stats_by_reach, kge <= kge_bins[1]) %>% select(river)
+kge_good <- filter(stats_by_reach, kge >= kge_bins[2]) %>% select(river)
+kge_eh <- filter(stats_by_reach, kge >= kge_bins[1] & kge <= kge_bins[2]) %>% select(river)
+
+badRiver <- filter(full_output, river == sample(kge_bad$river, 1)) %>%
+  gather(key=key, value=value, c(kobs, kest_mean))
+badRiverPlot <- ggplot(badRiver, aes(x=time, y=value, color=key)) + #model
+  geom_pointrange(aes(ymin = kest_low, ymax = kest_high), fatten=10) +
+  geom_line(size=1) + 
+  ylab('k600 [m/dy]') +
+  xlab('Timestep') +
+  scale_color_brewer(palette='Dark2') +
+  theme(legend.position = "none")
+
+ehRiver <- filter(full_output, river == sample(kge_eh$river, 1)) %>%
+  gather(key=key, value=value, c(kobs, kest_mean))
+ehRiverPlot <- ggplot(ehRiver, aes(x=time, y=value, color=key)) + #model
+  geom_pointrange(aes(ymin = kest_low, ymax = kest_high), fatten=10) +
+  geom_line(size=1) +
+  ylab('k600 [m/dy]') +
+  xlab('Timestep') +
+  scale_color_brewer(palette='Dark2') +
+  theme(legend.position = "none")
+ehRiverPlot
+goodRiver <- filter(full_output, river == sample(kge_good$river, 1)) %>%
+  gather(key=key, value=value, c(kobs, kest_mean))
+goodRiverPlot <- ggplot(goodRiver, aes(x=time, y=value, color=key)) + #model
+  geom_pointrange(aes(ymin = kest_low, ymax = kest_high), fatten=10) +
+  geom_line(size=1) +
+  ylab('k600 [m/dy]') +
+  xlab('Timestep') +
+  scale_color_brewer(palette='Dark2', name='k600 [m/dy]', labels=c('Modeled', 'Observed'))
+
+# extract the legend from one of the plots
+legend <- get_legend(  goodRiverPlot + theme(legend.box.margin = margin(0, 0, 0, 100)))
+
+timeseriesPlot <- plot_grid(goodRiverPlot + theme(legend.position = 'none'), ehRiverPlot, badRiverPlot, legend, ncol=2, labels=c('a','b','c',NA), label_size = 18)
+ggsave('outputs//validation//validation_timeseries.jpg', timeseriesPlot, width=10, height=8)

@@ -11,6 +11,7 @@ library(tidyverse)
 library(tmap)
 library(st)
 library(sf)
+library(grid)
 theme_set(theme_cowplot())
 
 #random samplers: M sets of reasonable observations for model
@@ -107,17 +108,16 @@ for(i in 1:M){
 
 output <- output[-1,]
 
-#Plot histogram of M uncertanties
+#Plot histogram of M uncertanties--------------------------
 meanSD <- mean(output$sigma_logk600, na.rm=T)
 medianSD <- median(output$sigma_logk600, na.rm=T)
 plot <- ggplot(output, aes(x=sigma_logk600)) +
   geom_histogram(color='black', fill='darkgreen', size=1, bins=50) +
   xlab('lnSD of MC Simulated Estimates [m/dy]') +
   ylab('Count') +
-  ggtitle('Uncertainty Estimates from 8,000 \nMC simulations') +
   geom_vline(xintercept = meanSD, linetype='dashed', size=1.2, color='blue')
 
-#plot measurement locations
+#plot measurement locations--------------------------------
 tif_sf <- st_as_sf(output, coords = c("lon", "lat"), crs = 4326)
 states <- st_read('inputs//MonteCarlo//states.shp')
 hydroBox <- st_bbox(tif_sf)
@@ -125,26 +125,27 @@ hydroBox <- st_bbox(tif_sf)
 map <- tm_shape(tif_sf, bbox = hydroBox) + 
   tm_dots(size=0.1, col = 'darkgreen') +
   tm_scale_bar(position = c('LEFT', 'BOTTOM')) +
-  tm_compass(position = c('RIGHT', 'TOP'))
+  tm_compass(position = c('RIGHT', 'TOP'), size = 1)
 rivs <- tm_shape(states, bbox = hydroBox)+
   tm_polygons(col='beige', scale=0.5)
-map <- rivs + map
+rivs + map
+g1 <- grid.grab(width=3, height=3)
 
-#Plot some example uncertanties
+#Plot some example uncertanties--------------------------------
 t <- data.frame(logk_100, logk_3700, logk_4000)
 t <- gather(t, key=key, value=value)
 plot2 <- ggplot(t, aes(x=value, color=key)) +
-  geom_density(size=3) +
+  geom_density(size=2) +
   ylab('Density') +
   scale_color_brewer(palette = 'Dark2') +
   xlab('ln k600 [m/dy]') +
-  theme(legend.position = 'none') +
-  ggtitle('3 example MC simulations')
+  theme(legend.position = 'none')
 
-combinedPlot <- plot_grid(plot, plot2, map, ncol=2)
+combinedPlot <- plot_grid(plot, plot2, ncol=2, labels = 'auto', label_size = 18)
+combinedPlot <- plot_grid(combinedPlot, g1, ncol=1, labels = c(NA, 'c'), label_size = 18)
 
+#combine subplots-------------------------------------------------
 ggsave('outputs//MonteCarlo//MCsimulations.jpg', combinedPlot, width=10, height=6)
-tmap_save(map, 'outputs//MonteCarlo//map.jpg', width=1.5, height=1.5)
 
 #uncertainity for algorithm---------------------------------------
 meanSD

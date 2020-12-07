@@ -81,7 +81,6 @@ test_vali <- ggplot(data_test, aes(x=(k600), y=(k600_pred), color=data)) +
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
   )
-ggsave('outputs//k600//validation.jpg', test_vali, width=8, height=5)
 
 #retrain model on all data for actual implementation in BIGEER algorithm (OOBtrain/test split)----------------------------------------
 theory_plot <- ggplot(data, aes(x=(eD), y=(k600), color=factor(widthRegime))) +
@@ -89,7 +88,7 @@ theory_plot <- ggplot(data, aes(x=(eD), y=(k600), color=factor(widthRegime))) +
   geom_smooth(method='lm', size=3, se=F) +
   xlab('eD [m2/s3]') +
   ylab('k600 [m/dy]') +
-  scale_color_discrete_qualitative(palette = 'Harmonic', name='River Width [m]', label=c('0-10\n(slope < 0.05)', '0-10\n(slope > 0.05)','10-50', '50-100', '100+'))+
+  scale_color_discrete_qualitative(palette = 'Harmonic', name='River Width [m]', label=c('0-10 (slope < 0.05)', '0-10 (slope > 0.05)','10-50', '50-100', '100+'))+
   scale_y_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
@@ -97,9 +96,15 @@ theory_plot <- ggplot(data, aes(x=(eD), y=(k600), color=factor(widthRegime))) +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
-  ) +
-  theme(legend.position = 'bottom')
-ggsave('outputs//k600//width_eD_theory.jpg', theory_plot, width=8, height=5)
+  )
+
+#plot these two together--------------------------------
+legend1 <- get_legend(theory_plot + theme(legend.box.margin = margin(0, 0, 0, 50)))
+legend2 <- get_legend(test_vali + theme(legend.box.margin = margin(0, 0, 0, 50)))
+
+
+plot1 <- plot_grid(theory_plot + theme(legend.position = 'none'), legend1, test_vali + theme(legend.position = 'none'), legend2, ncol=2, labels=c('a', NA,'b',NA), label_size = 18)
+ggsave('outputs//k600//validation.jpg', plot1, width=9, height=7)
 
 #save model coefficients to be implemented within BIGEER algorithm
 k_model <- group_by(data, widthRegime) %>%

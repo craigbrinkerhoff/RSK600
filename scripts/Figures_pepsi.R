@@ -71,8 +71,6 @@ plotSWOTreaches <- ggplot(plot_stats, aes(x=key, y=value, fill=key)) +
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
-ggsave('outputs//validation//validation_by_river.jpg', plotSWOTreaches, width=8, height=8)
-
  
 # #example timeseries plot------------------------------------------------------------------------------------
 set.seed(215)
@@ -114,5 +112,8 @@ goodRiverPlot <- ggplot(goodRiver, aes(x=time, y=value, color=key)) + #model
 # extract the legend from one of the plots
 legend <- get_legend(  goodRiverPlot + theme(legend.box.margin = margin(0, 0, 0, 100)))
 
-timeseriesPlot <- plot_grid(goodRiverPlot + theme(legend.position = 'none'), ehRiverPlot, badRiverPlot, legend, ncol=2, labels=c('a','b','c',NA), label_size = 18)
-ggsave('outputs//validation//validation_timeseries.jpg', timeseriesPlot, width=10, height=8)
+timeseriesPlot <- plot_grid(goodRiverPlot + theme(legend.position = 'none'), ehRiverPlot, badRiverPlot, legend, ncol=2, labels=c('b','c','d',NA), label_size = 18)
+
+#bring it alllllll together---------------------------
+plot2 <- plot_grid(plotSWOTreaches, timeseriesPlot, ncol=2, labels=c('a', NA), label_size = 18)
+ggsave('outputs//validation//validation_by_river.jpg', plot2, width=14, height=8)

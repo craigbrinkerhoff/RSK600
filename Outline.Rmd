@@ -44,12 +44,9 @@ options(tinytex.verbose = TRUE)
     a. i.e. river width and slope alone must be used to choose which scaling model to use.
 	    i. $k_{600}=a(gSV)^{b}$ where a and b are differentially determined by river size.
 	  b. Small rivers had to be broken into high/low slope to maintain all linear regression assumptions.
-	  
-![**Figure 1** *eD~k600 scaling by river width/slope. This is how we are able to scale k600 using just SWOT observables*](outputs//k600//width_eD_theory.jpg)
-
 4) To test this, we then combine these five scaling functions into a single 'rule-based' regression model, train it on 80% of the data and validate it on the remaining 20% (below). The version ultimately implemented in our algorithm is trained on the entire dataset however.
 
-![**Figure 2** *Model validation on 20% of data, withheld from training*](outputs//k600//validation.jpg)
+![**Figure 2** *a) eD~k600 scaling by river width/slope. This is how we are able to scale k600 using just SWOT observables. b) Overall model validation on 20% of data, withheld from training*](outputs//k600//validation.jpg)
 
 
 #### Quantifying Uncertainity in Model Estimates
@@ -78,11 +75,7 @@ options(tinytex.verbose = TRUE)
 4. Below are boxplots of performance metrics for the 32 rivers, i.e. how well do individual rivers do? NRMSE, RRMSE, and rBIAS are optimally zero while KGE is optimally 1. A KGE greater than -0.41 indicates our model outperforms a mean estimate, akin to an NSE of 0 for the hydrologists out there (Knoben etal 2019). Also see Knoben et al (2019) for why NSE completely blows up for k600.
     a. The result is great KGEs, NRMSEs, and RRMSEs (espically for aboslutely no in situ information) however a pretty high rBIAS. This bias is borne out in the scatterplot earlier.
 
-![**Figure 5** *Pepsi validation by river*](outputs//validation//validation_by_river.jpg)
-
-5. Below are timeseries plots of observed versus modeled k600 for three rivers randomly sampled from the three tertiles of the by-river kge scores. a) is a 'good' river, b is a 'reasonabley performing' river, and c is a 'bad' performing river.
-
-![**Figure 6** *Pepsi validation timeseries for three rivers, where the model results include the posterior means and 95% CIs: a) randomly selected from upper tertile of kge scores b) randomly selected from middle tertile, c) randomly selected from worse tertile*](outputs//validation//validation_timeseries.jpg)
+![**Figure 5** *a) Performance metrics by river. b)-d): validation timeseries for three rivers, where the model results include the posterior means and 95% CIs: b) randomly selected from upper tertile of kge scores c) randomly selected from middle tertile, d) randomly selected from worse tertile*](outputs//validation//validation_by_river.jpg)
 
 
 ##Goal 3

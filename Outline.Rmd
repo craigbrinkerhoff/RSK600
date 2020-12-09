@@ -1,5 +1,5 @@
 ---
-title: "Remote sensing the gas transfer velocity using SWOT observations"
+title: "Remote sensing the gas transfer velocity using SWOT observations and no in situ information"
 author: "Craig Brinkerhoff"
 date: "`r Sys.Date()`"
 output:
@@ -23,8 +23,8 @@ options(tinytex.verbose = TRUE)
 3)	K600 is incredibly cumbersome to directly measure, and impractical when performing upscaling to entire river networks
 4)	Previous work has stressed that this is largely a f(turbulence) driven by river hydraulics/geomorphology
     a.	Empirical scaling functions have been developed to use hydraulics to model k600 for entire river systems but are prone to significant uncertainties (Raymond et al. 2012)
-    b.	They are also fundamentally dependent on modeled or measured flow velocities which themselves are prone to significant uncertainties (or poorly informed hydraulic geometry models…)
-    c.	What is needed is a simple way to directly observe the gas transfer velocity at scale and high temporal resolution without needing explicit flow velocity estimates. We argue that the upcoming NASA SWOT mission provides exactly the data required to make this a reality and remotely sense (RS) k600 at unprecedented temporal resolution
+5) Further, in situ data for hydraulics is often unavaible (esp. in remote rivers) and so k models are at the mercy of modeled hydraulics, themselves highly uncertain.
+6)	What is needed is a simple way to observe the gas transfer velocity at large scales and high temporal resolution without relying on situ flow velocity data or modeled velocities. We argue that the upcoming SWOT mission provides exactly the data required to make this a reality (at least in large rivers) and remotely sense (RS) k600 as a function of river hydraulics.
 
 ## Research Goals
 
@@ -60,7 +60,7 @@ options(tinytex.verbose = TRUE)
 ![**Figure 3** *Model uncertainity estimates: a) histogram of SDs for all 8,000 MC simulations b) Three example MC simulations of 10,000 samples each c) Map of the 8,000 sets of hydraulic measurements used for this analysis*](outputs//MonteCarlo//MCsimulations.jpg)
 
 ## Goal 2
-1) We propose the BIGER (Bayesian Inference/Inversion of Gas Evasion Rate) algorithm to remotely sense k600 from river width/height alone.
+1) We propose the BIGER (Bayesian Inference/Inversion of the Gas Evasion Rate) algorithm to remotely sense k600 from river width/height alone.
 2) We implement the k600~eD model from Q1 as a Bayesian likelihood function following methods developed for ungauged RSQ (Hagemann et al. 2017). Below is the derivation of the likelihood function used in the Bayesian inference model.
 	  a. $k_{600}=a(gS[\frac{1}{n} (A_{0}+dA)^{2/3} W^{-2/3} S^{1/2}])^{b}$
 	  b. $k_{600}(\frac{1}{n}(A_0+dA)^{2/3})^{-b}=a(g W^{2/3}S^{3/2})^{b}$
@@ -70,13 +70,22 @@ options(tinytex.verbose = TRUE)
     a. Therefore, in the validation setup, posterior uncertainty is only Manning’s uncertainty (0.25) and not the total model uncertainty obtained in the MC simulations earlier. However, this total uncertainity would be implemented if running the algorithm for general science objectives.
     b. We validated on 10-day pepsi 2 data. Plotted are means and 95% CIs of the posterior k600 values versus the ‘observed’ k600 calculated from observed velocity and slope for all timesteps across all 32 rivers
 
-![**Figure 4** *Validation of remote sensing algorithm for 32 rivers with 10day sampling intervals*](outputs//validation//validation.jpg)
+![**Figure 4** *Validation of remote sensing algorithm for 32 rivers with 10day sampling intervals. Black bars are 95% CIs for the modeled values. Black line is linear regression and dashed grey line is 1:1 line.*](outputs//validation//validation.jpg)
 
-4. Below are boxplots of performance metrics for the 32 rivers, i.e. how well do individual rivers do? NRMSE, RRMSE, and rBIAS are optimally zero while KGE is optimally 1. A KGE greater than -0.41 indicates our model outperforms a mean estimate, akin to an NSE of 0 for the hydrologists out there (Knoben etal 2019). Also see Knoben et al (2019) for why NSE completely blows up for k600.
-    a. The result is great KGEs, NRMSEs, and RRMSEs (espically for aboslutely no in situ information) however a pretty high rBIAS. This bias is borne out in the scatterplot earlier.
+4. Below are boxplots of performance metrics for the 32 rivers, i.e. how well do individual rivers do? NRMSE, RRMSE, and rBIAS are optimally zero while KGE is optimally 1. A KGE greater than -0.41 indicates our model outperforms a mean estimate, akin to an NSE of 0 (Knoben etal 2019). Also see Knoben et al (2019) for why NSE completely blows up for k600.
 
 ![**Figure 5** *a) Performance metrics by river. b)-d): validation timeseries for three rivers, where the model results include the posterior means and 95% CIs: b) randomly selected from upper tertile of kge scores c) randomly selected from middle tertile, d) randomly selected from worse tertile*](outputs//validation//validation_by_river.jpg)
 
 
 ##Goal 3
 Who knows! Any interesting questions you can think of?
+
+
+##References
+Durand, M., Neal, J., Rodríguez, E., Andreadis, K. M., Smith, L. C., & Yoon, Y. (2014). Estimating reach-averaged discharge for the River Severn from measurements of river water surface elevation and slope. Journal of Hydrology, 511, 92–104. https://doi.org/10.1016/j.jhydrol.2013.12.050
+
+Engram, M., Walter Anthony, K. M., Sachs, T., Kohnert, K., Serafimovich, A., Grosse, G., & Meyer, F. J. (2020). Remote sensing northern lake methane ebullition. Nature Climate Change, 1–7. https://doi.org/10.1038/s41558-020-0762-8
+
+Hagemann, M. W., Gleason, C. J., & Durand, M. T. (2017). BAM: Bayesian AMHG-Manning Inference of Discharge Using Remotely Sensed Stream Width, Slope, and Height: BAM FLOW USING STREAM WIDTH SLOPE HEIGHT. Water Resources Research, 53(11), 9692–9707. https://doi.org/10.1002/2017WR021626
+
+Knoben, W. J. M., Freer, J. E., & Woods, R. A. (2019). Technical note: Inherent benchmark or not? Comparing Nash–Sutcliffe and Kling–Gupta efficiency scores. Hydrology and Earth System Sciences, 23(10), 4323–4331. https://doi.org/10.5194/hess-23-4323-2019

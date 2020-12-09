@@ -10,6 +10,6 @@ source("scripts//monte_carlo_analysis.R")
 rm(list = ls())
 print('MC simulations done')
 
-source("scripts//Figures_pepsi.R")
+source("scripts//validation_figures.R")
 rm(list = ls())
-print('Validation figures done. Hopefully you had the validation results stored in the project!!')
+print('Validation figures done. Hopefully you had the correct validation results stored in the output directory!!')

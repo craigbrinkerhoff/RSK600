@@ -193,7 +193,7 @@ summary {
 
 <div id="remote-sensing-the-gas-transfer-velocity-using-swot-observations" class="section level1">
 <h1>Remote sensing the gas transfer velocity using SWOT observations</h1>
-<p>See the 'outline.html' RMarkdown file, which explains this project in detail. In short, this project deals with devolping an empirical model for the normalized gas transfer velocity k600, and a subsequent algorithm which uses Bayesian inference to remotely sense k600 in preperation for the launch of the NASA/CNES/UKSA/CSA SWOT mission. This project is a work in progress.</p>
+<p>See the 'outline.html' file, which explains this project and its results in detail. In short, this project deals with devolping an empirical model for the normalized gas transfer velocity k600, and a subsequent algorithm which uses Bayesian inference to remotely sense k600 in preperation for the launch of the NASA/CNES/UKSA/CSA SWOT mission. This project is a work in progress.</p>
 <div id="to-run" class="section level2">
 <h2>To run</h2>
 <ol style="list-style-type: decimal">
@@ -205,14 +205,15 @@ summary {
 <div id="notes" class="section level2">
 <h2>Notes</h2>
 <ol style="list-style-type: decimal">
-<li><p>Included in this repo are validation results after running the algorithm on simulated SWOT data. The actual algorithm is at <a href="https://github.com/craigbrinkerhoff/BIGEER" class="uri">https://github.com/craigbrinkerhoff/BIGEER</a> and the script needed to run these tests is included here (though is not run in the main.R script and is set up specifally for implementation on a high performance computing cluster).</p></li>
+<li><p>Included in this repo are validation results after running the algorithm on simulated SWOT data. The actual algorithm is stored in an R package and availble at <a href="https://github.com/craigbrinkerhoff/BIGER" class="uri">https://github.com/craigbrinkerhoff/BIGER</a> and the script needed to run these tests is included here (runBIGER.R), though it is not run in the main.R script and is set up specifally for implementation on a high performance computing cluster.</p></li>
+<li><p>The stan model implemented in the algorithm is saved here purely for posterity's sake (along with past versions as this is all a work in progress). The most recent version is the one implemented in the BIGER algorith and is used there.</p></li>
 <li><p>Note that the hydraulics dataset needed to run the MC simulations is not included here as it is too large to store on Git. It is availble in dropbox from its paper's original repo (<a href="https://github.com/craigbrinkerhoff/2019_AMHG" class="uri">https://github.com/craigbrinkerhoff/2019_AMHG</a>) but you will need to store it in the following location for all code to run smoothly: ~inputs/MonteCarlo/field_measurements.csv</p></li>
 </ol>
 </div>
 <div id="things-for-craig-to-do" class="section level2">
 <h2>Things for Craig to do</h2>
 <ol style="list-style-type: decimal">
-<li>Rerun entire validation with correct posterior uncertainity --&gt; 0.25</li>
+<li>Rerun entire validation with correct posterior uncertainity --&gt; 0.25 <b>DONE </b></li>
 <li>Figure out a 3rd research goal/Q.</li>
 </ol>
 </div>

@@ -16,6 +16,13 @@ knitr::opts_chunk$set(echo = TRUE)
 options(tinytex.verbose = TRUE)
 ```
 
+## Craig's things to do
+1) Address bias from k600 prior
+2) redo fig 6 with sigma_man not kest_sd
+2) Working on 3rd research question (courtesy of Merritt)
+
+--------------------------------------------------------------------------
+
 ## Background
 
 1)	CO2 emissions from rivers are significant (duh)
@@ -24,68 +31,116 @@ options(tinytex.verbose = TRUE)
 4)	Previous work has stressed that this is largely a f(turbulence) driven by river hydraulics/geomorphology
     a.	Empirical scaling functions have been developed to use hydraulics to model k600 for entire river systems but are prone to significant uncertainties (Raymond et al. 2012)
 5) Further, in situ data for hydraulics is often unavaible (esp. in remote rivers) and so k models are at the mercy of modeled hydraulics, themselves highly uncertain.
-6)	What is needed is a simple way to observe the gas transfer velocity at large scales and high temporal resolution without relying on situ flow velocity data or modeled velocities. We argue that the upcoming SWOT mission provides exactly the data required to make this a reality (at least in large rivers) and remotely sense (RS) k600 as a function of river hydraulics.
+6)	We argue that the upcoming SWOT mission will allow for addressing these limitations by remotely sensing (RS) k600 as a function of river hydraulics and, through a Bayesian framework, explicitly quantifying estimate uncertainity from multiple sources.
 
 ## Research Goals
 
 1)	Formulate a new empirical scaling model to predict k600 using only RS-able geomorphology
 2)	Build algorithm to run the new empirical model using SWOT observations
-3)	?????????
-    a. Biogeochemists might be interested in a Merritt style test of this algorithm at field-scale (to circumvent velocity measurements…)
-    b. Pepsi2-style comparisons across temporal sampling?
-    c. Some sort of k600 timeseries analysis? But these are all simulated k so I dunno.
-    d. MORE
+3)	Explore the GHG flux implications of using this algorithm versus standard upscaling functions
 
 ## Goal 1
 #### Theory
-1) Raymond 2012 show that k600 can be scaled using hydraulics b/c k600 generally correlates with the turbulent dissipation rate (eD = gSV)
-2) Ulseth et al 2019 show two distinct scaling regimes for k600 with eD using an expanded dataset including steeper streams than those in Raymond 2012.
-3) Here, we take the Ulseth et al. 2019 dataset and develop a k600~eD scaling function that accounts for this regime shift and the fact that scaling relationships differ as a f(river size). BUT, we only use SWOT observables to determine which scaling relationship to use.
-    a. i.e. river width and slope alone must be used to choose which scaling model to use.
-	    i. $k_{600}=a(gSV)^{b}$ where a and b are differentially determined by river size.
-	  b. Small rivers had to be broken into high/low slope to maintain all linear regression assumptions.
-4) To test this, we then combine these five scaling functions into a single 'rule-based' regression model, train it on 80% of the data and validate it on the remaining 20% (below). The version ultimately implemented in our algorithm is trained on the entire dataset however.
+1) Raymond 2012 show that k600 can be scaled using hydraulics b/c k600 generally correlates with the water column turbulent dissipation rate ($eD \approx gSV$)
+2) Ulseth et al 2019 show two distinct scaling regimes for k600 with eD using an expanded dataset including steeper streams than those in Raymond etal 2012 (all data used here were collected in the field and/or from previous studies by Ulseth etal 2019)
+3) Here, we extend the Ulseth et al. 2019 model and develop an RS-able variant of it that continues to account for the regime shift presented in that paper but also uses only SWOT observables to determine which scaling relationship to use (as opposed to using an eD threshold, which can't be known a priori from SWOT). The theory behind this rule-based regression if plotted in Figure 1 with the Ulseth etal (2019) dataset.
+    a. i.e. river width and slope alone are used to choose which scaling model to use.
+	    i. $k_{600}=a_i(gSV)^{b_i}$ for parameters a and b and 'characteristic river size thresholds' i (i = [10m, 50m, 100m])
+	  b. Small rivers are further broken into high/low slope to maintain all linear regression assumptions.
 
-![**Figure 2** *a) eD~k600 scaling by river width/slope. This is how we are able to scale k600 using just SWOT observables. b) Overall model validation on 20% of data, withheld from training*](outputs//k600//validation.jpg)
+![**Figure 1** *Extension of the Ulseth etal 2019 eD~k600 scaling model that is completely RS-able. This is how we are able to scale k600 using just SWOT observables.*](outputs//k600//theory_plot.jpg)
 
 
-#### Quantifying Uncertainity in Model Estimates
-1) In order to remotely sense k600, we need a way to approximate flow velocity as it is not easily RS-able. We use a variant of Manning's equation, THE classic open channel flow depth~velocity relation, to do this (Durand et al. 2014; Hagemann et al. 2017 used to do the same thing from getting discharge from SWOT data).
-	  a. $k_{600}=a(gSV)^{b}$ Original Model
-	  b. $k_{600}=a(gS[\frac{1}{n} d^{2/3} S^{1/2}])^{b}$ Classical Manning's equation introduced
-	  c. $k_{600}=a(gS[\frac{1}{n} (A_{0}+dA)^{2/3} W^{-2/3} S^{1/2}])^{b}$ Durand et al. (2014) formulation of Manning's equation. (The handling of n and A0 in a RS framework will be addressed under Goal 2).
-2) We then quantified the total uncertainity implicit in the model output. Uncertainty can stem from three sources: 1) error from Manning's equation, 2) error in using a k600~eD scaling model, and 3) error implicit in our remote sensing algorithm. This third error source will be explicitly accounted for (via Bayesian inference) in the RS algorithm output, however we also wanted to quantify total uncertainty from the model being used in the RS algorithm, i.e. from the other two sources. To do this, we used Monte Carlo simulations to propogate uncertanites through the entire model.
-    a. 8,000 sets of river hydraulic measurements from across the United States were taken from the Brinkerhoff etal (2019) dataset. For each one I ran a 10,000 run Monte Carlo simulation (randomly sampling from the three parameters a, b, and "Manning's velocity") and obtained 8,000 different distributions quantifying model estimate uncertainity. Log uncertainity for the "Manning's velocity"" was assigned 0.25 following Hagemann et al. (2017)'s value for Manning's equation uncertainity.
+
+4) We then compare this RS-able extension of the Ulseth model against the Ulseth model itself, as well as the three models from Raymond etal 2012 that use only slope and velocity as predictors (i.e. RS-able). The Raymond models were retrained on the expanded Ulseth dataset, which includes new data in addition to the Raymond 2012 dataset. We see identical predictive ability between the Ulseth model and our RS-able variant of that model. We also see that Raymond Eq. 5 predicts negative k values, which can't be plotted in log-space and highlight the limitations of a linear model for this problem.
+
+![**Figure 2** *Validation of five k600 upscaling models on 20% of the Ulseth etal 2019 dataset witheld for independent testing. Raymond Eq. 5 predicts negative k600 values, which are not plotted here and highlight the limitation of a linear model for this problem.*](outputs//k600//validation.jpg)
+
+
+#### Quantifying Uncertainity in Scaling Model + Manning's Equation
+1) In order to remotely sense k600, we need a way to approximate average flow velocity as it is not strictly RS-able. We use Manning's equation, the classic open channel flow depth~velocity relation, to do this.
+	  a. $k_{600}=a_i(gSV)^{b_i}$ Original Model
+	  b. $k_{600}=a_i(gS[\frac{1}{n} d^{2/3} S^{1/2}])^{b_i}$
+2) We then quantified the total uncertainity implicit in the model output. Uncertainty can stem from three sources: 1) error from Manning's equation, 2) error in using a k600~eD scaling model, and 3) error implicit in our remote sensing algorithm. This third error source will be explicitly accounted for (via Bayesian inference) in the RS algorithm output (Goal 2), however we also wanted to quantify total uncertainty from the model being used in the RS algorithm, i.e. from the other two sources. To do this, we used Monte Carlo simulations to propogate uncertanites through the entire model.
+    a. 8,000 sets of river hydraulic measurements from across the United States were taken from the Brinkerhoff etal (2019) dataset (Fig 3c). For each one I ran a 10,000 run Monte Carlo simulation (randomly sampling from the three parameters a, b, and "Manning's velocity") and obtained 8,000 different distributions (Fig 3b for some examples) quantifying model estimate uncertainity. Log uncertainity for the "Manning's velocity"" was assigned 0.25 following Hagemann et al. (2017)'s value for Manning's equation uncertainity.
 
 ![**Figure 3** *Model uncertainity estimates: a) histogram of SDs for all 8,000 MC simulations b) Three example MC simulations of 10,000 samples each c) Map of the 8,000 sets of hydraulic measurements used for this analysis*](outputs//MonteCarlo//MCsimulations.jpg)
 
-## Goal 2
-1) We propose the BIGER (Bayesian Inference/Inversion of the Gas Evasion Rate) algorithm to remotely sense k600 from river width/height alone.
-2) We implement the k600~eD model from Q1 as a Bayesian likelihood function following methods developed for ungauged RSQ (Hagemann et al. 2017). Below is the derivation of the likelihood function used in the Bayesian inference model.
-	  a. $k_{600}=a(gS[\frac{1}{n} (A_{0}+dA)^{2/3} W^{-2/3} S^{1/2}])^{b}$
-	  b. $k_{600}(\frac{1}{n}(A_0+dA)^{2/3})^{-b}=a(g W^{2/3}S^{3/2})^{b}$
-	    i. Model parameters are now on left-hand side (i.e. need priors) and the data (i.e. SWOT observables) are on right-hand side. This allows us to, given the constant rhs value, sample from the left in the same manner that a traditional Bayesian sampling model samples from a set of model parameters (see Hagemann etal 2017 & Durand etal 2014). Therefore, the 'model parameters' are k600, n, and A0. In a Bayesian framework, these need priors assigned to them.
-	    ii. Brinkerhoff etal 2020 priors are used for n and A0. k600 priors are obtained similarly using Ulseth etal 2019 as the training data. <b> ELABORATE </b>
-3) For the sake of validating the algorithm, we assume that the scaling model is ‘truth’ and see if we can infer these values using only SWOT observables (river width and height/slope).
-    a. Therefore, in the validation setup, posterior uncertainty is only Manning’s uncertainty (0.25) and not the total model uncertainty obtained in the MC simulations earlier. However, this total uncertainity would be implemented if running the algorithm for general science objectives.
-    b. We validated on 10-day pepsi 2 data. Plotted are means and 95% CIs of the posterior k600 values versus the ‘observed’ k600 calculated from observed velocity and slope for all timesteps across all 32 rivers
+The average lnSD (i.e. k600 estimate uncertainity) is 1.31 (~3.7 m/dy).
 
-![**Figure 4** *Validation of remote sensing algorithm for 32 rivers with 10day sampling intervals. Black bars are 95% CIs for the modeled values. Black line is linear regression and dashed grey line is 1:1 line.*](outputs//validation//validation.jpg)
+## Goal 2
+1) We propose the BIKER algorithm (<b>B</b>ayesian <b>I</b>nference/<b>I</b>nversion of the <b>k</b>600 <b>E</b>vasion <b>R</b>ate) to remotely sense k600 from river width/height alone.
+2) First, we use a variant of the Manning's equation that is defined using the SWOT observable variables width W, slope S, and change in channel area dA (the latter two are implicitly observed through river height H). We draw on Durand et al. 2014 and Hagemann et al. 2017 who do something similar to infer discharge from SWOT data.
+	  c. $k_{600}=a_i(gS[\frac{1}{n} (A_{0}+dA)^{2/3} W^{-2/3} S^{1/2}])^{b_i}$ Hagemann etal (2017) formulation of Manning's equation.
+3) We then implement this as a Bayesian likelihood function following methods developed for ungauged RSQ (Hagemann et al. 2017).
+	  a. $k_{600}=a_i(gS[\frac{1}{n} (A_{0}+dA)^{2/3} W^{-2/3} S^{1/2}])^{b_i}$
+	  b. $k_{600}(\frac{1}{n}(A_0+dA)^{2/3})^{-b_i}=a_i(g W^{-2/3}S^{3/2})^{b_i}$
+	    i. Model parameters are now on left-hand side (i.e. need priors) and the data (i.e. SWOT observables) are on right-hand side. This allows us to, given the constant rhs value, sample from the left in the same manner that a traditional Bayesian sampling model samples from a set of model parameters (see Hagemann etal 2017 & Durand etal 2014). Therefore, the 'model parameters' are k600, n, and A0. In a Bayesian framework, these need priors assigned to them, each defined by a set of prior hyperparameters.
+	    ii. Brinkerhoff etal 2020 prior hyperparameters are used for n and A0. k600 prior is calculatd using slope and trained onUlseth data. <b>The key here is that all hyperparameters are assigned using only river width and/or slope, meaning that absoultely no a priori information is needed about the river. Thus, no field measurements are required, no velocities need to be modeled, etc.</b>
+4) For the sake of validating the algorithm, we assume that the scaling model is ‘truth’ and see if we can infer these values using only SWOT observables (river width and height/slope). <b> This is thus largely a test of whether we can invert Manning's equation and define a reasoinable k600 prior. </b>
+    a. Therefore, in the validation setup, posterior uncertainty is only Manning’s uncertainty (0.25) and not the total model uncertainty obtained in the MC simulations earlier. However, this total uncertainity would be used in practice.
+    b. We validated on SWOT simulated rivers, every 11 days, replicating the average SWOT overpass. Plotted are means and 95% CIs of the posterior k600 values versus the ‘observed’ k600 calculated from observed velocity and slope for all timesteps across all 32 rivers
+
+![**Figure 4** *Validation of remote sensing algorithm for 22 rivers with 11 day sampling intervals. Black bars are 95% CIs for the modeled values. Black line is linear regression and dashed grey line is 1:1 line.*](outputs//validation//validation.jpg)
 
 4. Below are boxplots of performance metrics for the 32 rivers, i.e. how well do individual rivers do? NRMSE, RRMSE, and rBIAS are optimally zero while KGE is optimally 1. A KGE greater than -0.41 indicates our model outperforms a mean estimate, akin to an NSE of 0 (Knoben etal 2019). Also see Knoben et al (2019) for why NSE completely blows up for k600.
 
 ![**Figure 5** *a) Performance metrics by river. b)-d): validation timeseries for three rivers, where the model results include the posterior means and 95% CIs: b) randomly selected from upper tertile of kge scores c) randomly selected from middle tertile, d) randomly selected from worse tertile*](outputs//validation//validation_by_river.jpg)
 
 
-##Goal 3
-Who knows! Any interesting questions you can think of?
 
+6. We also compare a priori model uncertainity (i.e. from Manning's equation) against posterior model uncertainity to see how much uncertianity is added by using only observed W and H, i.e. a test of the manifestation of the priors and equifinality.
+
+THIS NEEDS TO BE REDONE WITH SIGMA_MAN
+
+![**Figure 6** *A) Histogram of BIKER k600 uncertainities (across all rivers and timesteps) compared against a priori uncertainity from Manning's equation (0.25- dark blue line). Red line is the mean of the BIKER uncertainities (0.32). B) The same plot, but mean uncertaintities for the 22 rivers (red line at 0.33).*](outputs//validation//validation_uncertainity.jpg)
+
+I'm still trying to figure out why there's like five rivers that have crazy increased uncertianity (causing the bimodal distributions).
+
+##Goal 3
+#### Current Approach
+1) Used the 22 SWOT rivers in conjunction with biweekly in-stream CO2 data for a similarly large river (Ohio River- Beauliu etal 2012). <b> NOTE: </b> there are only 29 CO2 values in this dataset so FOR THIS TEST ONLY we ignored all timesteps beyond 29 (only a few rivers go to 34, but its fine for this test)
+    a. We assume these CO2 data aligned with the SWOT observations, which isn't true but is fine for this test as we care only about relative FCO2 differences
+    b. Also, keeping CO2 data constant across rivers allows us to explore the sentivity of the k model only
+
+2) We calculated k600 using three different methods
+    a. Ulseth etal 2019 model
+    b. Raymond etal. 2012 model that is often used in global upscaling (Raymond etal. 2012; Lauerwald etal 2015; Liu etal in review)
+    c. BIKER algorithm.
+
+3) kco2 was backed out using a Schmidt number for CO2 and 25C temp following Raymond etal 2012 and Wanninkof (1992)
+
+4) air-side pCO2 was assumed to be 390 uatm
+
+#### Current Results
+Figure 6 shows the resulting timeseries of FCO2 [$g/m2*dy$]). Basically, we reproduce scaling model dynamics and magntiude, but there is some scatter around this line. Basically, works in some rivers and not others. Need to parse this out.
+
+![**Figure 7** *Left: FCO2 from BIKER versus using observed average flow velocity for all timesteps for 22 SWOT rivers. right: timeseries plots for three example rivers.*](outputs//flux_implications//FCO2_plot.jpg)
 
 ##References
+Beaulieu, J. J., Shuster, W. D., & Rebholz, J. A. (2012). Controls on gas transfer velocities in a large river. Journal of Geophysical Research: Biogeosciences, 117(G2). https://doi.org/10.1029/2011JG001794
+
+Brinkerhoff, C. B., Gleason, C. J., Feng, D., & Lin, P. (2020). Constraining Remote River Discharge Estimation Using Reach-Scale Geomorphology. Water Resources Research, 56(11), e2020WR027949. https://doi.org/10.1029/2020WR027949
+
 Durand, M., Neal, J., Rodríguez, E., Andreadis, K. M., Smith, L. C., & Yoon, Y. (2014). Estimating reach-averaged discharge for the River Severn from measurements of river water surface elevation and slope. Journal of Hydrology, 511, 92–104. https://doi.org/10.1016/j.jhydrol.2013.12.050
 
 Engram, M., Walter Anthony, K. M., Sachs, T., Kohnert, K., Serafimovich, A., Grosse, G., & Meyer, F. J. (2020). Remote sensing northern lake methane ebullition. Nature Climate Change, 1–7. https://doi.org/10.1038/s41558-020-0762-8
 
+Frasson, R. P. de M., Durand, M. T., & Rodríguez, E. (2019). Compilation of hydraulic models for the study of the spatial averaging on flow laws [Data set]. Zenodo. https://doi.org/10.5281/zenodo.3463541
+
 Hagemann, M. W., Gleason, C. J., & Durand, M. T. (2017). BAM: Bayesian AMHG-Manning Inference of Discharge Using Remotely Sensed Stream Width, Slope, and Height: BAM FLOW USING STREAM WIDTH SLOPE HEIGHT. Water Resources Research, 53(11), 9692–9707. https://doi.org/10.1002/2017WR021626
 
 Knoben, W. J. M., Freer, J. E., & Woods, R. A. (2019). Technical note: Inherent benchmark or not? Comparing Nash–Sutcliffe and Kling–Gupta efficiency scores. Hydrology and Earth System Sciences, 23(10), 4323–4331. https://doi.org/10.5194/hess-23-4323-2019
+
+Lauerwald, R., Laruelle, G. G., Hartmann, J., Ciais, P., & Regnier, P. A. G. (2015). Spatial patterns in CO2 evasion from the global river network. Global Biogeochemical Cycles, 29(5), 534–554. https://doi.org/10.1002/2014GB004941
+
+Raymond, P. A., Zappa, C. J., Butman, D., Bott, T. L., Potter, J., Mulholland, P., et al. (2012). Scaling the gas transfer velocity and hydraulic geometry in streams and small rivers. Limnology and Oceanography: Fluids and Environments, 2(1), 41–53. https://doi.org/10.1215/21573689-1597669
+
+Raymond, P. A., Hartmann, J., Lauerwald, R., Sobek, S., McDonald, C., Hoover, M., et al. (2013). Global carbon dioxide emissions from inland waters. Nature, 503(7476), 355–359. https://doi.org/10.1038/nature12760
+
+Rodríguez, E., Durand, M., & Frasson, R. P. de M. (2020). Observing Rivers With Varying Spatial Scales. Water Resources Research, 56(9), e2019WR026476. https://doi.org/10.1029/2019WR026476
+
+Ulseth, A. J., Hall, R. O., Boix Canadell, M., Madinger, H. L., Niayifar, A., & Battin, T. J. (2019). Distinct air–water gas exchange regimes in low- and high-energy streams. Nature Geoscience, 12(4), 259–263. https://doi.org/10.1038/s41561-019-0324-8
+
+Wanninkhof, R. (1992). Relationship between wind speed and gas exchange over the ocean. Journal of Geophysical Research: Oceans, 97(C5), 7373–7382. https://doi.org/10.1029/92JC00188
+

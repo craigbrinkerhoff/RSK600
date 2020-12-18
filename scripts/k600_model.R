@@ -8,6 +8,7 @@ library(Metrics)
 library(colorspace)
 library(ggfortify)
 library(ggtext)
+library(segmented)
 
 theme_set(theme_cowplot())
 options(scipen = 999)
@@ -22,19 +23,28 @@ data <- ulseth_data
 data <- filter(data, is.na(width)==0) #filter out no width measurements
 
 data$eD <- 9.8 * data$slope * data$Vms #water column turbulent dissipation rate m2/s3
-data$eS <- sqrt(9.8*data$depth*data$slope) / data$depth #turbulent dissipation rate from bed friction
 
 #width regime models for k600-----------------------------------------------------------------------
   #Width regimes are necessary because we can't remotely sense eD directly (hence the entire Bayesian algorithm!)
     #Thus, we can't know the eD threhsold of 0.02 a priori. BUT, we do know width a priori
- data$widthRegime <- ifelse(data$width < 10 & data$slope < 0.05, '1',
+data$widthRegime <- ifelse(data$width < 10 & data$slope < 0.05, '1',
                             ifelse(data$width < 10 & data$slope > 0.05, '1.5',
                                 ifelse(data$width < 50, '2',
                                    ifelse(data$width < 100, '3','4'))))
 
+data$log_eD <- log(data$eD)
+data$log_k600 <- log(data$k600)
+data$log_slope <- log(data$slope)
+data$raymond <- data$slope*data$Vms #for raymonds 2012 model
+
+lmSlope <- lm(log_k600~log_slope, data=data)
+segLmSlope <- segmented(lmSlope, npsi=1) #r2 0.55
+summary(segLmSlope)
+plot(segLmSlope)
+
 #Check linearity assumptions within each width class. If you cycle through the different classes, everything holds
-lm <- lm(log(k600)~log(eD), data=filter(data, widthRegime==1))
-autoplot(lm)
+#lm <- lm(log_k600~log_eD, data=filter(data, widthRegime==1))
+#autoplot(lm)
 
 #80/20 training and test split----------------------------------------
   #This is just for validation of method. In implementation I train model on entire dataset (see below)
@@ -44,6 +54,16 @@ sample = sample.split(data$k600, SplitRatio = .80)
 data_train = subset(data, sample == TRUE)
 data_test  = subset(data, sample == FALSE)
 
+#Other models: Ulseth and raymond models using only V and S
+lm_raymond <- lm(k600~raymond, data=data_train) #raymond model- linear, eq 5
+lm_raymond_2 <- lm(log_k600~log(raymond), data=data_train)#raymond model 2- power law, eq 4
+lm_raymond_3 <- lm(log_k600~log(slope)+log(Vms), data=data_train)#raymond model 3- multi power law, eq 3
+
+#Ulseth model
+linearModel <- lm(log_k600~log_eD, data=data_train)
+lm_ulseth <- segmented(linearModel, npsi = 1)
+
+#Our model
 #model k600 using rule-based linear regression
 k_model_train <- group_by(data_train, widthRegime) %>%
   do(model = lm(log(k600) ~ log(eD), data=.)) %>%
@@ -60,18 +80,23 @@ data_train <- left_join(data_train,k_model_train, by="widthRegime")
 data_test <- left_join(data_test,k_model_train, by="widthRegime")
 
 #predict k600
-data_test$k600_pred <- data_test$a * data_test$eD^data_test$b
+data_test$k600_pred_me <- data_test$a * data_test$eD^data_test$b
+data_test$k600_pred_raymond <- predict(lm_raymond, data_test)
+data_test$k600_pred_raymond_2 <- exp(predict(lm_raymond_2, data_test))
+data_test$k600_pred_raymond_3 <- exp(predict(lm_raymond_3, data_test))
+data_test$k600_pred_ulseth <- exp(predict(lm_ulseth, data_test))
 
-#Plot predicition validation
-r2 <- round(summary(lm(log10(data_test$k600) ~ log10(data_test$k600_pred)))$r.squared,2)
-rmse <- round(Metrics::rmse(log10(data_test$k600), log10(data_test$k600_pred)),3)
-test_vali <- ggplot(data_test, aes(x=(k600), y=(k600_pred), color=data)) +
+#Plot validation - me
+r2 <- round(summary(lm(log10(data_test$k600) ~ log10(data_test$k600_pred_me)))$r.squared,2)
+rmse <- 10^(round(Metrics::rmse(log10(data_test$k600), log10(data_test$k600_pred_me)),3))
+test_vali_me <- ggplot(data_test, aes(x=(k600), y=(k600_pred_me), color=data)) +
   geom_abline(size=2, color='grey', linetype='dashed') +
   geom_point(size=5, alpha=0.75) +
   geom_smooth(color='black', method='lm', size=2, se=F) +
   xlab('Observed k600 [m/dy]') +
   ylab('Predicted k600 [m/dy]') +
-  geom_richtext(aes(x=4, y=1000), label=paste0('r<sup>2</sup>: ', r2, '0'), color='black')+
+  geom_richtext(aes(x=4, y=300), label=paste0('r<sup>2</sup>: ', r2, '0'), color='black')+
+#  geom_richtext(aes(x=4, y=800), label=paste0('RMSE: ', rmse, '0'), color='black')+
   scale_color_brewer(palette = 'Dark2', name='Model Validation (80/20 Split)')+
   scale_y_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
@@ -82,7 +107,105 @@ test_vali <- ggplot(data_test, aes(x=(k600), y=(k600_pred), color=data)) +
     labels = scales::trans_format("log10", scales::math_format(10^.x))
   )
 
-#retrain model on all data for actual implementation in BIGEER algorithm (OOBtrain/test split)----------------------------------------
+#Plot validation - raymond
+r2 <- round(summary(lm(log10(data_test$k600) ~ log10(data_test$k600_pred_raymond)))$r.squared,2)
+rmse <- 10^(round(Metrics::rmse(log10(data_test$k600), log10(data_test$k600_pred_raymond)),3))
+test_vali_raymond <- ggplot(data_test, aes(x=(k600), y=(k600_pred_raymond), color=data)) +
+  geom_abline(size=2, color='grey', linetype='dashed') +
+  geom_point(size=5, alpha=0.75) +
+  geom_smooth(color='black', method='lm', size=2, se=F) +
+  xlab('Observed k600 [m/dy]') +
+  ylab('Predicted k600 [m/dy]') +
+  geom_richtext(aes(x=4, y=800), label=paste0('r<sup>2</sup>: ', r2, '0'), color='black')+
+ # geom_richtext(aes(x=4, y=600), label=paste0('RMSE: ', rmse, '0'), color='black')+
+  scale_color_brewer(palette = 'Dark2')+
+  theme(legend.position='none')+
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  )
+
+#Plot validation - raymond 2
+r2 <- round(summary(lm(log10(data_test$k600) ~ log10(data_test$k600_pred_raymond_2)))$r.squared,2)
+rmse <- 10^(round(Metrics::rmse(log10(data_test$k600), log10(data_test$k600_pred_raymond_2)),3))
+test_vali_raymond_2 <- ggplot(data_test, aes(x=(k600), y=(k600_pred_raymond_2), color=data)) +
+  geom_abline(size=2, color='grey', linetype='dashed') +
+  geom_point(size=5, alpha=0.75) +
+  geom_smooth(color='black', method='lm', size=2, se=F) +
+  xlab('Observed k600 [m/dy]') +
+  ylab('Predicted k600 [m/dy]') +
+  geom_richtext(aes(x=4, 100), label=paste0('r<sup>2</sup>: ', r2, '0'), color='black')+
+  # geom_richtext(aes(x=4, y=600), label=paste0('RMSE: ', rmse, '0'), color='black')+
+  scale_color_brewer(palette = 'Dark2')+
+  theme(legend.position='none')+
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  )
+
+#Plot validation - raymond 3
+r2 <- round(summary(lm(log10(data_test$k600) ~ log10(data_test$k600_pred_raymond_3)))$r.squared,2)
+rmse <- 10^(round(Metrics::rmse(log10(data_test$k600), log10(data_test$k600_pred_raymond_3)),3))
+test_vali_raymond_3 <- ggplot(data_test, aes(x=(k600), y=(k600_pred_raymond_3), color=data)) +
+  geom_abline(size=2, color='grey', linetype='dashed') +
+  geom_point(size=5, alpha=0.75) +
+  geom_smooth(color='black', method='lm', size=2, se=F) +
+  xlab('Observed k600 [m/dy]') +
+  ylab('Predicted k600 [m/dy]') +
+  geom_richtext(aes(x=4, y=100), label=paste0('r<sup>2</sup>: ', r2, '0'), color='black')+
+  # geom_richtext(aes(x=4, y=600), label=paste0('RMSE: ', rmse, '0'), color='black')+
+  scale_color_brewer(palette = 'Dark2')+
+  theme(legend.position='none')+
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  )
+
+#Plot validation - Ulseth
+r2 <- round(summary(lm(log10(data_test$k600) ~ log10(data_test$k600_pred_ulseth)))$r.squared,2)
+rmse <- 10^(round(Metrics::rmse(log10(data_test$k600), log10(data_test$k600_pred_ulseth)),3))
+test_vali_ulseth <- ggplot(data_test, aes(x=(k600), y=(k600_pred_ulseth), color=data)) +
+  geom_abline(size=2, color='grey', linetype='dashed') +
+  geom_point(size=5, alpha=0.75) +
+  geom_smooth(color='black', method='lm', size=2, se=F) +
+  xlab('Observed k600 [m/dy]') +
+  ylab('Predicted k600 [m/dy]') +
+  geom_richtext(aes(x=4, y=300), label=paste0('r<sup>2</sup>: ', r2, '0'), color='black')+
+ # geom_richtext(aes(x=4, y=600), label=paste0('RMSE: ', rmse, '0'), color='black')+
+  scale_color_brewer(palette = 'Dark2', name='')+
+  theme(legend.position='none')+
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  )
+
+legend <- get_legend(test_vali_me + theme(legend.box.margin = margin(0, 0, 0, 90)))
+validation <- plot_grid(test_vali_me + theme(legend.position='none') + xlab(''), 
+                        test_vali_ulseth + xlab('') + ylab(''), 
+                        test_vali_raymond_2 + xlab(''), 
+                        test_vali_raymond_3 + ylab(''), 
+                        test_vali_raymond, 
+                        legend, ncol=2, 
+                        labels=c('    RS-able Ulseth etal 2019', '   Ulseth etal 2019', 'Raymond etal 2012- Eq 4','Raymond etal 2012- Eq. 3', 'Raymond etal 2012- Eq 5', NA))
+ggsave('outputs/k600/validation.jpg', validation, width=10, height=12)
+
+#retrain model on all data for actual implementation in BIKER algorithm (OOBtrain/test split)----------------------------------------
 theory_plot <- ggplot(data, aes(x=(eD), y=(k600), color=factor(widthRegime))) +
   geom_point(size=4, alpha=0.50) +
   geom_smooth(method='lm', size=3, se=F) +
@@ -97,16 +220,9 @@ theory_plot <- ggplot(data, aes(x=(eD), y=(k600), color=factor(widthRegime))) +
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
   )
+ggsave('outputs//k600//theory_plot.jpg', theory_plot, width=9, height=7)
 
-#plot these two together--------------------------------
-legend1 <- get_legend(theory_plot + theme(legend.box.margin = margin(0, 0, 0, 50)))
-legend2 <- get_legend(test_vali + theme(legend.box.margin = margin(0, 0, 0, 50)))
-
-
-plot1 <- plot_grid(theory_plot + theme(legend.position = 'none'), legend1, test_vali + theme(legend.position = 'none'), legend2, ncol=2, labels=c('a', NA,'b',NA), label_size = 18)
-ggsave('outputs//k600//validation.jpg', plot1, width=9, height=7)
-
-#save model coefficients to be implemented within BIGEER algorithm
+#save model coefficients to be implemented within BIKER algorithm
 k_model <- group_by(data, widthRegime) %>%
   do(model = lm(log(k600) ~ log(eD), data=.)) %>%
   mutate(a = exp(model$coefficients[1])) %>%
@@ -120,11 +236,17 @@ k_model_groups <- group_by(data, widthRegime) %>%
 k_model <- left_join(k_model, k_model_groups, by='widthRegime')
 data <- left_join(data,k_model, by="widthRegime")
 
-data$k600_pred <- data$a * data$eD^data$b
-r2 <- round(summary(lm(log10(data$k600) ~ log10(data$k600_pred)))$r.squared,2)
-r2
+#Other models trained on full dataset-------------------------------------
+#Other models: Ulseth and raymond models using only V and S
+lm_raymond <- lm(k600~raymond, data=data) #raymond model- linear, eq 5
+lm_raymond_2 <- lm(log_k600~log(raymond), data=data)#raymond model 2- power law, eq 4
+lm_raymond_3 <- lm(log_k600~log(slope)+log(Vms), data=data)#raymond model 3- multi power law, eq 3
 
-#k600 prior pdfs used within BIGEER algorithm--------------------------------------
+#Ulseth model
+linearModel <- lm(log_k600~log_eD, data=data)
+lm_ulseth <- segmented(linearModel, npsi = 1)
+
+#k600 prior pdfs used within BIKER algorithm--------------------------------------
 k_prior_plot <- ggplot(data, aes(x=(k600), fill=factor(widthRegime))) +
   geom_density(alpha=0.4, color='black', size=1.2) +
   scale_x_log10(
@@ -135,12 +257,13 @@ k_prior_plot <- ggplot(data, aes(x=(k600), fill=factor(widthRegime))) +
   scale_color_brewer(palette = 'Dark2', name='Width Class')
 ggsave2('outputs//k600//priors.jpg')
 
-bigeer_k_prior <- group_by(data, widthRegime) %>%
+biker_k_prior <- group_by(data, widthRegime) %>%
   summarise(k600_hat = median(k600, na.rm = T),
+            k600_hat_mean = mean(k600, na.rm=T),
             k600_sd = sd(k600, na.rm=T),
             lowerbound_k600 = min(k600, na.rm=T),
             upperbound_k600 = max(k600, na.rm=T))
-write.csv(bigeer_k_prior, 'outputs//k600//k_priors.csv')
+write.csv(biker_k_prior, 'outputs//k600//k_priors.csv')
 
 
 #scrap-------------------------------------------------

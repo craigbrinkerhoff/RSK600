@@ -17,9 +17,7 @@ options(tinytex.verbose = TRUE)
 ```
 
 ## Craig's things to do
-1) Address bias from k600 prior
-2) redo fig 6 with sigma_man not kest_sd
-2) Working on 3rd research question (courtesy of Merritt)
+1) Run with slope errors from Renato
 
 --------------------------------------------------------------------------
 
@@ -81,7 +79,7 @@ The average lnSD (i.e. k600 estimate uncertainity) is 1.31 (~3.7 m/dy).
     a. Therefore, in the validation setup, posterior uncertainty is only Manning’s uncertainty (0.25) and not the total model uncertainty obtained in the MC simulations earlier. However, this total uncertainity would be used in practice.
     b. We validated on SWOT simulated rivers, every 11 days, replicating the average SWOT overpass. Plotted are means and 95% CIs of the posterior k600 values versus the ‘observed’ k600 calculated from observed velocity and slope for all timesteps across all 32 rivers
 
-![**Figure 4** *Validation of remote sensing algorithm for 22 rivers with 11 day sampling intervals. Black bars are 95% CIs for the modeled values. Black line is linear regression and dashed grey line is 1:1 line.*](outputs//validation//validation.jpg)
+![**Figure 4** *Validation of remote sensing algorithm for 22 rivers with 11 day sampling intervals. Black bars are 95% CIs for the modeled values. Grey line is linear regression (and 95% predicition intervals) and dashed black line is 1:1 line.*](outputs//validation//validation.jpg)
 
 4. Below are boxplots of performance metrics for the 32 rivers, i.e. how well do individual rivers do? NRMSE, RRMSE, and rBIAS are optimally zero while KGE is optimally 1. A KGE greater than -0.41 indicates our model outperforms a mean estimate, akin to an NSE of 0 (Knoben etal 2019). Also see Knoben et al (2019) for why NSE completely blows up for k600.
 
@@ -89,16 +87,8 @@ The average lnSD (i.e. k600 estimate uncertainity) is 1.31 (~3.7 m/dy).
 
 
 
-6. We also compare a priori model uncertainity (i.e. from Manning's equation) against posterior model uncertainity to see how much uncertianity is added by using only observed W and H, i.e. a test of the manifestation of the priors and equifinality.
-
-THIS NEEDS TO BE REDONE WITH SIGMA_MAN
-
-![**Figure 6** *A) Histogram of BIKER k600 uncertainities (across all rivers and timesteps) compared against a priori uncertainity from Manning's equation (0.25- dark blue line). Red line is the mean of the BIKER uncertainities (0.32). B) The same plot, but mean uncertaintities for the 22 rivers (red line at 0.33).*](outputs//validation//validation_uncertainity.jpg)
-
-I'm still trying to figure out why there's like five rivers that have crazy increased uncertianity (causing the bimodal distributions).
-
 ##Goal 3
-#### Current Approach
+#### Method
 1) Used the 22 SWOT rivers in conjunction with biweekly in-stream CO2 data for a similarly large river (Ohio River- Beauliu etal 2012). <b> NOTE: </b> there are only 29 CO2 values in this dataset so FOR THIS TEST ONLY we ignored all timesteps beyond 29 (only a few rivers go to 34, but its fine for this test)
     a. We assume these CO2 data aligned with the SWOT observations, which isn't true but is fine for this test as we care only about relative FCO2 differences
     b. Also, keeping CO2 data constant across rivers allows us to explore the sentivity of the k model only
@@ -115,9 +105,15 @@ I'm still trying to figure out why there's like five rivers that have crazy incr
 #### Current Results
 Figure 6 shows the resulting timeseries of FCO2 [$g/m2*dy$]). Basically, we reproduce scaling model dynamics and magntiude, but there is some scatter around this line. Basically, works in some rivers and not others. Need to parse this out.
 
-![**Figure 7** *Left: FCO2 from BIKER versus using observed average flow velocity for all timesteps for 22 SWOT rivers. right: timeseries plots for three example rivers.*](outputs//flux_implications//FCO2_plot.jpg)
+![**Figure 6** *Left: FCO2 from BIKER versus using observed average flow velocity for all timesteps for 22 SWOT rivers (grey lines are linear regression and 95% prediciton intervals, while black dashed line is the 1:1 line). right: timeseries plots for three example rivers.*](outputs//flux_implications//FCO2_plot.jpg)
 
-##References
+Finally, we wanted to see how our completely ungauged, no in situ information algorithm compares against gauged approaches for estimating average flow velocity. We used two V~Q rating curves used for global CO2 upscaling efforts (Liu et al. in review; Raymond etal. 2013).
+
+![**Figure 7** *Left: barplots of total flux, per day and m2, of CO2 off of the 22 SWOT rivers for BIKER and threevelocity models: observed velocity and two hydraulic geomtery models (using observed discharge) used for global CO2 upscaling. Right: Cummulative density functions (CDFs) of all FCO2 estimates across all timesteps and rivers for the same set of velocity models. *](outputs//flux_implications//FCO2_models.jpg)
+
+
+
+## References
 Beaulieu, J. J., Shuster, W. D., & Rebholz, J. A. (2012). Controls on gas transfer velocities in a large river. Journal of Geophysical Research: Biogeosciences, 117(G2). https://doi.org/10.1029/2011JG001794
 
 Brinkerhoff, C. B., Gleason, C. J., Feng, D., & Lin, P. (2020). Constraining Remote River Discharge Estimation Using Reach-Scale Geomorphology. Water Resources Research, 56(11), e2020WR027949. https://doi.org/10.1029/2020WR027949

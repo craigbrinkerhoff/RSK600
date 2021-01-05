@@ -14,36 +14,65 @@ theme_set(theme_cowplot())
 sumsq <- function(x) sum(x^2)
 
 #read in results----------------------------------
-full_output <- read.csv('inputs//validation//results_SWOT_11day_slopeK.csv')
+full_output <- read.csv('inputs//validation//results_SWOT_11day_markK.csv')
 full_output <- filter(full_output, river != 'guez_etal_2020/ArialKhan')
-r2 <- round(summary(lm(log(full_output$kest_mean)~log(full_output$kobs)))$r.squared, 2)
+lm_kfit <- lm(log(full_output$kest_mean)~log(full_output$kobs))
+r2 <- round(summary(lm_kfit)$r.squared, 2)
 full_output <- drop_na(full_output)
 rmse <- round(exp(Metrics::rmse(log(full_output$kest_mean), log(full_output$kobs))), 2)
 
+predInts <- predict(lm_kfit, interval='prediction')
+full_output <- cbind(full_output, predInts)
+
 #Model Validation across all rivers and timesteps--------------------------------------------------------
 valPlot <- ggplot(full_output, aes(x=(kobs), y=(kest_mean))) +
-  geom_abline(size=2, linetype='dashed', color='grey') +
- # geom_point(size=5, pch=21, color='black', fill='#1b9e77') +
+  geom_abline(size=2, linetype='dashed', color='black') +
   geom_pointrange(aes(ymin = kest_low, ymax = kest_high), fatten=10, fill='#1b9e77', pch=21, color='black') +
-  geom_smooth(size=2, color='black', method='lm', se=F)+
-  xlab('Scaling Model k [m/dy]') +
-  ylab('Remotely Sensed k [m/dy]') +
+  geom_smooth(size=2, color='darkgrey', method='lm', se=F)+
+  geom_line(aes(y=exp(lwr)), color='darkgrey', linetype='dashed', size=1.75) +
+  geom_line(aes(y=exp(upr)), color='darkgrey', linetype='dashed', size=1.75) +
+  xlab('k600 via observed velocity [m/dy]') +
+  ylab('BIKER k600 [m/dy]') +
     scale_y_log10(
       breaks = scales::trans_breaks("log10", function(x) 10^x),
       labels = scales::trans_format("log10", scales::math_format(10^.x)))+
    scale_x_log10(
       breaks = scales::trans_breaks("log10", function(x) 10^x),
       labels = scales::trans_format("log10", scales::math_format(10^.x)))+
-  coord_cartesian(xlim=c(10^-0.75, 10^0.75), ylim=c(10^-0.75,10^0.75))+
   scale_color_discrete_qualitative(palette = 'Harmonic') +
   theme(legend.position = "none",
         axis.text=element_text(size=20),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold')) +
-  geom_richtext(aes(x=10^-0.5, y=10^0.6), color='black', label=paste0('RMSE: ', rmse, ' m/dy')) +
- geom_richtext(aes(x=10^-0.5, y=10^0.5), color='black', label=paste0('r<sup>2</sup>: ', r2), size=5)
-ggsave('outputs//validation//validation.jpg', valPlot, width=8, height=8)
+  geom_richtext(aes(x=10^-0.4, y=10^0.6), color='black', label=paste0('RMSE: ', rmse, ' m/dy')) +
+  geom_richtext(aes(x=10^-0.4, y=10^0.5), color='black', label=paste0('r<sup>2</sup>: ', r2), size=5)
+
+#hit rates------------------- BAD
+kobs_ecdf <- ecdf(full_output$kobs)
+full_output$hitRate <- ifelse(round(full_output$kobs, 1) >= round(full_output$kest_low,1) & round(full_output$kobs,1) <= round(full_output$kest_high,0),1,0)
+sum(full_output$hitRate)/nrow(full_output)
+
+#cdfs---------------------
+t <- gather(full_output, key=key, value=value, c(kobs, kest_mean, kest_high, kest_low))
+t$flag <- ifelse(t$key == 'kobs', 1, 0)
+k600_cdfs <- ggplot(t, aes(x=value, color=key, linetype=factor(flag))) +
+  stat_ecdf(size=1.25) +
+  scale_color_manual(values=c('#67a9cf','#67a9cf', '#66c2a5', 'black')) +
+  xlab('k600 [m/dy]') +
+  ylab('Percentile') +
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x)))+
+  geom_hline(yintercept = 0.50, size=1.2) +
+  theme(legend.position = "none",
+        axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'))
+
+valPlot <- plot_grid(valPlot, k600_cdfs, ncol=2, labels=c('a', 'b'))
+ggsave('outputs//validation//validation.jpg', valPlot, width=12, height=7)
 
 #by river metrics---------------------------------------------
 stats_by_reach <- group_by(full_output, river) %>%
@@ -81,32 +110,38 @@ kge_eh <- filter(stats_by_reach, kge >= kge_bins[1] & kge <= kge_bins[2]) %>% se
 
 badRiver <- filter(full_output, river == sample(kge_bad$river, 1)) %>%
   gather(key=key, value=value, c(kobs, kest_mean))
+riv <- substr(as.character(badRiver[1,]$river), 16, nchar(as.character(badRiver[1,]$river)))
 badRiverPlot <- ggplot(badRiver, aes(x=time, y=value, color=key)) + #model
   geom_pointrange(aes(ymin = kest_low, ymax = kest_high), fatten=10) +
   geom_line(size=1) + 
   ylab('k600 [m/dy]') +
   xlab('Timestep') +
   scale_color_brewer(palette='Set2') +
-  theme(legend.position = "none")
+  theme(legend.position = "none") +
+  ggtitle(riv)
 
 ehRiver <- filter(full_output, river == sample(kge_eh$river, 1)) %>%
   gather(key=key, value=value, c(kobs, kest_mean))
+riv <- substr(as.character(ehRiver[1,]$river), 16, nchar(as.character(ehRiver[1,]$river)))
 ehRiverPlot <- ggplot(ehRiver, aes(x=time, y=value, color=key)) + #model
   geom_pointrange(aes(ymin = kest_low, ymax = kest_high), fatten=10) +
   geom_line(size=1) +
   ylab('k600 [m/dy]') +
   xlab('Timestep') +
   scale_color_brewer(palette='Set2') +
-  theme(legend.position = "none")
+  theme(legend.position = "none") +
+  ggtitle(riv)
 
 goodRiver <- filter(full_output, river == sample(kge_good$river, 1)) %>%
   gather(key=key, value=value, c(kobs, kest_mean))
+riv <- substr(as.character(goodRiver[1,]$river), 16, nchar(as.character(goodRiver[1,]$river)))
 goodRiverPlot <- ggplot(goodRiver, aes(x=time, y=value, color=key)) + #model
   geom_pointrange(aes(ymin = kest_low, ymax = kest_high), fatten=10) +
   geom_line(size=1) +
   ylab('k600 [m/dy]') +
   xlab('Timestep') +
-  scale_color_brewer(palette='Set2', name='k600 [m/dy]', labels=c('Modeled', 'Observed'))
+  scale_color_brewer(palette='Set2', name='k600 [m/dy]', labels=c('Modeled', 'Observed')) +
+  ggtitle(riv)
 
 # extract the legend from one of the plots
 legend <- get_legend(goodRiverPlot + theme(legend.box.margin = margin(0, 0, 0, 100)))
@@ -117,22 +152,22 @@ plot2 <- plot_grid(plotSWOTreaches, timeseriesPlot, ncol=2, labels=c('a', NA), l
 ggsave('outputs//validation//validation_by_river.jpg', plot2, width=14, height=8)
 
 
-#Compare BIKER uncertainties against MC uncertanties-------------------------------------------------------
-prior_k600_uncertainity <- 1.029
-mean_modelSD_by_riv <- group_by(full_output, river) %>%
-  summarise(meanSD = mean(kest_sd, na.rm=T))
-uncertainity_comparison_alltimesteps <- ggplot(full_output, aes(x=kest_sd)) +
-  geom_histogram(size=1, color='black', fill='darkgreen', bins=30) +
-  geom_vline(xintercept = prior_k600_uncertainity, linetype='dashed', size=1.3, color='darkblue') +
-  geom_vline(xintercept = mean(full_output$kest_sd), size=1.3, color='darkred') +
-  xlab('BIKER k600 ln(sd)') +
-  ylab('Count')
-uncertainity_comparison_byRiv <- ggplot(mean_modelSD_by_riv, aes(x=meanSD)) +
-  geom_histogram(size=1, color='black', fill='darkgreen', bins=30) +
-  geom_vline(xintercept = prior_k600_uncertainity, linetype='dashed', size=1.3, color='darkblue') +
-  geom_vline(xintercept = mean(mean_modelSD_by_riv$meanSD), size=1.3, color='darkred') +
-  xlab('BIKER k600 ln(sd)') +
-  ylab('Count')
-
-RS_uncertainity <- plot_grid(uncertainity_comparison_alltimesteps, uncertainity_comparison_byRiv, ncol=2, labels = 'auto')
-ggsave('outputs//validation/validation_uncertainity.jpg', RS_uncertainity)
+# #Compare BIKER uncertainties against MC uncertanties-------------------------------------------------------
+# prior_k600_uncertainity <- 1.029
+# mean_modelSD_by_riv <- group_by(full_output, river) %>%
+#   summarise(meanSD = mean(kest_sd, na.rm=T))
+# uncertainity_comparison_alltimesteps <- ggplot(full_output, aes(x=kest_sd)) +
+#   geom_histogram(size=1, color='black', fill='darkgreen', bins=30) +
+#   geom_vline(xintercept = prior_k600_uncertainity, linetype='dashed', size=1.3, color='darkblue') +
+#   geom_vline(xintercept = mean(full_output$kest_sd), size=1.3, color='darkred') +
+#   xlab('BIKER k600 ln(sd)') +
+#   ylab('Count')
+# uncertainity_comparison_byRiv <- ggplot(mean_modelSD_by_riv, aes(x=meanSD)) +
+#   geom_histogram(size=1, color='black', fill='darkgreen', bins=30) +
+#   geom_vline(xintercept = prior_k600_uncertainity, linetype='dashed', size=1.3, color='darkblue') +
+#   geom_vline(xintercept = mean(mean_modelSD_by_riv$meanSD), size=1.3, color='darkred') +
+#   xlab('BIKER k600 ln(sd)') +
+#   ylab('Count')
+# 
+# RS_uncertainity <- plot_grid(uncertainity_comparison_alltimesteps, uncertainity_comparison_byRiv, ncol=2, labels = 'auto')
+# ggsave('outputs//validation/validation_uncertainity.jpg', RS_uncertainity)

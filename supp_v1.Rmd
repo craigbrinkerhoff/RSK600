@@ -1,0 +1,29 @@
+---
+title: "Supplemental Information"
+author: "Craig Brinkerhoff"
+date: "January 28, 2021"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Supplemental Information
+Text S1
+Tsivoglou & Neal (1976) outlined an energy dissipation model for the reaeration coefficient (K2, or k without depth correction) that is frequently generalized and used to scale k600 (Raymond et al. 2012; Ulseth et al. 2019). They showed that K2 scales linearly with the energy dissipation rate eD. Their derivation explicitly shows that eD=dH/dT for some segment of stream where H is water surface elevation and T is hydraulic residence time. For a stream segment with residence time T, the loss in water surface elevation is synonymous equivalent to the downward component of flow velocity V in the h dimension over the stream segment length (i.e. Sh). So, we can generalize this to dH/dT=V_h S_h≈VS_h. Finally, this can be converted to an energy dissipation rate per unit weight of water such that eD [L^2/T^3 ]=g dH/dT≈〖gVS〗_h. This model is convenient for our use because SWOT will only measure Sh and not channel slope S0. Further, Manning’s equation under non-uniform flow conditions requires Sh and not S¬0 and so we can conveniently merge the slope terms across equations and directly measure them from SWOT.
+
+To my knowledge, most k600 upscaling studies to date have assumed uniform flow conditions (i.e. S_0=S_h) to train their upscaling parameters. This is presumably because channel slope is readily available in hydrographic data products while water surface slope is not. Therefore, future work should look at the influence of non-uniform flow on the upscaling of k600. Once SWOT launches, this will be easy to compare as SWOT data products will have both channel slope and water surface slope.
+
+![Figure S1 Timeseries of the biweekly CO2 data from Beaulieu et al. (2012). Sampling took place 2008-2009 in the Ohio River (upstream of Cincinnati, OH). Each point here was joined to the 11-day SWOT observations used in this study (section 5.2.4).](outputs/flux_implications/Beaulieu_timeseries.jpg)
+ 
+![Figure S2 Histogram of equation 3 uncertainty terms extracted from 8,000 different Monte Carlo simulations (following that outlined in section 5.2.2). This indicates estimate uncertainty from the ai and bi parameters (and not Manning’s equation). Dashed blue line indicates the mean uncertainty (1.30 in ln-space, or ~3.67 m/day).](outputs/MonteCarlo/noMannings.jpeg)
+ 
+![Figure S3 By-river performance metrics for FCO2 using the metrics outlined in Table 1. Dashed lines denote scores of 1, 0, and -0.41 for KGE (Knoben et al. 2019). Recall that the Raymond and Lauerwald models use the in-situ discharge record while BIKER does not.](outputs/flux_implications/FCO2_by_river.jpg)
+
+Table S1 Details on the 3 velocity rating curve models used to estimate bulk carbon efflux from the SWOT rivers (section 5.2.4).
+	Equation	Description
+Raymond et al. (2012)	lnV=-1.64+0.285lnQ	Trained on Raymond et al. (2012) dataset
+Raymond et al. (2013)	lnV=mean{█(-1.64+0.285lnQ,@-1.06+0.12lnQ  )}	Average of Raymond et al. (2012) model and one trained on 9,811 USGS streamgauges
+Lauerwald et al. (2015)	lnV=-1.06+0.12lnQ	Borrowed from ½ of the Raymond et al. (2013) calculation (trained on 9,811 USGS streamgauges)
+

@@ -16,10 +16,10 @@ sumsq <- function(x) sum(x^2)
 #read in results----------------------------------
 full_output <- read.csv('inputs//validation//results_SWOT_11day_markK.csv')
 full_output <- filter(full_output, river != 'guez_etal_2020/ArialKhan')
-lm_kfit <- lm(log(full_output$kest_mean)~log(full_output$kobs))
+lm_kfit <- lm(log10(full_output$kest_mean)~log10(full_output$kobs))
 r2 <- round(summary(lm_kfit)$r.squared, 2)
 full_output <- drop_na(full_output)
-rmse <- round(exp(Metrics::rmse(log(full_output$kest_mean), log(full_output$kobs))), 2)
+rmse <- round((Metrics::rmse(log10(full_output$kest_mean), log10(full_output$kobs))), 2)
 
 predInts <- predict(lm_kfit, interval='prediction')
 full_output <- cbind(full_output, predInts)
@@ -29,14 +29,14 @@ valPlot <- ggplot(full_output, aes(x=(kobs), y=(kest_mean))) +
   geom_abline(size=2, linetype='dashed', color='black') +
   geom_pointrange(aes(ymin = kest_low, ymax = kest_high), fatten=10, fill='#1b9e77', pch=21, color='black') +
   geom_smooth(size=2, color='darkgrey', method='lm', se=F)+
-  geom_line(aes(y=exp(lwr)), color='darkgrey', linetype='dashed', size=1.75) +
-  geom_line(aes(y=exp(upr)), color='darkgrey', linetype='dashed', size=1.75) +
+  geom_line(aes(y=10^(lwr)), color='darkgrey', linetype='dashed', size=1.75) +
+  geom_line(aes(y=10^(upr)), color='darkgrey', linetype='dashed', size=1.75) +
   xlab('k600 via observed velocity [m/dy]') +
   ylab('BIKER k600 [m/dy]') +
-    scale_y_log10(
+  scale_y_log10(
       breaks = scales::trans_breaks("log10", function(x) 10^x),
       labels = scales::trans_format("log10", scales::math_format(10^.x)))+
-   scale_x_log10(
+  scale_x_log10(
       breaks = scales::trans_breaks("log10", function(x) 10^x),
       labels = scales::trans_format("log10", scales::math_format(10^.x)))+
   scale_color_discrete_qualitative(palette = 'Harmonic') +
@@ -45,13 +45,8 @@ valPlot <- ggplot(full_output, aes(x=(kobs), y=(kest_mean))) +
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold')) +
-  geom_richtext(aes(x=10^-0.4, y=10^0.6), color='black', label=paste0('RMSE: ', rmse, ' m/dy')) +
-  geom_richtext(aes(x=10^-0.4, y=10^0.5), color='black', label=paste0('r<sup>2</sup>: ', r2), size=5)
-
-#hit rates------------------- BAD
-kobs_ecdf <- ecdf(full_output$kobs)
-full_output$hitRate <- ifelse(round(full_output$kobs, 1) >= round(full_output$kest_low,1) & round(full_output$kobs,1) <= round(full_output$kest_high,0),1,0)
-sum(full_output$hitRate)/nrow(full_output)
+  geom_richtext(aes(x=10^-0.25, y=10^0.6), color='black', label=paste0('RMSE: 10^', rmse, ' m/dy'), size=8) +
+  geom_richtext(aes(x=10^-0.25, y=10^0.35), color='black', label=paste0('r<sup>2</sup>: ', r2), size=8)
 
 #cdfs---------------------
 t <- gather(full_output, key=key, value=value, c(kobs, kest_mean, kest_high, kest_low))
@@ -81,7 +76,8 @@ stats_by_reach <- group_by(full_output, river) %>%
             nrmse = sqrt(mean((kobs - kest_mean)^2)) / mean(kobs, na.rm=T),
             rBIAS =   mean(kest_mean - kobs) / mean(kobs, na.rm=T),
             rrmse =   sqrt(mean((kest_mean - kobs)^2 / kobs^2)),
-            CVobs = round(sd(kobs)/mean(kobs, na.rm=T), 2))
+            CVobs = round(sd(kobs)/mean(kobs, na.rm=T), 2),
+            CVest = round(sd(kest_mean)/mean(kest_mean, na.rm=T), 2))
 
 plot_stats <- gather(stats_by_reach, key=key, value=value, c('nse', 'nrmse', 'rBIAS', 'rrmse', 'kge'))
 plot_stats <- filter(plot_stats, key %in% c('nrmse', 'rrmse', 'rBIAS', 'kge'))
@@ -150,24 +146,25 @@ legend <- get_legend(goodRiverPlot + theme(legend.box.margin = margin(0, 0, 0, 1
 timeseriesPlot <- plot_grid(goodRiverPlot + theme(legend.position = 'none'), ehRiverPlot, badRiverPlot, legend, ncol=2, labels=c('b','c','d',NA), label_size = 18)
 plot2 <- plot_grid(plotSWOTreaches, timeseriesPlot, ncol=2, labels=c('a', NA), label_size = 18)
 ggsave('outputs//validation//validation_by_river.jpg', plot2, width=14, height=8)
+break
+#save results for ms---------------------------------------------------
+results_3_2 <- data.frame('rmse'=rmse, 'r2'=r2)
+write.csv(results, 'outputs//validation//results_all_riv.csv')
+write.csv(stats_by_reach, 'outputs//validation//results_by_riv.csv')
 
 
-# #Compare BIKER uncertainties against MC uncertanties-------------------------------------------------------
-# prior_k600_uncertainity <- 1.029
-# mean_modelSD_by_riv <- group_by(full_output, river) %>%
-#   summarise(meanSD = mean(kest_sd, na.rm=T))
-# uncertainity_comparison_alltimesteps <- ggplot(full_output, aes(x=kest_sd)) +
-#   geom_histogram(size=1, color='black', fill='darkgreen', bins=30) +
-#   geom_vline(xintercept = prior_k600_uncertainity, linetype='dashed', size=1.3, color='darkblue') +
-#   geom_vline(xintercept = mean(full_output$kest_sd), size=1.3, color='darkred') +
-#   xlab('BIKER k600 ln(sd)') +
-#   ylab('Count')
-# uncertainity_comparison_byRiv <- ggplot(mean_modelSD_by_riv, aes(x=meanSD)) +
-#   geom_histogram(size=1, color='black', fill='darkgreen', bins=30) +
-#   geom_vline(xintercept = prior_k600_uncertainity, linetype='dashed', size=1.3, color='darkblue') +
-#   geom_vline(xintercept = mean(mean_modelSD_by_riv$meanSD), size=1.3, color='darkred') +
-#   xlab('BIKER k600 ln(sd)') +
-#   ylab('Count')
-# 
-# RS_uncertainity <- plot_grid(uncertainity_comparison_alltimesteps, uncertainity_comparison_byRiv, ncol=2, labels = 'auto')
-# ggsave('outputs//validation/validation_uncertainity.jpg', RS_uncertainity)
+
+#for finesst
+#slope versus temporal variation of k600
+temp <- gather(stats_by_reach, key=key, value=value, c('CVobs', 'CVest'))
+ggplot(temp, aes(x=meanS, y=value*100, color=key)) + 
+  geom_point(size=5) +
+  geom_smooth(se=F, method='lm', size=1.5)+
+  scale_color_brewer(palette='Dark2', name='', labels=c('BIKER', 'Observed'))+
+  ylim(0,100)+
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))) +
+  ylab('CV K600 [%]') +
+  xlab('Mean SWOT slope') +
+  theme(legend.position = 'bottom')

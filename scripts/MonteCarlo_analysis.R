@@ -147,6 +147,6 @@ combinedPlot <- plot_grid(combinedPlot, g1, ncol=1, labels = c(NA, 'c'), label_s
 #combine subplots-------------------------------------------------
 ggsave('outputs//MonteCarlo//MCsimulations.jpg', combinedPlot, width=10, height=6)
 
-#uncertainity for algorithm---------------------------------------
-meanSD
-medianSD
+#Save uncertainity to file for ms---------------------------------------
+results <- data.frame('meanSigma'=meanSD, 'medianSigma'=medianSD)
+write.csv(results, 'outputs//MonteCarlo//results.csv')

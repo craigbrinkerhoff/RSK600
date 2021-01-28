@@ -69,7 +69,7 @@ k600_craig <- function(w, s, v) {
   }
   return(k)
 }
-
+s <- data.frame('river'=NA, 'meanS'=NA)
 #run-------------------------------------------
 if (munge == 1) {
   #read in co2 data (Beauliu etal 2012)--------------------------------
@@ -90,7 +90,8 @@ if (munge == 1) {
                        'FCO2_ulset'=NA, 
                        'FCO2_BIKER'=NA, 'FCO2_BIKER_low'=NA, 'FCO2_BIKER_high'=NA,
                        'FCO2_raymond2012'=NA, 'FCO2_raymond2012_low'=NA, 'FCO2_raymond2012_high'=NA,
-                       'FCO2_raymond2013'=NA, 'FCO2_raymond2013_low'=NA, 'FCO2_raymond2013_high'=NA)
+                       'FCO2_raymond2013'=NA, 'FCO2_raymond2013_low'=NA, 'FCO2_raymond2013_high'=NA,
+                       'FCO2_Lauerwald2015'=NA, 'FCO2_Lauerwald2015_low'=NA, 'FCO2_Lauerwald2015_high'=NA)
   files = list.files('inputs/flux_implications', pattern="*.nc", full.names = TRUE)
   for (river in files[2:length(files)]){ #skip Arial Khan
     #read in swot rivers
@@ -140,6 +141,8 @@ if (munge == 1) {
       area=area[,-remove_index]
     }
     
+    s <- rbind(s, data.frame('river'=river, meanS=mean(S_obs, na.rm=T)))
+    
     #Calculate dA matrix from RS W and H
     dA_obs <- calcdA_mat(W_obs,H_obs) #m2
     
@@ -156,10 +159,18 @@ if (munge == 1) {
     # V_raymond2012_low <- exp(-1.9)*Q_obs^(0.218) #95% CIs
     # V_raymond2012_high <- exp(-1.78)*Q_obs^(0.272)
 
-    #Calculate velocity using global rating curve from Liu etal in review
+    #Calculate velocity using global rating curve from 1/2 the raymond 2013 model (used in Lauerwald 2015)
     V_raymond2013 <- exp(-1.06)*Q_obs^0.12
     V_raymond2013_low <- exp(-1.06)*Q_obs^(0.12+1.96*0.0091) #95% CIs but these are using 2012 uncertainities b/c there are no CIs published for these
     V_raymond2013_high <- exp(-1.06)*Q_obs^(0.12-1.96*0.0091)
+    
+    V_lauerwald2015 <- V_raymond2013
+    V_lauerwald2015_low <- V_raymond2013_low
+    V_lauerwald2015_high <- V_raymond2013_high
+    
+    #avgerage of the models was the actual implemntation in Raymond 2013
+    d <- data.frame(V_raymond2012, V_raymond2013)
+    V_raymond2013 <- rowMeans(d)
     
     #eD
     eD <- g * V_obs * S_obs
@@ -169,19 +180,23 @@ if (munge == 1) {
     k600_BIKER <- filter(BIKER_results, river == name)$kest_mean
     k600_raymond2012 <- k600_craig(W_obs, S_obs, V_raymond2012)
     k600_raymond2013 <- k600_craig(W_obs, S_obs, V_raymond2013)
-
+    k600_Lauerwald2015 <- k600_craig(W_obs, S_obs, V_lauerwald2015)
+    
     k600_BIKER_low <- filter(BIKER_results, river == name)$kest_low
     k600_BIKER_high <- filter(BIKER_results, river == name)$kest_high
     k600_raymond2012_low <- k600_craig(W_obs, S_obs, V_raymond2012_low)
     k600_raymond2012_high <- k600_craig(W_obs, S_obs, V_raymond2012_high)
     k600_raymond2013_low <- k600_craig(W_obs, S_obs, V_raymond2013_low)
     k600_raymond2013_high <- k600_craig(W_obs, S_obs, V_raymond2013_high)
+    k600_Lauerwald2015_low <- k600_craig(W_obs, S_obs, V_lauerwald2015_low)
+    k600_Lauerwald2015_high <- k600_craig(W_obs, S_obs, V_lauerwald2015_high)
 
     #Convert to kco2--------------------------
     kco2_ulseth <- colMeans((Sc_co2/600)^(-1/2)/k600_ulseth, na.rm=T)
     kco2_BIKER <- (Sc_co2/600)^(-1/2)/k600_BIKER
     kco2_raymond2012 <- colMeans((Sc_co2/600)^(-1/2)/k600_raymond2012, na.rm=T)
     kco2_raymond2013 <- colMeans((Sc_co2/600)^(-1/2)/k600_raymond2013, na.rm=T)
+    kco2_Lauerwald2015 <- colMeans((Sc_co2/600)^(-1/2)/k600_Lauerwald2015, na.rm=T)
 
     kco2_BIKER_low <- (Sc_co2/600)^(-1/2)/k600_BIKER_low
     kco2_BIKER_high <- (Sc_co2/600)^(-1/2)/k600_BIKER_high
@@ -189,6 +204,8 @@ if (munge == 1) {
     kco2_raymond2012_high <- colMeans((Sc_co2/600)^(-1/2)/k600_raymond2012_high, na.rm=T)
     kco2_raymond2013_low <- colMeans((Sc_co2/600)^(-1/2)/k600_raymond2013_low, na.rm=T)
     kco2_raymond2013_high <- colMeans((Sc_co2/600)^(-1/2)/k600_raymond2013_high, na.rm=T)
+    kco2_Lauerwald2015_low <- colMeans((Sc_co2/600)^(-1/2)/k600_Lauerwald2015_low, na.rm=T)
+    kco2_Lauerwald2015_high <- colMeans((Sc_co2/600)^(-1/2)/k600_Lauerwald2015_high, na.rm=T)
 
     #Calculate FCO2 using Beauliu data-------------------------------------------
     co2 <- Data$CO2_uatm[1:length(kco2_BIKER)] #measured co2
@@ -197,20 +214,24 @@ if (munge == 1) {
     FCO2_BIKER <- kco2_BIKER*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2
     FCO2_raymond2012 <- kco2_raymond2012*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2
     FCO2_raymond2013 <- kco2_raymond2013*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2
-
+    FCO2_Lauerwald2015 <- kco2_Lauerwald2015*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2
+    
     FCO2_BIKER_low <- kco2_BIKER_low*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2
     FCO2_BIKER_high <- kco2_BIKER_high*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2
     FCO2_raymond2012_low <- kco2_raymond2012_low*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2
     FCO2_raymond2012_high <- kco2_raymond2012_high*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2
     FCO2_raymond2013_low <- kco2_raymond2013_low*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2
     FCO2_raymond2013_high <- kco2_raymond2013_high*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2
-
+    FCO2_Lauerwald2015_low <- kco2_Lauerwald2015_low*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2
+    FCO2_Lauerwald2015_high <- kco2_Lauerwald2015_high*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2
+    
     #plot------------------------
     for_plot <- data.frame('river' = name, 'timestep'=1:length(FCO2_BIKER), 
                            'FCO2_ulset'=FCO2_ulseth, 
                            'FCO2_BIKER'=FCO2_BIKER, 'FCO2_BIKER_low'=FCO2_BIKER_low, 'FCO2_BIKER_high'=FCO2_BIKER_high,
                            'FCO2_raymond2012'=FCO2_raymond2012, 'FCO2_raymond2012_low'=FCO2_raymond2012_low, 'FCO2_raymond2012_high'=FCO2_raymond2012_high,
-                           'FCO2_raymond2013'=FCO2_raymond2013, 'FCO2_raymond2013_low'=FCO2_raymond2013_low, 'FCO2_raymond2013_high'=FCO2_raymond2013_high)
+                           'FCO2_raymond2013'=FCO2_raymond2013, 'FCO2_raymond2013_low'=FCO2_raymond2013_low, 'FCO2_raymond2013_high'=FCO2_raymond2013_high,
+                           'FCO2_Lauerwald2015'=FCO2_Lauerwald2015, 'FCO2_Lauerwald2015_low'=FCO2_Lauerwald2015_low, 'FCO2_Lauerwald2015_high'=FCO2_Lauerwald2015_high)
     for_plot2 <- gather(for_plot, key=key, value=value, c(FCO2_ulset, FCO2_BIKER))
      # gather(key=key_low, value=value_low, c(FCO2_ulset_low, FCO2_BIKER_low)) %>%
     #  gather(key=key_high, value=value_high, c(FCO2_ulset_high, FCO2_BIKER_high)) %>%
@@ -231,25 +252,32 @@ if (munge == 1) {
     
     #ticker for total number of timesteps and total surface area
     sa <- sa + (mean(W_obs, na.rm = T) * reaches[length(reaches)]) #m2
-    print(sa * 1e-6) #skm
   }
   
   output <- output[-1,]
   output$sa <- sa
   write.csv(output, 'outputs/flux_implications/CO2_results.csv')
+  
+  #plot Beaulieu 2012 data--------------------------------
+  Data$Date <- as.Date(as.character(Data$Date), '%m/%d/%y')
+  beaulieu <- ggplot(data=Data, aes(y=CO2_uatm, x=Date)) +
+    geom_point(size=5, color='darkgreen') +
+    geom_line(size=1.25, linetype='dashed') +
+    ylab('Water-Side CO2 [uatm]')
+  ggsave('outputs/flux_implications/Beaulieu_timeseries.jpg', beaulieu, width=10, height=6)
 }
 
 #Summary stats-------------------------------
 output <- read.csv('outputs/flux_implications/CO2_results.csv')
 output$river <- as.character(output$river)
 sa <- output[1,]$sa
-output <- output[,-14]
+output <- output[,-17]
 
 #CO2 data is only for 29 samples, so ignore k values beyond that (applies to a few rivers)
 output <- drop_na(output)
 
 #total mass fluxes of CO2 from rivers------------------------------------------------
-massFluxes <- gather(output, key=key, value=value, c(FCO2_ulset, FCO2_BIKER, FCO2_raymond2012, FCO2_raymond2013)) %>%
+massFluxes <- gather(output, key=key, value=value, c(FCO2_ulset, FCO2_BIKER, FCO2_raymond2012, FCO2_raymond2013, FCO2_Lauerwald2015)) %>%
   group_by(key) %>%
   summarise(sumFCO2 = (sum(value, na.rm=T)/nrow(output)) * sa * 1e-9 * (12.011/44.01) * 365) #gG-C/yr from all rivers
 
@@ -260,8 +288,8 @@ masFlux_raymond2012_high <- (sum(output$FCO2_raymond2012_high, na.rm=T)/nrow(out
 masFlux_raymond2013_low <- (sum(output$FCO2_raymond2013_low, na.rm=T)/nrow(output)) * sa * 1e-9 * (12.011/44.01) * 365
 masFlux_raymond2013_high <- (sum(output$FCO2_raymond2013_high, na.rm=T)/nrow(output)) * sa * 1e-9 * (12.011/44.01) * 365
 
-massFluxes$low <- c(masFlux_BIKER_low, masFlux_raymond2012_low, NA, NA)
-massFluxes$high <- c(masFlux_BIKER_high, masFlux_raymond2012_high, NA, NA)
+massFluxes$low <- c(masFlux_BIKER_low, masFlux_raymond2012_low, NA, NA, NA)
+massFluxes$high <- c(masFlux_BIKER_high, masFlux_raymond2012_high, NA, NA, NA)
 
 #plot results----------------------------------------------------------------------
 #Comparing velocity models----------------------------------------------------------------
@@ -271,7 +299,7 @@ barPlots <- ggplot(massFluxes, aes(y=sumFCO2, x=key, fill=key)) +
  # geom_linerange(aes(ymin=low, ymax=high), size=1.2) +
   ylab('Bulk C Efflux [gG-C/yr]') +
   xlab('Velocity Model') +
-  scale_fill_brewer(palette = 'Set1', name='', labels=c('BIKER', 'Raymond 2012', 'Raymond 2013', 'Observed')) +
+  scale_fill_brewer(palette = 'Set1', name='', labels=c('BIKER', 'Lauerwald \n2015', 'Raymond \n2012', 'Raymond \n2013', 'Observed')) +
   theme(legend.position = "bottom",
         axis.title.x=element_blank(),
         axis.text.x=element_blank(),
@@ -280,9 +308,10 @@ barPlots <- ggplot(massFluxes, aes(y=sumFCO2, x=key, fill=key)) +
         axis.title.y=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
+write.csv(massFluxes, 'outputs//flux_implications//bulkFluxes.csv')
 
 #CDFs comparing gauged rating curves versus our ungauged approach------------------------
-t <- gather(output, key=key, value=value, c(FCO2_BIKER, FCO2_ulset, FCO2_raymond2012, FCO2_raymond2013))
+t <- gather(output, key=key, value=value, c(FCO2_BIKER, FCO2_ulset, FCO2_raymond2012, FCO2_raymond2013, FCO2_Lauerwald2015))
 t$flag <- ifelse(t$key == 'FCO2_ulset', 1, 0)
 FCO2_cdfs <- ggplot(t, aes(x=value, color=key, linetype=factor(flag))) +
   stat_ecdf(size=1.25) +
@@ -303,9 +332,9 @@ FCO2_models <- plot_grid(barPlots, FCO2_cdfs, ncol=2, labels='auto')
 ggsave('outputs/flux_implications/FCO2_models.jpg', FCO2_models, width=12, height=7)
 
 #error stats and plot across all rivers and timesteps for BIKER vs obsereved V----------------------------------
-lm <- lm(log(FCO2_BIKER)~log(FCO2_ulset), data=output)
+lm <- lm(log10(FCO2_BIKER)~log10(FCO2_ulset), data=output)
 lmr2 <- round(summary(lm)$r.squared,2)
-rmse <- round(exp(Metrics::rmse(log(output$FCO2_ulset), log(output$FCO2_BIKER))), 2) #g/m2/dy
+rmse <- round((Metrics::rmse(log10(output$FCO2_ulset), log10(output$FCO2_BIKER))), 2) #g/m2/dy
 
 predInts <- predict(lm, interval='prediction')
 output <- cbind(output, predInts)
@@ -313,8 +342,8 @@ output <- cbind(output, predInts)
 flux_plot<- ggplot(output, aes(x=(FCO2_ulset), y=(FCO2_BIKER), color=key)) +
   geom_pointrange(aes(ymin = FCO2_BIKER_low, ymax = FCO2_BIKER_high), fatten=10, fill='#1b9e77', pch=21, color='black') +
   geom_smooth(size=2, color='grey', method='lm', se=F)+
-  geom_line(aes(y=exp(lwr)), color='grey', linetype='dashed', size=1.75) +
-  geom_line(aes(y=exp(upr)), color='grey', linetype='dashed', size=1.75) +
+  geom_line(aes(y=10^(lwr)), color='grey', linetype='dashed', size=1.75) +
+  geom_line(aes(y=10^(upr)), color='grey', linetype='dashed', size=1.75) +
   geom_abline(size=2, linetype='dashed', color='black') +
   xlab('FCO2 via observed velocity [g/m2*dy]') +
   ylab('FCO2 via BIKER [g/m2*dy]') +
@@ -329,7 +358,7 @@ flux_plot<- ggplot(output, aes(x=(FCO2_ulset), y=(FCO2_BIKER), color=key)) +
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold')) +
-  geom_richtext(aes(x=10^-0.4, y=10^0.5), color='black', label=paste0('RMSE: ', rmse, ' g/m2*dy')) +
+  geom_richtext(aes(x=10^-0.4, y=10^0.5), color='black', label=paste0('RMSE: 10^', rmse, ' g/m2*dy')) +
   geom_richtext(aes(x=10^-0.5, y=10^0.4), color='black', label=paste0('r<sup>2</sup>: ', lmr2), size=5)
 
 #add some individual river plots
@@ -375,11 +404,8 @@ plot_fin <- plot_grid(Kanawha_plot + theme(legend.position = 'none'), OhioSectio
 plot_fin <- plot_grid(flux_plot, plot_fin, ncol=2, labels=c('a', NA))
 ggsave('outputs/flux_implications/FCO2_plot.jpg', plot_fin, width=12, height=7)
 
-
-
-
 #By river stats--------------------------------------------------------
-for_plot <- gather(output, key=key, value=value, c(FCO2_raymond2012, FCO2_raymond2013, FCO2_BIKER))
+for_plot <- gather(output, key=key, value=value, c(FCO2_raymond2012, FCO2_raymond2013, FCO2_BIKER, FCO2_Lauerwald2015))
 stats_by_reach <- group_by(for_plot, river, key) %>%
   summarise(kge = hydroGOF::KGE(value, FCO2_ulset),
             nrmse = sqrt(mean((FCO2_ulset - value)^2)) / mean(FCO2_ulset, na.rm=T),
@@ -402,3 +428,9 @@ plotRivs <- ggplot(plot_stats, aes(x=key2, y=value, fill=key)) +
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
 ggsave('outputs/flux_implications/FCO2_by_river.jpg', plotRivs, width=10, height=7)
+break
+
+#save stats to file--------------------------------------
+results_all_rivs <- data.frame('rmse'=rmse, 'r2'=lmr2)
+write.csv(results_all_rivs, 'outputs//flux_implications//fco2_stats_all.csv')
+write.csv(stats_by_reach, 'outputs//flux_implications//fco2_stats_by_river.csv')

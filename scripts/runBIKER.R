@@ -6,9 +6,11 @@ library(ncdf4)
 library(tidyverse)
 library(BIKER)
 
+#no scientific notation
 options(scipen=999)
 
 #model settings-------------------------------
+err <- 1 #set to 1 to corrupt S and dA with Durand et al. layover model (approximately)
 g <- 9.8 #m/s2
 mannings_uncertainity <- 0.25 #see monte_carlo_analysis.R for actual uncertainty
 #For these tests, should assume only error is from manning's equation (0.21), NOT k600 model b/c we are assuming this model is 'true'
@@ -17,7 +19,7 @@ mannings_uncertainity <- 0.25 #see monte_carlo_analysis.R for actual uncertainty
 #set working directory----------------------------------------------------------
 setwd('/home/cbrinkerhoff_umass_edu/RS_evasion/BIKER/')
 
-#BAM-stle functions------------------------------------------------------
+#dA functions------------------------------------------------------
 #' @param w Matrix of widths
 #' @param h Matrix of heights(FROM MARK)
 calcdA_mat <- function(w, h) {
@@ -45,7 +47,7 @@ calcdA_vec <- function(w, h) {
 }
 
 #load in SWOT observables-------------------------------------------
-#using rivers from Frasson etal 2019 & Rodriquez etal 2020
+#Frasson etal 2019 & Rodriquez etal 2020
 files = list.files('/home/cbrinkerhoff_umass_edu/RS_evasion/SWOTrivs_Rodriguez_etal_2020', pattern="*.nc", full.names = TRUE)
 
 #run model-------------------------------------------------------
@@ -70,13 +72,14 @@ for (currPepsi in files[2:length(files)]){
   area[area<0]=NA
   Q_obs[Q_obs<0]=NA
   
-  #Sample every 11 days (swot-style)------------------------
+  #Sample every 11 days (SWOT-style)------------------------
   W_obs = W_obs[,seq(1, ncol(W_obs), 11)]
   S_obs = S_obs[,seq(1, ncol(S_obs), 11)]  
   H_obs = H_obs[,seq(1, ncol(H_obs), 11)]  
   Q_obs = Q_obs[,seq(1, ncol(Q_obs), 11)]  
   area = area[,seq(1, ncol(area), 11)]
   
+  #Some NA handling in slopes
   if (any(apply(S_obs,2,sum,na.rm=TRUE) ==0)){
     remove_index =  which((apply(S_obs,2,sum,na.rm=TRUE) ==0) ==TRUE)
     
@@ -98,17 +101,17 @@ for (currPepsi in files[2:length(files)]){
   }
   
   #Calculate dA matrix from RS W and H-----------------------------------------------------------
-  dA_obs <- calcdA_mat(W_obs,H_obs) #m2
+  dA_obs <- calcdA_mat(W_obs,H_obs) #[m2]
   
   #calculate observed k ------------------------------------------------------------------------
-  V_obs <- Q_obs / area #m/s
+  V_obs <- Q_obs / area #[m/s]
   
-  #my rule-based regression model for k600 [m/dy]------------------------------------------
+  #my rule-based regression model for k600 [m/dy]
   widthRegime <- ifelse(mean(W_obs, na.rm = T) < 10 & mean(S_obs, na.rm=T) < 0.05, 1,
                         ifelse(mean(W_obs, na.rm = T) < 10 & mean(S_obs, na.rm=T) >= 0.05, 5,
                                ifelse(mean(W_obs, na.rm = T) < 50, 2,
                                       ifelse(mean(W_obs, na.rm = T)< 100, 3, 4))))
-  
+  #Generate observed k600 here  
   if (widthRegime == 1){
     k_obs <- (111.58121 * (g*S_obs * (V_obs))^0.6488131)
   }
@@ -127,18 +130,35 @@ for (currPepsi in files[2:length(files)]){
   
   k_obs <- colMeans(k_obs, na.rm=T)
   
+  #Introduce measurement errors using Durand et al. 2020 model------------------------
+  set.seed(100)
+  S_err <- S_obs
+  for(i in 1:nrow(S_err)) {
+    for(j in 1:ncol(S_err)){
+      S_err[i,j] <- rnorm(1,S_err[i,j], 1.7e-5) #km/km
+      S_err[i,j] <- ifelse(S_err[i,j] <= 0, 0.000001, S_err[i,j]) #min obs slope Biancarma 2016
+    }
+  }
+  
+  dA_err <- dA_obs
+  for(i in 1:nrow(dA_err)) {
+    for(j in 1:ncol(dA_err)){
+      dA_err[i,j] <- rnorm(1,dA_err[i,j], W_obs[i,j]*sqrt(2)*0.104) #m2
+    }
+  }
+  
   #run BIKER------------------------------------------
-  data <- biker_data(w=W_obs, s=S_obs, dA=dA_obs)
+  if(err == 1){
+    data <- biker_data(w=W_obs, s=S_err, dA=dA_err)  
+  }
+  else{
+    data <- biker_data(w=W_obs, s=S_obs, dA=dA_obs)  
+  }
+  
   priors <- biker_priors(data)
-  priors$river_type_priors$sigma_post = matrix(mannings_uncertainity, nrow=nrow(W_obs), ncol=ncol(W_obs)) #For this validation, we only want manning's uncertainity. Real implementation would use full model uncertainty
+  priors$sigma_model$sigma_post = matrix(mannings_uncertainity, nrow=nrow(W_obs), ncol=ncol(W_obs)) #For this validation, we only want manning's uncertainity. Real implementation would use full model uncertainty
   
-  #Run this to set k600 prior as f(slope) a la Mark
-  colSobs <- colMeans(log(S_obs), na.rm=T)
-  priors$river_type_priors$logk600_hat = ifelse(colSobs < -4.634, 3.22 + 0.347*colSobs, 6.85 + 1.13*colSobs) #needs to be implemented within BIKER
-  priors$river_type_priors$logk600_sd =  rep(1.023, ncol(data$Wobs)) #CV of 100%
-  
-  #run algorithm
-  kest <- biker_estimate(bikerdata = data, bikerpriors = priors)
+  kest <- biker_estimate(bikerdata = data, bikerpriors = priors, meas_error = FALSE)
   
   #write to file
   temp <- data.frame('river'= rep(name, length(k_obs)), 'time'=kest$time, 'kobs'=k_obs, 'kest_mean'=kest$mean, 'kest_low'=kest$conf.low, 'kest_high'=kest$conf.high, 'kest_sd'=kest$sigma)
@@ -147,4 +167,4 @@ for (currPepsi in files[2:length(files)]){
 }
 
 output <- output[-1,]
-write.csv(output, 'results_SWOT_11day_slopeK.csv')
+write.csv(output, 'results_SWOT_11day_Slope_Errors_external.csv')

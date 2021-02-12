@@ -21,6 +21,8 @@ The manuscript file draws all figures and results from the analysis outputs in o
 
 ##To do
 1) rerun FCO2 analysis using varying water temperature
+2) Figure out bad performance using Durand slope errors. I probably need a varying term from him instead of just 1.7e-5 or whatever because that's too high for low sloped rivers
+3) make supp plot for roughness versus k600
 
 #Remember
 Make sure you move the final runBIKER.R script from the cluster into this project

@@ -107,7 +107,25 @@
 # data$chezys_c <- data$mean_velocity_m_s * data$slope^(-1/2) * data$mean_depth_m^(-1/2) * 0.552
 # data$friction_f <- (8*9.8*data$mean_depth_m*data$slope) / data$mean_velocity_m_s^2
 
+ggsave('outputs/flux_implications/FCO2_by_river.jpg', plotRivs, width=10, height=7)
 
+#CDFs comparing gauged rating curves versus our ungauged approach------------------------
+# t <- gather(output, key=key, value=value, c(FCO2_BIKER, FCO2_ulset, FCO2_raymond2012, FCO2_raymond2013, FCO2_Lauerwald2015))
+# t$flag <- ifelse(t$key == 'FCO2_ulset', 1, 0)
+# FCO2_cdfs <- ggplot(t, aes(x=value, color=key, linetype=factor(flag))) +
+#   stat_ecdf(size=1.25) +
+#   scale_color_brewer(palette='Set1') +
+#   xlab('FCO2 [g/m2*dy]') +
+#   ylab('Percentile') +
+#   scale_x_log10(
+#     breaks = scales::trans_breaks("log10", function(x) 10^x),
+#     labels = scales::trans_format("log10", scales::math_format(10^.x)))+
+#   geom_hline(yintercept = 0.50, size=1.2) +
+#   theme(legend.position = "none",
+#         axis.text=element_text(size=20),
+#         axis.title=element_text(size=24,face="bold"),
+#         legend.text = element_text(size=17),
+#         legend.title = element_text(size=17, face='bold'))
 
 
 

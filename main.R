@@ -23,9 +23,13 @@ results_3_1_MC <- read.csv('outputs//MonteCarlo//results.csv')
 results_3_2_rivs <- read.csv('outputs//validation//results_by_riv.csv')
 results_3_2_all <- read.csv('outputs//validation//results_all_riv.csv')
 results_3_3_all <- read.csv('outputs//flux_implications//fco2_stats_all.csv')
+results_3_3_rivs <- read.csv('outputs//flux_implications//fco2_stats_by_river.csv')
 results_3_3_bulk <- read.csv('outputs//flux_implications//bulkFluxes.csv')
 results_3_3_bulk$key <- as.character(results_3_3_bulk$key)
 
 #knit manuscript
 rmarkdown::render("manuscript_v1.Rmd")
-print('Project report, or Outline.html, is generated.')
+print('Manuscript generated.')
+
+rmarkdown::render("supp_v1.Rmd")
+print('Supplemental Information generated.')

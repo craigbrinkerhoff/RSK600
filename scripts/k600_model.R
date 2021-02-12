@@ -261,6 +261,88 @@ biker_k_prior <- group_by(data, slopeRegime) %>%
             n=n())
 write.csv(biker_k_prior, 'outputs//k600//k_priors.csv')
 
+#Figure S4: bed roughness vs. k600-------------------------------------------
+data$keulegan <- 11*data$depth*(1/exp(data$Vms/(2.5*(9.8*data$depth*data$slope)^(1/2))))
+
+lm_roughness <- lm(log10(data$k600)~log10(data$keulegan))
+r2_roughness <- round(summary(lm_roughness)$r.squared, 2)
+roughness_0 <- ggplot(data, aes(x=keulegan, y=k600)) +
+  geom_point() +
+  geom_smooth(method='lm', se=F)+
+  geom_richtext(aes(x=10^-1.5, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
+  coord_cartesian(x=c(10^-2.5, 10^1.5), c(10^-2, 10^5)) +
+  ylab('K600 [m/dy]') +
+  xlab('') +
+  ggtitle('All Data')+
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  )
+
+lm_roughness <- lm(log10(k600)~log10(keulegan), data = filter(data, slope > 0.001))
+r2_roughness <- round(summary(lm_roughness)$r.squared, 2)
+roughness_1 <- ggplot(filter(data, slope > 0.001), aes(x=keulegan, y=k600)) +
+  geom_point() +
+  geom_smooth(method='lm', se=F)+
+  geom_richtext(aes(x=10^-1.5, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
+  coord_cartesian(x=c(10^-2.5, 10^1.5), c(10^-2, 10^5)) +
+  ylab('') +
+  xlab('') +
+  ggtitle('Slope > 0.001')+
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  )
+
+lm_roughness <- lm(log10(k600)~log10(keulegan), data = filter(data, slope > 0.1))
+r2_roughness <- round(summary(lm_roughness)$r.squared, 2)
+roughness_2 <- ggplot(filter(data, slope > 0.1), aes(x=keulegan, y=k600)) +
+  geom_point() +
+  geom_smooth(method='lm', se=F)+
+  geom_richtext(aes(x=10^-1.5, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
+  coord_cartesian(x=c(10^-2.5, 10^1.5), c(10^-2, 10^5)) +
+  ylab('K600 [m/dy]') +
+  xlab('Effective Bed Roughness height [m]') +
+  ggtitle('Slope > 0.1')+
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  )
+
+lm_roughness <- lm(log10(k600)~log10(keulegan), data = filter(data, slope > 0.2))
+r2_roughness <- round(summary(lm_roughness)$r.squared, 2)
+roughness_3 <- ggplot(filter(data, slope > 0.2), aes(x=keulegan, y=k600)) +
+  geom_point() +
+  geom_smooth(method='lm', se=F)+
+  geom_richtext(aes(x=10^-1.5, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
+  coord_cartesian(x=c(10^-2.5, 10^1.5), c(10^-2, 10^5)) +
+  ylab('') +
+  xlab('Effective Bed Roughness height [m]') +
+  ggtitle('Slope > 0.2')+
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  )
+
+roughness_plot <- plot_grid(roughness_0, roughness_1, roughness_2, roughness_3, ncol=2)
+ggsave('outputs/k600/roughness.jpg', roughness_plot, width=9, height=8)
+
 #Save results to file for manuscript-----------------------------------
 results <- data.frame('r2'=c(r2_me, NA, r2_raymond2, r2_raymond3, r2_ulseth), 
                       'rmse'=c(rmse_me, NA, rmse_raymond2, rmse_raymond3,rmse_ulseth), 

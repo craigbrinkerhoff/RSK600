@@ -14,8 +14,10 @@ theme_set(theme_cowplot())
 sumsq <- function(x) sum(x^2)
 
 #read in results----------------------------------
-full_output <- read.csv('inputs//validation//results_SWOT_11day_markK.csv')
+full_output <- read.csv('inputs//validation//results_SWOT_11day.csv')
 full_output <- filter(full_output, river != 'guez_etal_2020/ArialKhan')
+full_output_errors <- read.csv('inputs//validation//results_SWOT_11day_Slope_Errors_external.csv')
+full_output_errors <- filter(full_output_errors, river != 'guez_etal_2020/ArialKhan')
 lm_kfit <- lm(log10(full_output$kest_mean)~log10(full_output$kobs))
 r2 <- round(summary(lm_kfit)$r.squared, 2)
 full_output <- drop_na(full_output)
@@ -45,8 +47,8 @@ valPlot <- ggplot(full_output, aes(x=(kobs), y=(kest_mean))) +
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold')) +
-  geom_richtext(aes(x=10^-0.25, y=10^0.6), color='black', label=paste0('RMSE: 10^', rmse, ' m/dy'), size=8) +
-  geom_richtext(aes(x=10^-0.25, y=10^0.35), color='black', label=paste0('r<sup>2</sup>: ', r2), size=8)
+  geom_richtext(aes(x=10^-0.25, y=10^1), color='black', label=paste0('RMSE: 10^', rmse, ' m/dy'), size=6) +
+  geom_richtext(aes(x=10^-0.25, y=10^0.8), color='black', label=paste0('r<sup>2</sup>: ', r2), size=6)
 
 #cdfs---------------------
 t <- gather(full_output, key=key, value=value, c(kobs, kest_mean, kest_high, kest_low))
@@ -70,18 +72,19 @@ valPlot <- plot_grid(valPlot, k600_cdfs, ncol=2, labels=c('a', 'b'))
 ggsave('outputs//validation//validation.jpg', valPlot, width=12, height=7)
 
 #by river metrics---------------------------------------------
-stats_by_reach <- group_by(full_output, river) %>%
-  summarise(kge = hydroGOF::KGE(kest_mean, kobs),
-            nse =   hydroGOF::NSE(kest_mean, kobs),
-            nrmse = sqrt(mean((kobs - kest_mean)^2)) / mean(kobs, na.rm=T),
-            rBIAS =   mean(kest_mean - kobs) / mean(kobs, na.rm=T),
-            rrmse =   sqrt(mean((kest_mean - kobs)^2 / kobs^2)),
-            CVobs = round(sd(kobs)/mean(kobs, na.rm=T), 2),
-            CVest = round(sd(kest_mean)/mean(kest_mean, na.rm=T), 2))
+errors <- full_output_errors$kest_mean
+full_output2 <- cbind(full_output, errors)
+full_output2 <- gather(full_output2, key=key, value=value, c('kest_mean', 'errors'))
+stats_by_reach <- group_by(full_output2, river, key) %>%
+  summarise(kge = hydroGOF::KGE(value, kobs),
+            nse =   hydroGOF::NSE(value, kobs),
+            nrmse = sqrt(mean((kobs - value)^2)) / mean(kobs, na.rm=T),
+            rBIAS =   mean(value - kobs) / mean(kobs, na.rm=T),
+            rrmse =   sqrt(mean((value - kobs)^2 / kobs^2)))
 
-plot_stats <- gather(stats_by_reach, key=key, value=value, c('nse', 'nrmse', 'rBIAS', 'rrmse', 'kge'))
-plot_stats <- filter(plot_stats, key %in% c('nrmse', 'rrmse', 'rBIAS', 'kge'))
-plotSWOTreaches <- ggplot(plot_stats, aes(x=key, y=value, fill=key)) +
+plot_stats <- gather(stats_by_reach, key=key2, value=value, c('nse', 'nrmse', 'rBIAS', 'rrmse', 'kge'))
+plot_stats <- filter(plot_stats, key2 %in% c('nrmse', 'rrmse', 'rBIAS', 'kge'))
+plotSWOTreaches <- ggplot(plot_stats, aes(x=key2, y=value, fill=key)) +
   geom_boxplot(size=1) +
   geom_hline(yintercept=1, linetype='dashed') +
   geom_hline(yintercept=0, linetype='dashed') +
@@ -89,8 +92,8 @@ plotSWOTreaches <- ggplot(plot_stats, aes(x=key, y=value, fill=key)) +
   xlab('Metric') +
   ylab('Value') +
   coord_cartesian(ylim = c(-1,1))+
-  scale_fill_brewer(palette = 'Dark2', name='') +
-  theme(legend.position = "none",
+  scale_fill_brewer(palette = 'Accent', name='', labels=c('Internal + Layover Errors', 'No Error')) +
+  theme(legend.position = "bottom",
         axis.text=element_text(size=20),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
@@ -99,10 +102,10 @@ plotSWOTreaches <- ggplot(plot_stats, aes(x=key, y=value, fill=key)) +
 # example timeseries plot per river------------------------------------------------------------------------------------
 set.seed(700)
 
-kge_bins <- quantile(stats_by_reach$kge, c(0.33, 0.66), na.rm = T)
-kge_bad <- filter(stats_by_reach, kge <= kge_bins[1]) %>% select(river)
-kge_good <- filter(stats_by_reach, kge >= kge_bins[2]) %>% select(river)
-kge_eh <- filter(stats_by_reach, kge >= kge_bins[1] & kge <= kge_bins[2]) %>% select(river)
+kge_bins <- quantile(stats_by_reach[stats_by_reach$key == 'kest_mean',]$kge, c(0.33, 0.66), na.rm = T)
+kge_bad <- filter(stats_by_reach[stats_by_reach$key == 'kest_mean',], kge <= kge_bins[1]) %>% select(river)
+kge_good <- filter(stats_by_reach[stats_by_reach$key == 'kest_mean',], kge >= kge_bins[2]) %>% select(river)
+kge_eh <- filter(stats_by_reach[stats_by_reach$key == 'kest_mean',], kge >= kge_bins[1] & kge <= kge_bins[2]) %>% select(river)
 
 badRiver <- filter(full_output, river == sample(kge_bad$river, 1)) %>%
   gather(key=key, value=value, c(kobs, kest_mean))
@@ -136,7 +139,7 @@ goodRiverPlot <- ggplot(goodRiver, aes(x=time, y=value, color=key)) + #model
   geom_line(size=1) +
   ylab('k600 [m/dy]') +
   xlab('Timestep') +
-  scale_color_brewer(palette='Set2', name='k600 [m/dy]', labels=c('Modeled', 'Observed')) +
+  scale_color_brewer(palette='Set2', name='k600 [m/dy]', labels=c('BIKER', 'Model Using Observed \nVelocity')) +
   ggtitle(riv)
 
 # extract the legend from one of the plots
@@ -146,25 +149,25 @@ legend <- get_legend(goodRiverPlot + theme(legend.box.margin = margin(0, 0, 0, 1
 timeseriesPlot <- plot_grid(goodRiverPlot + theme(legend.position = 'none'), ehRiverPlot, badRiverPlot, legend, ncol=2, labels=c('b','c','d',NA), label_size = 18)
 plot2 <- plot_grid(plotSWOTreaches, timeseriesPlot, ncol=2, labels=c('a', NA), label_size = 18)
 ggsave('outputs//validation//validation_by_river.jpg', plot2, width=14, height=8)
-break
+
 #save results for ms---------------------------------------------------
 results_3_2 <- data.frame('rmse'=rmse, 'r2'=r2)
-write.csv(results, 'outputs//validation//results_all_riv.csv')
+write.csv(results_3_2, 'outputs//validation//results_all_riv.csv')
 write.csv(stats_by_reach, 'outputs//validation//results_by_riv.csv')
 
 
 
 #for finesst
 #slope versus temporal variation of k600
-temp <- gather(stats_by_reach, key=key, value=value, c('CVobs', 'CVest'))
-ggplot(temp, aes(x=meanS, y=value*100, color=key)) + 
-  geom_point(size=5) +
-  geom_smooth(se=F, method='lm', size=1.5)+
-  scale_color_brewer(palette='Dark2', name='', labels=c('BIKER', 'Observed'))+
-  ylim(0,100)+
-  scale_x_log10(
-    breaks = scales::trans_breaks("log10", function(x) 10^x),
-    labels = scales::trans_format("log10", scales::math_format(10^.x))) +
-  ylab('CV K600 [%]') +
-  xlab('Mean SWOT slope') +
-  theme(legend.position = 'bottom')
+# temp <- gather(stats_by_reach, key=key, value=value, c('CVobs', 'CVest'))
+# ggplot(temp, aes(x=meanS, y=value*100, color=key)) + 
+#   geom_point(size=5) +
+#   geom_smooth(se=F, method='lm', size=1.5)+
+#   scale_color_brewer(palette='Dark2', name='', labels=c('BIKER', 'Observed'))+
+#   ylim(0,100)+
+#   scale_x_log10(
+#     breaks = scales::trans_breaks("log10", function(x) 10^x),
+#     labels = scales::trans_format("log10", scales::math_format(10^.x))) +
+#   ylab('CV K600 [%]') +
+#   xlab('Mean SWOT slope') +
+#   theme(legend.position = 'bottom')

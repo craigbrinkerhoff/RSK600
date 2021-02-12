@@ -19,7 +19,7 @@ Sc_co2_func <- function(t){1742 + (-91.24*t) + (2.208*t^2) + (-0.0219*t^3)} #Ray
 pCO2_a <- 390 #uatm
 henrys_law_func <- function(t) {-60.2409+93.4517*(100/(t+273.15))+23.3585*log((t+273.15)/100)} #Weiss 1974
 g <- 9.8 #m/s2
-sa <- 0 #m2 total surface area of 22 rivers. DUmmy favlue starts at 0
+sa <- 0 #m2 total surface area of 22 rivers. Dummy favlue starts at 0
 
 #legend labels------------------
 legend_labels <- c('BIKER', 
@@ -85,7 +85,7 @@ if (munge == 1) {
   Data$CO2_uatm <- Data$CO2_umol_L / exp(henrys_law_func(Data$Water_temp_C))
   
   #read in BIKER results-----------------------------------------------
-  BIKER_results <- read.csv('inputs/validation/results_SWOT_11day.csv')
+  BIKER_results <- read.csv('inputs/results_SWOT_11day.csv')
   BIKER_results$river <- substr(as.character(BIKER_results$river), 16, nchar(as.character(BIKER_results$river)))
   
   #Loop through SWOT rivers and just use Beaulieu etal 2012 CO2 data for all of them...------------------------
@@ -96,7 +96,7 @@ if (munge == 1) {
                        'FCO2_raymond2013'=NA, 'FCO2_raymond2013_low'=NA, 'FCO2_raymond2013_high'=NA,
                        'FCO2_Lauerwald2015'=NA, 'FCO2_Lauerwald2015_low'=NA, 'FCO2_Lauerwald2015_high'=NA)
   
-  files = list.files('inputs/flux_implications', pattern="*.nc", full.names = TRUE)
+  files = list.files('inputs/Frasson_etal_2019', pattern="*.nc", full.names = TRUE)
   for (river in files[2:length(files)]){ #skip Arial Khan
     #read in swot rivers
     name <- substr(river, 26, nchar(river))

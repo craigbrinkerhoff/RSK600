@@ -11,14 +11,17 @@ This project deals with devolping an empirical model for the normalized gas exch
 *on HPC cluster*
 1) set working directory to '~/RSK600/'
 2) run 'run.sh'
+3) That's it!
+
+Note that this bash script isn't running the MC analysis because it requires an external dataset too big for git (and an R package I can't get installed)...
 
 # Manuscript
 The manuscript for this project is under development and written in RMarkdown. The most recent version is stored in the project directory, while old versions are hosted in the manuscripts folder.
 
-The manuscript file draws all figures and results from the analysis outputs in order to have 100% reproducibility. Just use main.R!!
+The manuscript file draws all figures and results from the analysis outputs in order to have 100% reproducibility. Just use main.R!! Note that it can't be generated on an HPC currently.
 
 ## Notes
-1) Included in this repo are validation results after running the algorithm on simulated SWOT data. The actual algorithm is written as an R package and available at https://github.com/craigbrinkerhoff/BIKER. The script needed to run these tests is included here (runBIKER.R), though it is not run in the main.R script and is set up specifically for implementation on a high performance computing cluster.
+1) The actual algorithm is written as an R package and available at https://github.com/craigbrinkerhoff/BIKER. The script needed to run these tests is included here (runBIKER.R), though it is not run in the main.R script and is set up specifically for implementation on a high performance computing cluster.
 
 2) The stan model implemented in the algorithm is saved here purely for posterity's sake (along with past versions as this is all a work in progress). The most recent version is the one that is implemented in the BIKER R package.
 

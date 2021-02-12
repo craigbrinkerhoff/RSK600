@@ -14,10 +14,11 @@ theme_set(theme_cowplot())
 sumsq <- function(x) sum(x^2)
 
 #read in results----------------------------------
-full_output <- read.csv('inputs//validation//results_SWOT_11day.csv')
+full_output <- read.csv('outputs//results_SWOT_11day.csv')
 full_output <- filter(full_output, river != 'guez_etal_2020/ArialKhan')
-full_output_errors <- read.csv('inputs//validation//results_SWOT_11day_Slope_Errors_external.csv')
+full_output_errors <- read.csv('outputs//results_SWOT_11day_Slope_Errors.csv')
 full_output_errors <- filter(full_output_errors, river != 'guez_etal_2020/ArialKhan')
+
 lm_kfit <- lm(log10(full_output$kest_mean)~log10(full_output$kobs))
 r2 <- round(summary(lm_kfit)$r.squared, 2)
 full_output <- drop_na(full_output)

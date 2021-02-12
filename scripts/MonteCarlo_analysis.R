@@ -19,7 +19,7 @@ M <- 8000 # number of sets of hydraulic 'measurements'
 set.seed(455)
 
 #Pull in hydraulic measurements from Brinkerhoff etal 2019 to test parameter uncertainity------------------------------------------
-hydraulics_init <- read.csv('inputs//MonteCarlo//field_measurements.csv')
+hydraulics_init <- read.csv('/home/cbrinkerhoff_umass/edu/datasets/MonteCarlo/field_measurements.csv')
 nhd_med <- read.csv('inputs//MonteCarlo//NHD_join_table.csv')
 
 #add reach slopes from NHD

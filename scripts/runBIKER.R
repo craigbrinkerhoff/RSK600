@@ -16,9 +16,6 @@ mannings_uncertainity <- 0.25 #see monte_carlo_analysis.R for actual uncertainty
 #For these tests, should assume only error is from manning's equation (0.21), NOT k600 model b/c we are assuming this model is 'true'
 #In actual implementation, we want posterior uncertainity to reflect both (which is ~0.30 per our Monte Carlo Analysis)
 
-#set working directory----------------------------------------------------------
-setwd('/home/cbrinkerhoff_umass_edu/RS_evasion/BIKER/')
-
 #dA functions------------------------------------------------------
 #' @param w Matrix of widths
 #' @param h Matrix of heights(FROM MARK)
@@ -48,12 +45,12 @@ calcdA_vec <- function(w, h) {
 
 #load in SWOT observables-------------------------------------------
 #Frasson etal 2019 & Rodriquez etal 2020
-files = list.files('/home/cbrinkerhoff_umass_edu/RS_evasion/SWOTrivs_Rodriguez_etal_2020', pattern="*.nc", full.names = TRUE)
+files = list.files('inputs/Frasson_etal_2019', pattern="*.nc", full.names = TRUE)
 
 #run model-------------------------------------------------------
 output <- data.frame('river'= NA, 'time'=NA, 'kobs'=NA, 'kest_mean'=NA, 'kest_low'=NA, 'kest_high'=NA, 'kest_sd'=NA)
 for (currPepsi in files[2:length(files)]){
-  name <- substr(currPepsi, 55, nchar(currPepsi))
+  name <- substr(currPepsi, 26, nchar(currPepsi))
   name <- substr(name,1,nchar(name)-3)
   set.seed(12)
   data_in =nc_open(currPepsi)
@@ -145,8 +142,8 @@ for (currPepsi in files[2:length(files)]){
     for(j in 1:ncol(dA_err)){
       dA_err[i,j] <- rnorm(1,dA_err[i,j], W_obs[i,j]*sqrt(2)*0.104) #m2
     }
-  }
-  
+  } 
+ 
   #run BIKER------------------------------------------
   if(err == 1){
     data <- biker_data(w=W_obs, s=S_err, dA=dA_err)  
@@ -167,4 +164,4 @@ for (currPepsi in files[2:length(files)]){
 }
 
 output <- output[-1,]
-write.csv(output, 'results_SWOT_11day_Slope_Errors_external.csv')
+write.csv(output, 'outputs/results_SWOT_11day_Slope_Errors.csv')

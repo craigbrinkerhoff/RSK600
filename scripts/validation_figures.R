@@ -14,10 +14,8 @@ theme_set(theme_cowplot())
 sumsq <- function(x) sum(x^2)
 
 #read in results----------------------------------
-full_output <- read.csv('outputs//results_SWOT_11day.csv')
-full_output <- filter(full_output, river != 'guez_etal_2020/ArialKhan')
-full_output_errors <- read.csv('outputs//results_SWOT_11day_Slope_Errors.csv')
-full_output_errors <- filter(full_output_errors, river != 'guez_etal_2020/ArialKhan')
+results <- read.csv('outputs//validation//BIKER_validation_results.csv')
+full_output <- filter(results, errFlag == 0)
 
 lm_kfit <- lm(log10(full_output$kest_mean)~log10(full_output$kobs))
 r2 <- round(summary(lm_kfit)$r.squared, 2)
@@ -73,19 +71,20 @@ valPlot <- plot_grid(valPlot, k600_cdfs, ncol=2, labels=c('a', 'b'))
 ggsave('outputs//validation//validation.jpg', valPlot, width=12, height=7)
 
 #by river metrics---------------------------------------------
-errors <- full_output_errors$kest_mean
-full_output2 <- cbind(full_output, errors)
-full_output2 <- gather(full_output2, key=key, value=value, c('kest_mean', 'errors'))
-stats_by_reach <- group_by(full_output2, river, key) %>%
-  summarise(kge = hydroGOF::KGE(value, kobs),
-            nse =   hydroGOF::NSE(value, kobs),
-            nrmse = sqrt(mean((kobs - value)^2)) / mean(kobs, na.rm=T),
-            rBIAS =   mean(value - kobs) / mean(kobs, na.rm=T),
-            rrmse =   sqrt(mean((value - kobs)^2 / kobs^2)))
+#errors <- full_output_errors$kest_mean
+#full_output2 <- cbind(full_output, errors)
+#full_output2 <- gather(results, key=key, value=value, c('kest_mean', 'errFlag'))
+stats_by_reach <- group_by(results, river, errFlag) %>%
+  summarise(kge = hydroGOF::KGE(kest_mean, kobs),
+            nse =   hydroGOF::NSE(kest_mean, kobs),
+            nrmse = sqrt(mean((kobs - kest_mean)^2)) / mean(kobs, na.rm=T),
+            rBIAS =   mean(kest_mean- kobs) / mean(kobs, na.rm=T),
+            rrmse =   sqrt(mean((kest_mean- kobs)^2 / kobs^2)))
 
-plot_stats <- gather(stats_by_reach, key=key2, value=value, c('nse', 'nrmse', 'rBIAS', 'rrmse', 'kge'))
-plot_stats <- filter(plot_stats, key2 %in% c('nrmse', 'rrmse', 'rBIAS', 'kge'))
-plotSWOTreaches <- ggplot(plot_stats, aes(x=key2, y=value, fill=key)) +
+plot_stats <- gather(stats_by_reach, key=key, value=value, c('nse', 'nrmse', 'rBIAS', 'rrmse', 'kge'))
+plot_stats <- filter(plot_stats, key %in% c('nrmse', 'rrmse', 'rBIAS', 'kge'))
+print(plot_stats)
+plotSWOTreaches <- ggplot(plot_stats, aes(x=key, y=value, fill=factor(errFlag))) +
   geom_boxplot(size=1) +
   geom_hline(yintercept=1, linetype='dashed') +
   geom_hline(yintercept=0, linetype='dashed') +
@@ -93,7 +92,7 @@ plotSWOTreaches <- ggplot(plot_stats, aes(x=key2, y=value, fill=key)) +
   xlab('Metric') +
   ylab('Value') +
   coord_cartesian(ylim = c(-1,1))+
-  scale_fill_brewer(palette = 'Accent', name='', labels=c('Internal + Layover Errors', 'No Error')) +
+  scale_fill_brewer(palette = 'Accent', name='', labels=c('No Error', 'Internal + Layover Errors')) +
   theme(legend.position = "bottom",
         axis.text=element_text(size=20),
         axis.title=element_text(size=24,face="bold"),
@@ -103,10 +102,10 @@ plotSWOTreaches <- ggplot(plot_stats, aes(x=key2, y=value, fill=key)) +
 # example timeseries plot per river------------------------------------------------------------------------------------
 set.seed(700)
 
-kge_bins <- quantile(stats_by_reach[stats_by_reach$key == 'kest_mean',]$kge, c(0.33, 0.66), na.rm = T)
-kge_bad <- filter(stats_by_reach[stats_by_reach$key == 'kest_mean',], kge <= kge_bins[1]) %>% select(river)
-kge_good <- filter(stats_by_reach[stats_by_reach$key == 'kest_mean',], kge >= kge_bins[2]) %>% select(river)
-kge_eh <- filter(stats_by_reach[stats_by_reach$key == 'kest_mean',], kge >= kge_bins[1] & kge <= kge_bins[2]) %>% select(river)
+kge_bins <- quantile(stats_by_reach[stats_by_reach$errFlag ==0,]$kge, c(0.33, 0.66), na.rm = T)
+kge_bad <- filter(stats_by_reach[stats_by_reach$errFlag ==0,], kge <= kge_bins[1]) %>% select(river)
+kge_good <- filter(stats_by_reach[stats_by_reach$errFlag ==0,], kge >= kge_bins[2]) %>% select(river)
+kge_eh <- filter(stats_by_reach[stats_by_reach$errFlag ==0,], kge >= kge_bins[1] & kge <= kge_bins[2]) %>% select(river)
 
 badRiver <- filter(full_output, river == sample(kge_bad$river, 1)) %>%
   gather(key=key, value=value, c(kobs, kest_mean))

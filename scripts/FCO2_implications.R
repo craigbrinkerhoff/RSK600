@@ -9,9 +9,10 @@ library(ncdf4)
 library(cowplot)
 library(ggtext)
 library(lubridate)
+library(parallel)
 theme_set(theme_cowplot())
 
-munge <- 0 #set to 1 if you need to generate results and individual river plots, otherwise 0
+munge <- 1 #set to 1 if you need to generate results and individual river plots, otherwise 0. Just leave to 1 on an HPC b/c it's quick
 
 #constants-------------------
 molarMass <- 44.01 #g/mol for CO2
@@ -69,6 +70,7 @@ k600_craig <- function(w, s, v) {
   }
   return(k)
 }
+
 s <- data.frame('river'=NA, 'meanS'=NA)
 #run-------------------------------------------
 if (munge == 1) {
@@ -85,9 +87,9 @@ if (munge == 1) {
   Data$CO2_uatm <- Data$CO2_umol_L / exp(henrys_law_func(Data$Water_temp_C))
   
   #read in BIKER results-----------------------------------------------
-  BIKER_results <- read.csv('inputs/results_SWOT_11day.csv')
-  BIKER_results$river <- substr(as.character(BIKER_results$river), 16, nchar(as.character(BIKER_results$river)))
-  
+  BIKER_results <- read.csv('outputs/validation/BIKER_validation_results.csv')
+  BIKER_results <- filter(BIKER_results, errFlag == 0)
+
   #Loop through SWOT rivers and just use Beaulieu etal 2012 CO2 data for all of them...------------------------
   output <- data.frame('river'=NA, 'timestep'=NA,
                        'FCO2_ulset'=NA, 
@@ -114,7 +116,6 @@ if (munge == 1) {
     start_date <- ncvar_get(data_in, 'Reach_Timeseries/t')
     start_date <- ifelse(start_date[1] !=1, start_date[1], 1)
     river_start_date <- format(as.Date('0000/01/01') + start_date, format='%m')
-print(river_start_date)
 
     #prep pepsi rivers
     S_obs[S_obs<=0]=NA

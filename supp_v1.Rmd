@@ -2,7 +2,7 @@
 title: "Supplemental Information"
 author: "CB Brinkerhoff, CJ Gleason, PA Raymond, MH Harlan"
 date: "`r Sys.Date()`"
-csl: APA.csl
+csl: american-geophysical-union.csl
 output:
   word_document: 
       reference_docx: word-styles-reference.docx

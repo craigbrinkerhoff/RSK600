@@ -13,6 +13,9 @@ library(segmented)
 theme_set(theme_cowplot())
 options(scipen = 999)
 
+#model settings-------------------------------
+source(here::here('scripts' , 'inputs.R'))
+
 #Ulseth etal 2019------------------------------------------------------------
 ulseth_data <- read.csv('inputs//k600//Ulseth_etal_2019.csv', fileEncoding="UTF-8-BOM") #contains data from 5 studies
 ulseth_data <- ulseth_data[,-8]
@@ -22,7 +25,7 @@ ulseth_data$data <- ifelse(ulseth_data$data == 'Raymond et al. 2012', 'Raymond e
 data <- ulseth_data
 data <- filter(data, is.na(width)==0) #filter out no width measurements
 
-data$eD <- 9.8 * data$slope * data$Vms #water column turbulent dissipation rate m2/s3
+data$eD <- g * data$slope * data$Vms #water column turbulent dissipation rate m2/s3
 
 #width regime models for k600-----------------------------------------------------------------------
 data$widthRegime <- ifelse(data$width < 10 & data$slope < 0.05, '1', #meters
@@ -189,12 +192,12 @@ test_vali_ulseth <- ggplot(data_test, aes(x=(k600), y=(k600_pred_ulseth), color=
   )
 
 legend <- get_legend(test_vali_me + theme(legend.box.margin = margin(0, 0, 0, 90)))
-validation <- plot_grid(test_vali_me + theme(legend.position='none') + xlab(''), 
-                        test_vali_ulseth + xlab('') + ylab(''), 
-                        test_vali_raymond_2 + xlab(''), 
-                        test_vali_raymond_3 + ylab(''), 
-                        test_vali_raymond, 
-                        legend, ncol=2, 
+validation <- plot_grid(test_vali_me + theme(legend.position='none') + xlab(''),
+                        test_vali_ulseth + xlab('') + ylab(''),
+                        test_vali_raymond_2 + xlab(''),
+                        test_vali_raymond_3 + ylab(''),
+                        test_vali_raymond,
+                        legend, ncol=2,
                         labels=c('    RS-able Ulseth etal 2019', '   Ulseth etal 2019', 'Raymond etal 2012- Eq 4','Raymond etal 2012- Eq. 3', 'Raymond etal 2012- Eq 5', NA))
 ggsave('outputs/k600/validation.jpg', validation, width=10, height=12)
 
@@ -344,7 +347,7 @@ roughness_plot <- plot_grid(roughness_0, roughness_1, roughness_2, roughness_3, 
 ggsave('outputs/k600/roughness.jpg', roughness_plot, width=9, height=8)
 
 #Save results to file for manuscript-----------------------------------
-results <- data.frame('r2'=c(r2_me, NA, r2_raymond2, r2_raymond3, r2_ulseth), 
-                      'rmse'=c(rmse_me, NA, rmse_raymond2, rmse_raymond3,rmse_ulseth), 
+results <- data.frame('r2'=c(r2_me, NA, r2_raymond2, r2_raymond3, r2_ulseth),
+                      'rmse'=c(rmse_me, NA, rmse_raymond2, rmse_raymond3,rmse_ulseth),
                       'Model'=c('RS-able', 'Raymond_1', 'Raymond_2', 'Raymond_3','Ulseth'))
 write.csv(results, 'outputs//k600//results.csv')

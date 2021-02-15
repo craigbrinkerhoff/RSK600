@@ -83,7 +83,7 @@ stats_by_reach <- group_by(results, river, errFlag) %>%
 
 plot_stats <- gather(stats_by_reach, key=key, value=value, c('nse', 'nrmse', 'rBIAS', 'rrmse', 'kge'))
 plot_stats <- filter(plot_stats, key %in% c('nrmse', 'rrmse', 'rBIAS', 'kge'))
-print(plot_stats)
+
 plotSWOTreaches <- ggplot(plot_stats, aes(x=key, y=value, fill=factor(errFlag))) +
   geom_boxplot(size=1) +
   geom_hline(yintercept=1, linetype='dashed') +
@@ -98,7 +98,7 @@ plotSWOTreaches <- ggplot(plot_stats, aes(x=key, y=value, fill=factor(errFlag)))
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
- 
+
 # example timeseries plot per river------------------------------------------------------------------------------------
 set.seed(700)
 
@@ -112,7 +112,7 @@ badRiver <- filter(full_output, river == sample(kge_bad$river, 1)) %>%
 riv <- substr(as.character(badRiver[1,]$river), 16, nchar(as.character(badRiver[1,]$river)))
 badRiverPlot <- ggplot(badRiver, aes(x=time, y=value, color=key)) + #model
   geom_pointrange(aes(ymin = kest_low, ymax = kest_high), fatten=10) +
-  geom_line(size=1) + 
+  geom_line(size=1) +
   ylab('k600 [m/dy]') +
   xlab('Timestep') +
   scale_color_brewer(palette='Set2') +
@@ -160,7 +160,7 @@ write.csv(stats_by_reach, 'outputs//validation//results_by_riv.csv')
 #for finesst
 #slope versus temporal variation of k600
 # temp <- gather(stats_by_reach, key=key, value=value, c('CVobs', 'CVest'))
-# ggplot(temp, aes(x=meanS, y=value*100, color=key)) + 
+# ggplot(temp, aes(x=meanS, y=value*100, color=key)) +
 #   geom_point(size=5) +
 #   geom_smooth(se=F, method='lm', size=1.5)+
 #   scale_color_brewer(palette='Dark2', name='', labels=c('BIKER', 'Observed'))+

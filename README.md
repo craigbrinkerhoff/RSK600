@@ -23,8 +23,6 @@ The manuscript file draws all figures and results from the analysis outputs in o
 ## Notes
 1) The actual algorithm is written as an R package and available at https://github.com/craigbrinkerhoff/BIKER and is called directly in the validation script in this analysis.
 
-2) The stan model implemented in the algorithm is saved here purely for posterity's sake (along with past versions as this is all a work in progress). The most recent version is the one that is implemented in the BIKER R package.
-
 3) Note that the hydraulics dataset needed to run the MC simulations is not included here as it is too large to store on Git. It is available in dropbox from its paper's original repo (https://github.com/craigbrinkerhoff/2019_AMHG) but you will need to store it in the following location for all code to run smoothly: ~inputs/MonteCarlo/field_measurements.csv
 
 ## To do

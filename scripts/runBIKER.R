@@ -1,16 +1,13 @@
-library(ncdf4)
-library(tidyverse)
-library(BIKER)
-library(parallel)
-library(readr)
+######################
+#Description: Runs the BIKER algorithm on SWOT-simulated rivers
+#Creator: Craig Brinkerhoff
+#Date: Winter 2021
+#####################
 
-#no scientific notation
-options(scipen=999)
-
-#model settings-------------------------------
+#load model settings and packages-------------------------------
 source(here::here('scripts' , 'inputs.R'))
 
-#dA functions------------------------------------------------------
+#functions to calculate dA from W and H------------------------------------------------------
 #' @param w Matrix of widths
 #' @param h Matrix of heights(FROM MARK)
 calcdA_mat <- function(w, h) {
@@ -42,7 +39,7 @@ calcdA_vec <- function(w, h) {
 files <- list.files('inputs/Frasson_etal_2019', pattern="*.nc", full.names = TRUE)
 files <- files[-1] #remove Arial Khan
 
-#function for parallelzing BIKER runs------------------------------
+#function for parallelizing BIKER runs------------------------------
 run_BIKER <- function(currPepsi, errFlag) {
   #run model-------------------------------------------------------
   name <- substr(currPepsi, 26, nchar(currPepsi))

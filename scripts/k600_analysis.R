@@ -1,19 +1,10 @@
-#Creator: Craig Brinkerhoff
+###########################
 #Description: Modeling k600 from hydraulics. Comparing upscaling models for k600 from eD
-#Fall 2020
+#Creator: Craig Brinkerhoff
+#Winter 2021
+###########################
 
-library(tidyverse)
-library(cowplot)
-library(Metrics)
-library(colorspace)
-library(ggfortify)
-library(ggtext)
-library(segmented)
-
-theme_set(theme_cowplot())
-options(scipen = 999)
-
-#model settings-------------------------------
+#load model settings and packages-------------------------------
 source(here::here('scripts' , 'inputs.R'))
 
 #Ulseth etal 2019------------------------------------------------------------

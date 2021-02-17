@@ -1,19 +1,10 @@
-#Toy model to explore implications of k model for GHG fluxes
-  #various upscaling models versus BIKER algorithm
-  #same script as FCH4_implications but for carbon dioxide
+###########################
+#Description: Uses BIKER and rating curves to calculate FCO2 and bulk C fluxes from the SWOT simulated rivers
 #Craig Brinkerhoff
-#Winter 2020
+#Winter 2021
+##########################
 
-library(tidyverse)
-library(ncdf4)
-library(cowplot)
-library(ggtext)
-library(lubridate)
-library(parallel)
-library(readr)
-theme_set(theme_cowplot())
-
-#model settings-------------------------------
+#load model settings and packages-------------------------------
 source(here::here('scripts' , 'inputs.R'))
 
 #legend labels------------------

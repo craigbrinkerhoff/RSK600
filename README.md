@@ -26,5 +26,5 @@ The manuscript file draws all figures and results from the analysis outputs in o
 3) Note that the hydraulics dataset needed to run the MC simulations is not included here as it is too large to store on Git. It is available in dropbox from its paper's original repo (https://github.com/craigbrinkerhoff/2019_AMHG) but you will need to store it in the following location for all code to run smoothly: ~inputs/MonteCarlo/field_measurements.csv
 
 ## To do
-1) Decide on slope errors
+1) Fix 2nd column of MC analysis in figure (save results for each MC analysis)
 2) Write!

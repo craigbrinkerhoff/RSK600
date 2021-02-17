@@ -1,14 +1,11 @@
-#Fall 2020
-#Craig Brinkerhoff
-#Produce figures for pepsi validation for BIGER algorithm
+########################
+#Description: Produce figures for BIKER runs on SWOT-simulated rivers
+#Creator: Craig Brinkerhoff
+#Date: Fall 2020
+######################
 
-library(tidyr)
-library(tidyverse)
-library(cowplot)
-library(RColorBrewer)
-library(colorspace)
-library(ggtext)
-theme_set(theme_cowplot())
+#load model settings and packages-------------------------------
+source(here::here('scripts' , 'inputs.R'))
 
 # Sum of squares function------------------------------
 sumsq <- function(x) sum(x^2)

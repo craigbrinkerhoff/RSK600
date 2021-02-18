@@ -385,7 +385,7 @@ legend <- get_legend(Kanawha_plot + theme(legend.box.margin = margin(0, 3, 3, 5)
 plot_fin <- plot_grid(Kanawha_plot + theme(legend.position = 'none'), OhioSection2_plot, MississippiDownstream_plot, legend, ncol=2,
                       labels=c('b', 'c', 'd', NA))
 plot_fin <- plot_grid(flux_plot, plot_fin, ncol=2, labels=c('a', NA))
-ggsave('outputs/FCO2/FCO2_plot.jpg', plot_fin, width=12, height=7)
+ggsave('outputs/FCO2/FCO2_plot.jpg', plot_fin, width=14, height=8)
 
 #save stats to file--------------------------------------
 results_all_rivs <- data.frame('rmse'=rmse, 'r2'=lmr2)

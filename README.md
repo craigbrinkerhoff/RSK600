@@ -26,5 +26,7 @@ The manuscript file draws all figures and results from the analysis outputs in o
 3) Note that the hydraulics dataset needed to run the MC simulations is not included here as it is too large to store on Git. I have included the amended version that the MC simulations are ran on. Set munge == 1 if you desire to regenerate this amended version, but you will need to store it in the following location for all code to run smoothly: ~inputs/MonteCarlo/field_measurements.csv
 
 ## To do
-1) rerun all analysis and make sure it's working smoothly
-2) Write!
+1) rerun all analysis using error term for both mannings and slope?
+2) Make sure I'm not ignoring data points when setting axis limits....
+3) Should I plot 95% CIs for the observed data using upscaling parameter uncertainity????? That'll show just how good BIKER is realtive to the upscaling uncertainitieis
+3) Write!

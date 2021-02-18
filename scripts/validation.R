@@ -89,7 +89,7 @@ plotSWOTreaches <- ggplot(plot_stats, aes(x=key, y=value, fill=factor(errFlag)))
   xlab('Metric') +
   ylab('Value') +
   coord_cartesian(ylim = c(-1,1))+
-  scale_fill_brewer(palette = 'Accent', name='', labels=c('No Error', 'Internal + Layover Errors')) +
+  scale_fill_brewer(palette = 'Accent', name='', labels=c('No Error', 'SWOT Measurement Error')) +
   theme(legend.position = "bottom",
         axis.text=element_text(size=20),
         axis.title=element_text(size=24,face="bold"),
@@ -106,7 +106,8 @@ kge_eh <- filter(stats_by_reach[stats_by_reach$errFlag ==0,], kge >= kge_bins[1]
 
 badRiver <- filter(full_output, river == sample(kge_bad$river, 1)) %>%
   gather(key=key, value=value, c(kobs, kest_mean))
-riv <- substr(as.character(badRiver[1,]$river), 16, nchar(as.character(badRiver[1,]$river)))
+
+riv <- as.character(badRiver[1,]$river)
 badRiverPlot <- ggplot(badRiver, aes(x=time, y=value, color=key)) + #model
   geom_pointrange(aes(ymin = kest_low, ymax = kest_high), fatten=10) +
   geom_line(size=1) +
@@ -118,7 +119,7 @@ badRiverPlot <- ggplot(badRiver, aes(x=time, y=value, color=key)) + #model
 
 ehRiver <- filter(full_output, river == sample(kge_eh$river, 1)) %>%
   gather(key=key, value=value, c(kobs, kest_mean))
-riv <- substr(as.character(ehRiver[1,]$river), 16, nchar(as.character(ehRiver[1,]$river)))
+riv <- as.character(ehRiver[1,]$river)
 ehRiverPlot <- ggplot(ehRiver, aes(x=time, y=value, color=key)) + #model
   geom_pointrange(aes(ymin = kest_low, ymax = kest_high), fatten=10) +
   geom_line(size=1) +
@@ -130,13 +131,13 @@ ehRiverPlot <- ggplot(ehRiver, aes(x=time, y=value, color=key)) + #model
 
 goodRiver <- filter(full_output, river == sample(kge_good$river, 1)) %>%
   gather(key=key, value=value, c(kobs, kest_mean))
-riv <- substr(as.character(goodRiver[1,]$river), 16, nchar(as.character(goodRiver[1,]$river)))
+riv <- as.character(goodRiver[1,]$river)
 goodRiverPlot <- ggplot(goodRiver, aes(x=time, y=value, color=key)) + #model
   geom_pointrange(aes(ymin = kest_low, ymax = kest_high), fatten=10) +
   geom_line(size=1) +
   ylab('k600 [m/dy]') +
   xlab('Timestep') +
-  scale_color_brewer(palette='Set2', name='k600 [m/dy]', labels=c('BIKER', 'Model Using Observed \nVelocity')) +
+  scale_color_brewer(palette='Set2', name='k600 [m/dy]', labels=c('BIKER', 'Model Using \nObserved Velocity')) +
   ggtitle(riv)
 
 # extract the legend from one of the plots

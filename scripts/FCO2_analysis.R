@@ -350,7 +350,7 @@ t <- filter(output, river=='Kanawha') %>%
   gather(key=key, value=value, c(FCO2_ulset, FCO2_BIKER))
 Kanawha_plot <- ggplot(t, aes(x=timestep, y=value, color=key)) +
   geom_line(size=1.5) +
-  geom_pointrange(aes(ymin=FCO2_BIKER_low, ymax=FCO2_BIKER_high))+
+  geom_pointrange(aes(ymin=FCO2_BIKER_low, ymax=FCO2_BIKER_high), fatten=10)+
   ylab('FCO2 [g/m2*dy]') +
   xlab('Timestep') +
   scale_color_brewer(palette='Set2', name='', labels=legend_labels) +
@@ -361,7 +361,7 @@ t <- filter(output, river=='OhioSection2') %>%
   gather(key=key, value=value, c(FCO2_ulset, FCO2_BIKER))
 OhioSection2_plot <- ggplot(t, aes(x=timestep, y=value, color=key)) +
   geom_line(size=1.5) +
-  geom_pointrange(aes(ymin=FCO2_BIKER_low, ymax=FCO2_BIKER_high))+
+  geom_pointrange(aes(ymin=FCO2_BIKER_low, ymax=FCO2_BIKER_high), fatten=10)+
   ylab('FCO2 [g/m2*dy]') +
   xlab('Timestep') +
   theme(legend.position = 'none') +
@@ -373,7 +373,7 @@ t <- filter(output, river=='MississippiDownstream') %>%
   gather(key=key, value=value, c(FCO2_ulset, FCO2_BIKER))
 MississippiDownstream_plot <- ggplot(t, aes(x=timestep, y=value, color=key)) +
   geom_line(size=1.5) +
-  geom_pointrange(aes(ymin=FCO2_BIKER_low, ymax=FCO2_BIKER_high))+
+  geom_pointrange(aes(ymin=FCO2_BIKER_low, ymax=FCO2_BIKER_high), fatten=10)+
   ylab('FCO2 [g/m2*dy]') +
   xlab('Timestep') +
   theme(legend.position = 'none') +

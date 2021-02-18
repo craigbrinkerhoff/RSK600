@@ -206,7 +206,11 @@ theory_plot <- ggplot(data, aes(x=(eD), y=(k600), color=factor(widthRegime))) +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
-  )
+  ) +
+  theme(axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'))
 ggsave('outputs//k600//theory_plot.jpg', theory_plot, width=9, height=7)
 
 #save model coefficients to be implemented within BIKER algorithm

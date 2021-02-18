@@ -5,7 +5,6 @@
 #load model settings and packages-------------------------------
 source(here::here('scripts' , 'inputs.R'))
 set.seed(455)
-munge2 <- 0
 
 #Pull in hydraulic measurements from Brinkerhoff etal 2019 to test parameter uncertainty------------------------------------------
 if(munge == 1){
@@ -86,61 +85,86 @@ func_MC <- function(id, mannings_flag, slopeFlag) {
   log_eD <- log(s * 9.8 * vel)
   logk <- exp*log_eD + log(int)
 
-  #save a few random uncertainty scenarios----------------
+  #save a few random k600 pdfs for plotting----------------
   if (id == 100) {
     logk_1 <- logk
-    write.csv(logk_1, 'outputs/MonteCarlo/example_pdfs_1.csv')
+    if(mannings_flag == 0 & slopeFlag == 0){
+      write.csv(logk_1, 'outputs/MonteCarlo/pdf_a_0_0.csv')
+    }
+    if(mannings_flag == 1 & slopeFlag == 0){
+      write.csv(logk_1, 'outputs/MonteCarlo/pdf_a_1_0.csv')
+    }
+    if(mannings_flag == 1 & slopeFlag == 1){
+      write.csv(logk_1, 'outputs/MonteCarlo/pdf_a_1_1.csv')
+    }
   }
   if (id == 1000) {
     logk_2 <- logk
-    write.csv(logk_2, 'outputs/MonteCarlo/example_pdfs_2.csv')
+    if(mannings_flag == 0 & slopeFlag == 0){
+      write.csv(logk_2, 'outputs/MonteCarlo/pdf_b_0_0.csv')
+    }
+    if(mannings_flag == 1 & slopeFlag == 0){
+      write.csv(logk_2, 'outputs/MonteCarlo/pdf_b_1_0.csv')
+    }
+    if(mannings_flag == 1 & slopeFlag == 1){
+      write.csv(logk_2, 'outputs/MonteCarlo/pdf_b_1_1.csv')
+    }
   }
-  if (id == 5000) {
+  if (id == 3400) {
     logk_3 <- logk
-    write.csv(logk_3, 'outputs/MonteCarlo/example_pdfs_3.csv')
+    if(mannings_flag == 0 & slopeFlag == 0){
+      write.csv(logk_3, 'outputs/MonteCarlo/pdf_c_0_0.csv')
+    }
+    if(mannings_flag == 1 & slopeFlag == 0){
+      write.csv(logk_3, 'outputs/MonteCarlo/pdf_c_1_0.csv')
+    }
+    if(mannings_flag == 1 & slopeFlag == 1){
+      write.csv(logk_3, 'outputs/MonteCarlo/pdf_c_1_1.csv')
+    }
   }
 
-  #get model estimate uncertainty
+  #get M different model estimate uncertainties and return that------------------------------
   temp <- data.frame('sigma_logk600' = sd(logk, na.rm=T), 'mean_logk600'= mean(logk, na.rm = T), 'id'=id)
 }
 
 #Run MC simulations in parallel--------------------------
 if(munge2 == 1){
-#No manning's or slope error
-print('MC simulation no errors')
-system.time(
-  output <- lapply(ids, func_MC, 0, 0)
-)
-output <- data.frame(t(sapply(output, function(x) x[1:max(lengths(output))])))
-output$sigma_logk600 <- as.numeric(output$sigma_logk600)
-output$mean_logk600 <- as.numeric(output$mean_logk600)
-output$id <- as.numeric(output$id)
-write.csv(output, 'outputs/MonteCarlo/mc_0_0.csv')
+  #No manning's or slope error
+  print('MC simulation no errors')
+  system.time(
+    output <- lapply(ids, func_MC, 0, 0, mc.cores=cores)
+  )
+  output <- data.frame(t(sapply(output, function(x) x[1:max(lengths(output))])))
+  output$sigma_logk600 <- as.numeric(output$sigma_logk600)
+  output$mean_logk600 <- as.numeric(output$mean_logk600)
+  output$id <- as.numeric(output$id)
+  write.csv(output, 'outputs/MonteCarlo/mc_0_0.csv')
 
-#No manning's or slope error
-print('MC simulation mannings errors')
-system.time(
-  output <- lapply(ids, func_MC, 1, 0)
-)
-output <- data.frame(t(sapply(output, function(x) x[1:max(lengths(output))])))
-output$sigma_logk600 <- as.numeric(output$sigma_logk600)
-output$mean_logk600 <- as.numeric(output$mean_logk600)
-output$id <- as.numeric(output$id)
-write.csv(output, 'outputs/MonteCarlo/mc_1_0.csv')
+  #No manning's or slope error
+  print('MC simulation mannings errors')
+  system.time(
+    output <- lapply(ids, func_MC, 1, 0, mc.cores=cores)
+  )
+  output <- data.frame(t(sapply(output, function(x) x[1:max(lengths(output))])))
+  output$sigma_logk600 <- as.numeric(output$sigma_logk600)
+  output$mean_logk600 <- as.numeric(output$mean_logk600)
+  output$id <- as.numeric(output$id)
+  write.csv(output, 'outputs/MonteCarlo/mc_1_0.csv')
 
-#No manning's or slope error
-print('MC simulation mannings and swot errors')
-system.time(
-  output <- lapply(ids, func_MC, 1, 1)
-)
-output <- data.frame(t(sapply(output, function(x) x[1:max(lengths(output))])))
-output$sigma_logk600 <- as.numeric(output$sigma_logk600)
-output$mean_logk600 <- as.numeric(output$mean_logk600)
-output$id <- as.numeric(output$id)
-write.csv(output, 'outputs/MonteCarlo/mc_1_1.csv')
+  #No manning's or slope error
+  print('MC simulation mannings and swot errors')
+  system.time(
+    output <- lapply(ids, func_MC, 1, 1, mc.cores=cores)
+  )
+  output <- data.frame(t(sapply(output, function(x) x[1:max(lengths(output))])))
+  output$sigma_logk600 <- as.numeric(output$sigma_logk600)
+  output$mean_logk600 <- as.numeric(output$mean_logk600)
+  output$id <- as.numeric(output$id)
+  write.csv(output, 'outputs/MonteCarlo/mc_1_1.csv')
 }
 
 #Plot histogram of M uncertainties--------------------------
+#ERROR SECNARIO 1
 df_0_0 <- read.csv('outputs/MonteCarlo/mc_0_0.csv')
 medianSD <- round(median(df_0_0$sigma_logk600, na.rm=T),2)
 print(medianSD)
@@ -152,6 +176,19 @@ plot_0_0 <- ggplot(df_0_0, aes(x=sigma_logk600)) +
   geom_text(x=3, y=300, label=paste0('median \u03c3: ', medianSD)) +
   ggtitle('Upscaling Uncertainty')
 
+df_1 <- read.csv('outputs/MonteCarlo/pdf_a_0_0.csv')
+df_2 <- read.csv('outputs/MonteCarlo/pdf_b_0_0.csv')
+df_3 <- read.csv('outputs/MonteCarlo/pdf_c_0_0.csv')
+df <- data.frame('a'= as.numeric(df_1$x), 'b'= as.numeric(df_2$x), 'c' = as.numeric(df_3$x))
+df <- gather(df, key=key, value=value)
+plot2_0_0 <- ggplot(df, aes(x=value, color=key)) +
+  geom_density(size=2) +
+  ylab('Density') +
+  scale_color_brewer(palette = 'Dark2') +
+  xlab('ln k600 [m/dy]') +
+  theme(legend.position = 'none')
+
+#ERROR SCENARIO 2
 df_1_0<- read.csv('outputs/MonteCarlo/mc_1_0.csv')
 medianSD <- round(median(df_1_0$sigma_logk600, na.rm=T),2)
 print(medianSD)
@@ -163,6 +200,19 @@ plot_1_0 <- ggplot(df_1_0, aes(x=sigma_logk600)) +
   geom_text(x=3, y=300, label=paste0('median \u03c3: ', medianSD)) +
   ggtitle('Upscaling + \nMannings Uncertainty')
 
+df_1 <- read.csv('outputs/MonteCarlo/pdf_a_1_0.csv')
+df_2 <- read.csv('outputs/MonteCarlo/pdf_b_1_0.csv')
+df_3 <- read.csv('outputs/MonteCarlo/pdf_c_1_0.csv')
+df <- data.frame('a'= as.numeric(df_1$x), 'b'= as.numeric(df_2$x), 'c' = as.numeric(df_3$x))
+df <- gather(df, key=key, value=value)
+plot2_1_0 <- ggplot(df, aes(x=value, color=key)) +
+    geom_density(size=2) +
+    ylab('Density') +
+    scale_color_brewer(palette = 'Dark2') +
+    xlab('ln k600 [m/dy]') +
+    theme(legend.position = 'none')
+
+#ERROR SCENARIO 3
 df_1_1 <- read.csv('outputs/MonteCarlo/mc_1_1.csv')
 medianSD <- round(median(df_1_1$sigma_logk600, na.rm=T),2)
 print(medianSD)
@@ -174,22 +224,20 @@ plot_1_1 <- ggplot(df_1_1, aes(x=sigma_logk600)) +
   geom_text(x=3, y=300, label=paste0('median \u03c3: ', medianSD)) +
   ggtitle('Upscaling + \nMannings + SWOT \nUncertainty')
 
-#Plot some example uncertainties--------------------------------
-df_1 <- read.csv('outputs/MonteCarlo/example_pdfs_1.csv')
-df_2 <- read.csv('outputs/MonteCarlo/example_pdfs_2.csv')
-df_3 <- read.csv('outputs/MonteCarlo/example_pdfs_3.csv')
+df_1 <- read.csv('outputs/MonteCarlo/pdf_a_1_1.csv')
+df_2 <- read.csv('outputs/MonteCarlo/pdf_b_1_1.csv')
+df_3 <- read.csv('outputs/MonteCarlo/pdf_c_1_1.csv')
 df <- data.frame('a'= as.numeric(df_1$x), 'b'= as.numeric(df_2$x), 'c' = as.numeric(df_3$x))
 df <- gather(df, key=key, value=value)
-plot2 <- ggplot(df, aes(x=value, color=key)) +
-  geom_density(size=2) +
-  ylab('Density') +
-  scale_color_brewer(palette = 'Dark2') +
-  xlab('ln k600 [m/dy]') +
-  theme(legend.position = 'none')
-
-combinedPlot <- plot_grid(plot_0_0, plot2, plot_1_0, plot2, plot_1_1, plot2, ncol=2, labels = 'auto', label_size = 18)
+plot2_1_1 <- ggplot(df, aes(x=value, color=key)) +
+    geom_density(size=2) +
+    ylab('Density') +
+    scale_color_brewer(palette = 'Dark2') +
+    xlab('ln k600 [m/dy]') +
+    theme(legend.position = 'none')
 
 #combine subplots-------------------------------------------------
+combinedPlot <- plot_grid(plot_0_0, plot2_0_0, plot_1_0, plot2_1_0, plot_1_1, plot2_1_1, ncol=2, labels = 'auto', label_size = 18)
 ggsave('outputs//MonteCarlo//MC_results.jpg', combinedPlot, width=8, height=9)
 
 #Save uncertainity to file for ms---------------------------------------

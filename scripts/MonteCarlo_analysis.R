@@ -130,9 +130,9 @@ func_MC <- function(id, mannings_flag, slopeFlag) {
 #Run MC simulations in parallel--------------------------
 if(munge2 == 1){
   #No manning's or slope error
-  print('MC simulation no errors')
+  print('MC simulation upscaling error')
   system.time(
-    output <- lapply(ids, func_MC, 0, 0, mc.cores=cores)
+    output <- mclapply(ids, func_MC, 0, 0, mc.cores=cores)
   )
   output <- data.frame(t(sapply(output, function(x) x[1:max(lengths(output))])))
   output$sigma_logk600 <- as.numeric(output$sigma_logk600)
@@ -141,9 +141,9 @@ if(munge2 == 1){
   write.csv(output, 'outputs/MonteCarlo/mc_0_0.csv')
 
   #No manning's or slope error
-  print('MC simulation mannings errors')
+  print('MC simulation upscaling + mannings errors')
   system.time(
-    output <- lapply(ids, func_MC, 1, 0, mc.cores=cores)
+    output <- mclapply(ids, func_MC, 1, 0, mc.cores=cores)
   )
   output <- data.frame(t(sapply(output, function(x) x[1:max(lengths(output))])))
   output$sigma_logk600 <- as.numeric(output$sigma_logk600)
@@ -152,9 +152,9 @@ if(munge2 == 1){
   write.csv(output, 'outputs/MonteCarlo/mc_1_0.csv')
 
   #No manning's or slope error
-  print('MC simulation mannings and swot errors')
+  print('MC simulation upscaling + mannings and swot errors')
   system.time(
-    output <- lapply(ids, func_MC, 1, 1, mc.cores=cores)
+    output <- mclapply(ids, func_MC, 1, 1, mc.cores=cores)
   )
   output <- data.frame(t(sapply(output, function(x) x[1:max(lengths(output))])))
   output$sigma_logk600 <- as.numeric(output$sigma_logk600)

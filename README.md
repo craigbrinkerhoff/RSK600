@@ -27,6 +27,5 @@ The manuscript file draws all figures and results from the analysis outputs in o
 
 ## To do
 1) rerun all analysis using error term for both mannings and slope?
-2) Make sure I'm not ignoring data points when setting axis limits....
-3) Should I plot 95% CIs for the observed data using upscaling parameter uncertainity????? That'll show just how good BIKER is realtive to the upscaling uncertainitieis
+2) Should I plot 95% CIs for the observed data using upscaling parameter uncertainity????? That'll show just how good BIKER is realtive to the upscaling uncertainitieis
 3) Write!

@@ -12,7 +12,7 @@ sumsq <- function(x) sum(x^2)
 
 #read in results----------------------------------
 results <- read.csv('outputs//validation//BIKER_validation_results.csv')
-full_output <- filter(results, errFlag == 0)
+full_output <- filter(results, errFlag == 0) #remove results with SWOT measurement error
 
 lm_kfit <- lm(log10(full_output$kest_mean)~log10(full_output$kobs))
 r2 <- round(summary(lm_kfit)$r.squared, 2)
@@ -64,21 +64,17 @@ k600_cdfs <- ggplot(t, aes(x=value, color=key, linetype=factor(flag))) +
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
 
-valPlot <- plot_grid(valPlot, k600_cdfs, ncol=2, labels=c('a', 'b'))
+valPlot <- plot_grid(valPlot, k600_cdfs, ncol=2, labels=c('a', 'b'), label_size=18)
 ggsave('outputs//validation//validation.jpg', valPlot, width=12, height=7)
 
 #by river metrics---------------------------------------------
-#errors <- full_output_errors$kest_mean
-#full_output2 <- cbind(full_output, errors)
-#full_output2 <- gather(results, key=key, value=value, c('kest_mean', 'errFlag'))
 stats_by_reach <- group_by(results, river, errFlag) %>%
   summarise(kge = hydroGOF::KGE(kest_mean, kobs),
-            nse =   hydroGOF::NSE(kest_mean, kobs),
             nrmse = sqrt(mean((kobs - kest_mean)^2)) / mean(kobs, na.rm=T),
             rBIAS =   mean(kest_mean- kobs) / mean(kobs, na.rm=T),
             rrmse =   sqrt(mean((kest_mean- kobs)^2 / kobs^2)))
 
-plot_stats <- gather(stats_by_reach, key=key, value=value, c('nse', 'nrmse', 'rBIAS', 'rrmse', 'kge'))
+plot_stats <- gather(stats_by_reach, key=key, value=value, c('nrmse', 'rBIAS', 'rrmse', 'kge'))
 plot_stats <- filter(plot_stats, key %in% c('nrmse', 'rrmse', 'rBIAS', 'kge'))
 
 plotSWOTreaches <- ggplot(plot_stats, aes(x=key, y=value, fill=factor(errFlag))) +
@@ -88,7 +84,7 @@ plotSWOTreaches <- ggplot(plot_stats, aes(x=key, y=value, fill=factor(errFlag)))
   geom_hline(yintercept=-0.41, linetype='dashed') +
   xlab('Metric') +
   ylab('Value') +
-  coord_cartesian(ylim = c(-1,1))+
+  coord_cartesian(ylim = c(-1.5,1))+
   scale_fill_brewer(palette = 'Accent', name='', labels=c('No Error', 'SWOT Measurement Error')) +
   theme(legend.position = "bottom",
         axis.text=element_text(size=20),
@@ -152,20 +148,3 @@ ggsave('outputs//validation//validation_by_river.jpg', plot2, width=14, height=8
 results_3_2 <- data.frame('rmse'=rmse, 'r2'=r2)
 write.csv(results_3_2, 'outputs//validation//results_all_riv.csv')
 write.csv(stats_by_reach, 'outputs//validation//results_by_riv.csv')
-
-
-
-#for finesst
-#slope versus temporal variation of k600
-# temp <- gather(stats_by_reach, key=key, value=value, c('CVobs', 'CVest'))
-# ggplot(temp, aes(x=meanS, y=value*100, color=key)) +
-#   geom_point(size=5) +
-#   geom_smooth(se=F, method='lm', size=1.5)+
-#   scale_color_brewer(palette='Dark2', name='', labels=c('BIKER', 'Observed'))+
-#   ylim(0,100)+
-#   scale_x_log10(
-#     breaks = scales::trans_breaks("log10", function(x) 10^x),
-#     labels = scales::trans_format("log10", scales::math_format(10^.x))) +
-#   ylab('CV K600 [%]') +
-#   xlab('Mean SWOT slope') +
-#   theme(legend.position = 'bottom')

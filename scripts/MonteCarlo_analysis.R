@@ -48,7 +48,6 @@ if(munge == 1){
 ids <- c(1:M)
 
 #Function that runs M Monte Carlo simulations (of 10,000 runs each) in parallel--------------------------------------------------------------
-#NOTE: this relies on global variables width, slope, velocity
 func_MC <- function(id, mannings_flag, slopeFlag) {
   hydraulics <- read.csv('inputs/MonteCarlo/mc_hydraulics.csv')
 
@@ -163,7 +162,7 @@ if(munge2 == 1){
   write.csv(output, 'outputs/MonteCarlo/mc_1_1.csv')
 }
 
-#Plot histogram of M uncertainties--------------------------
+#plot results-------------------------------
 #ERROR SECNARIO 1
 df_0_0 <- read.csv('outputs/MonteCarlo/mc_0_0.csv')
 medianSD <- round(median(df_0_0$sigma_logk600, na.rm=T),2)
@@ -183,9 +182,10 @@ df <- data.frame('a'= as.numeric(df_1$x), 'b'= as.numeric(df_2$x), 'c' = as.nume
 df <- gather(df, key=key, value=value)
 plot2_0_0 <- ggplot(df, aes(x=value, color=key)) +
   geom_density(size=2) +
+  coord_cartesian(ylim=c(0,0.5))+
   ylab('Density') +
   scale_color_brewer(palette = 'Dark2') +
-  xlab('ln k600 [m/dy]') +
+  xlab('') +
   theme(legend.position = 'none')
 
 #ERROR SCENARIO 2
@@ -207,9 +207,10 @@ df <- data.frame('a'= as.numeric(df_1$x), 'b'= as.numeric(df_2$x), 'c' = as.nume
 df <- gather(df, key=key, value=value)
 plot2_1_0 <- ggplot(df, aes(x=value, color=key)) +
     geom_density(size=2) +
+    coord_cartesian(ylim=c(0,0.5))+
     ylab('Density') +
     scale_color_brewer(palette = 'Dark2') +
-    xlab('ln k600 [m/dy]') +
+    xlab('') +
     theme(legend.position = 'none')
 
 #ERROR SCENARIO 3
@@ -231,6 +232,7 @@ df <- data.frame('a'= as.numeric(df_1$x), 'b'= as.numeric(df_2$x), 'c' = as.nume
 df <- gather(df, key=key, value=value)
 plot2_1_1 <- ggplot(df, aes(x=value, color=key)) +
     geom_density(size=2) +
+    coord_cartesian(ylim=c(0,0.5))+
     ylab('Density') +
     scale_color_brewer(palette = 'Dark2') +
     xlab('ln k600 [m/dy]') +

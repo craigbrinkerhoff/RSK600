@@ -303,7 +303,7 @@ plotRivs <- ggplot(plot_stats, aes(x=key2, y=value, fill=key)) +
   geom_hline(yintercept=-0.41, linetype='dashed') +
   xlab('Metric') +
   ylab('Value') +
-  coord_cartesian(ylim = c(-1,1))+
+  coord_cartesian(ylim = c(-1,1.5))+
   scale_fill_brewer(palette = 'Set1', name='') +
   theme(legend.position = "none",
         axis.text=element_text(size=20),

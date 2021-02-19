@@ -55,7 +55,7 @@ run_BIKER <- function(currPepsi, errFlag) {
 
   #prep pepsi rivers------------------------------------------------
   S_obs[S_obs<=0]=NA
-  S_obs[is.na(S_obs)] = 0.000001 #min obs SWOT slope
+  S_obs[is.na(S_obs)] = 0.000017 #min obs SWOT slope Biancarma etal 2016
   W_obs[W_obs<0]=NA
   H_obs[H_obs<0]=NA
   area[area<0]=NA
@@ -124,8 +124,8 @@ run_BIKER <- function(currPepsi, errFlag) {
     set.seed(100)
     for(i in 1:nrow(S_obs)) {
       for(j in 1:ncol(S_obs)){
-        S_obs[i,j] <- rnorm(1,S_obs[i,j], 1.7e-5) #km/km
-        S_obs[i,j] <- ifelse(S_obs[i,j] <= 0, 0.000001, S_obs[i,j]) #min obs slope Biancarma 2016
+        S_obs[i,j] <- rnorm(1,S_obs[i,j], 1.7e-5) #Durand etal 2020 [km/km]
+        S_obs[i,j] <- ifelse(S_obs[i,j] <= 0, 0.000017, S_obs[i,j]) #min obs slope Biancarma 2016
       }
     }
 

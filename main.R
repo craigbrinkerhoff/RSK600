@@ -1,21 +1,27 @@
-#Runs the three analysis scripts for this project.
-#Does not actually implement the algorithm (i.e. runBIGEER.R)
-  #but the results of those implmentations are included in the inputs directory.
+#################
+#uncomment this code if you want to run the project on your local machine. Optimized for parallel computing on an HPC so only the strongest machines will survive!!!
+#################
 
-#k600 model development
-source("scripts//k600_model.R")
-rm(list = ls())
-print('k model done')
 
-#Uncertainity analysis
-source("scripts//monte_carlo_analysis.R")
-rm(list = ls())
-print('MC simulations done')
-
-#Produce validation figures
-source("scripts//validation_figures.R")
-rm(list = ls())
-print('Validation figures done. Hopefully you had the correct validation results stored in the output directory!!')
+# #k600 model development
+# source("scripts//k600_analysis.R")
+# rm(list = ls())
+# 
+# #Uncertainity analysis
+# source("scripts//MonteCarlo_analysis.R")
+# rm(list = ls())
+# 
+# #run BIKER
+# source("scripts//runBIKER.R")
+# rm(list = ls())
+# 
+# #Produce validation figures
+# source("scripts//validation.R")
+# rm(list = ls())
+# 
+# #FCo2 analysis
+# source("scripts//FCO2_analysis.R")
+# rm(list = ls())
 
 #Move all results to global environment
 results_3_1 <- read.csv('outputs//k600//results.csv')

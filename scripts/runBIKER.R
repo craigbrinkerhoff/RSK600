@@ -89,9 +89,6 @@ run_BIKER <- function(currPepsi, errFlag) {
     area=area[,-remove_index]
   }
 
-  #Calculate dA matrix from RS W and H-----------------------------------------------------------
-  dA_obs <- calcdA_mat(W_obs,H_obs) #[m2]
-
   #calculate observed k ------------------------------------------------------------------------
   V_obs <- Q_obs / area #[m/s]
 
@@ -129,19 +126,22 @@ run_BIKER <- function(currPepsi, errFlag) {
       }
     }
 
-    for(i in 1:nrow(dA_obs)) {
-      for(j in 1:ncol(dA_obs)){
-        dA_obs[i,j] <- rnorm(1,dA_obs[i,j], W_obs[i,j]*sqrt(2)*0.104) #m2
+    for(i in 1:nrow(H_obs)) {
+      for(j in 1:ncol(H_obs)){
+        H_obs[i,j] <- rnorm(1,H_obs[i,j], 0.104) #m2
       }
     }
   }
 
+  #Calculate dA matrix from RS W and H-----------------------------------------------------------
+  dA_obs <- calcdA_mat(W_obs,H_obs) #[m2]
+
   #run BIKER------------------------------------------
   data <- biker_data(w=W_obs, s=S_obs, dA=dA_obs)
   priors <- biker_priors(data)
-  priors$sigma_model$sigma_post = matrix(mannings_uncertainity, nrow=nrow(W_obs), ncol=ncol(W_obs)) #For this validation, we only want manning's uncertainity. Real implementation would use full model uncertainty
+  priors$sigma_model$sigma_post = matrix(mannings_uncertainity, nrow=nrow(W_obs), ncol=ncol(W_obs)) #For this validation, we only want manning's uncertainty. Real implementation would use full model uncertainty
 
-  kest <- biker_estimate(bikerdata = data, bikerpriors = priors, meas_error = FALSE)
+  kest <- biker_estimate(bikerdata = data, bikerpriors = priors, meas_err=F) #this function needs to be removed because it doesn't work
 
   #write to file
   if(errFlag == 1){

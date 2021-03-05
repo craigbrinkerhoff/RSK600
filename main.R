@@ -34,7 +34,7 @@ results_3_3_bulk <- read.csv('outputs//FCO2//bulkFluxes.csv')
 results_3_3_bulk$key <- as.character(results_3_3_bulk$key)
 
 #knit manuscript
-rmarkdown::render("manuscript_v1.Rmd")
+rmarkdown::render("manuscript_v2.Rmd")
 print('Manuscript generated.')
 
 rmarkdown::render("supp_v1.Rmd")

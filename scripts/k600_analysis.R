@@ -195,7 +195,7 @@ ggsave('outputs/k600/validation.jpg', validation, width=10, height=12)
 #retrain model on all data for actual implementation in BIKER algorithm (OOBtrain/test split)----------------------------------------
 theory_plot <- ggplot(data, aes(x=(eD), y=(k600), color=factor(widthRegime))) +
   geom_point(size=4, alpha=0.50) +
-  geom_smooth(method='lm', size=3, se=F) +
+  geom_smooth(size=3, method='lm', se=F) +
   xlab('eD [m2/s3]') +
   ylab('k600 [m/dy]') +
   scale_color_discrete_qualitative(palette = 'Harmonic', name='River Width [m]', label=c('0-10 (slope < 0.05)', '0-10 (slope > 0.05)','10-50', '50-100', '100+'))+
@@ -346,3 +346,29 @@ results <- data.frame('r2'=c(r2_me, NA, r2_raymond2, r2_raymond3, r2_ulseth),
                       'rmse'=c(rmse_me, NA, rmse_raymond2, rmse_raymond3,rmse_ulseth),
                       'Model'=c('RS-able', 'Raymond_1', 'Raymond_2', 'Raymond_3','Ulseth'))
 write.csv(results, 'outputs//k600//results.csv')
+
+
+#non linear function tests
+k_model_poly <- lm(log(k600) ~ poly(log(eD), 2), data=data)
+data$k600_pred_poly <- predict(k_model_poly, data)
+theory_plot2 <- ggplot(data, aes(x=(eD), y=(k600))) +
+  geom_point(size=4, alpha=0.50) +
+  #geom_smooth(size=3, se=F, method='lm') +
+  geom_line(aes(x=eD, y=exp(k600_pred_poly)), color='blue', size=3) +
+  xlab('eD [m2/s3]') +
+  ylab('k600 [m/dy]') +
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  theme(axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'))
+ggsave('outputs//k600//theory_plot2.jpg', theory_plot2, width=9, height=7)
+
+print(summary(k_model_poly))

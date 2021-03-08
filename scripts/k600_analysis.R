@@ -19,10 +19,17 @@ data <- filter(data, is.na(width)==0) #filter out no width measurements
 data$eD <- g * data$slope * data$Vms #water column turbulent dissipation rate m2/s3
 
 #width regime models for k600-----------------------------------------------------------------------
-data$widthRegime <- ifelse(data$width < 10 & data$slope < 0.05, '1', #meters
-                            ifelse(data$width < 10 & data$slope > 0.05, '1.5',
-                                ifelse(data$width < 50, '2',
-                                   ifelse(data$width < 100, '3','4'))))
+#data$widthRegime <- ifelse(data$width < 10 & data$slope < 0.05, '1', #meters
+#                            ifelse(data$width < 10 & data$slope > 0.05, '1.5',
+#                                ifelse(data$width < 50, '2',
+#                                   ifelse(data$width < 100, '3','4'))))
+
+data$widthRegime <- ifelse(data$width < 3, '1', #meters
+                            ifelse(data$width < 5, '2',
+                              ifelse(data$width < 10, '3',
+                                  ifelse(data$width < 25, '4',
+                                    ifelse(data$width < 50, '5',
+                                      ifelse(data$width < 100, '6','7'))))))
 
 #log transform some variables-----------------------------------------------------------
 data$log_eD <- log(data$eD)
@@ -348,27 +355,83 @@ results <- data.frame('r2'=c(r2_me, NA, r2_raymond2, r2_raymond3, r2_ulseth),
 write.csv(results, 'outputs//k600//results.csv')
 
 
-#non linear function tests
-k_model_poly <- lm(log(k600) ~ poly(log(eD), 2), data=data)
-data$k600_pred_poly <- predict(k_model_poly, data)
-theory_plot2 <- ggplot(data, aes(x=(eD), y=(k600))) +
+#Polynomial regressions--------------------------------------------
+data$k_model_ulseth <- ifelse(data$eD < 0.02, 3.10 + 0.35*log(data$eD), 6.43+1.18*log(data$eD))
+
+k_model_poly_2 <- lm(log(k600) ~ poly(log(eD), 2), data=data)
+r2_poly_2 <- round(summary(k_model_poly_2)$r.squared,3)
+data$k600_pred_poly_2 <- predict(k_model_poly_2, data)
+
+k_model_poly_3 <- lm(log(k600) ~ poly(log(eD), 3), data=data)
+r2_poly_3 <- round(summary(k_model_poly_3)$r.squared,3)
+data$k600_pred_poly_3 <- predict(k_model_poly_3, data)
+
+data$swotFlag <- ifelse(data$width >= 50, 'SWOT Observable [50+m]', 'Small')
+theory_plot2 <- ggplot(data, aes(x=eD, y=k600)) +
   geom_point(size=4, alpha=0.50) +
-  #geom_smooth(size=3, se=F, method='lm') +
-  geom_line(aes(x=eD, y=exp(k600_pred_poly)), color='blue', size=3) +
+  geom_line(aes(x=eD, y=exp(k_model_ulseth)), color='darkgreen', size=2.5) +
+  geom_line(aes(x=eD, y=exp(k600_pred_poly_2)), color='darkred', size=2.5) +
+  geom_line(aes(x=eD, y=exp(k600_pred_poly_3)), color='darkblue', size=2.5) +
   xlab('eD [m2/s3]') +
   ylab('k600 [m/dy]') +
-  scale_y_log10(
+  geom_richtext(aes(x=10^-4, y=10^3), label=paste0('Ulseth r<sup>2</sup>: 0.78'), color='darkgreen') +
+  geom_richtext(aes(x=10^-4, y=10^2.5), label=paste0('2nd order poly r<sup>2</sup>: ', r2_poly_2), color='darkred') +
+  geom_richtext(aes(x=10^-4, y=10^2), label=paste0('3rd order poly r<sup>2</sup>: ', r2_poly_3), color='darkblue') +
+  scale_color_brewer(palette='Set2')+
+  scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
   ) +
-  scale_x_log10(
+  scale_y_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
   ) +
   theme(axis.text=element_text(size=20),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'))
+        legend.title = element_text(size=17, face='bold'),
+        legend.position = 'bottom')
 ggsave('outputs//k600//theory_plot2.jpg', theory_plot2, width=9, height=7)
 
-print(summary(k_model_poly))
+#amhg test...-----------------
+r2_amhg <- round(summary(lm(log10(k_model$a)~k_model$b))$r.squared,2)
+amhg_plot <- ggplot(k_model, aes(x=a, y=b, color=widthRegime)) +
+  geom_point(size=8)+
+  geom_smooth(method='lm', se=F, color='black') +
+  xlab('log10 Upscaling Coefficient') +
+  ylab('Upscaling exponent')+
+  scale_color_discrete_qualitative(palette='Dark2')+
+  geom_richtext(aes(x=10^1.3, y=1), label=paste0('r<sup>2</sup>: ', r2_amhg), color='black') +
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  ylim(0,1.5)+
+  theme(axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        legend.position = 'none')
+
+theory_plot_ratings <- ggplot(data, aes(x=(eD), y=(k600), color=factor(widthRegime))) +
+  geom_point(size=4, alpha=0.50) +
+  geom_smooth(size=3, method='lm', se=F, fullrange=TRUE) +
+  xlab('eD [m2/s3]') +
+  ylab('k600 [m/dy]') +
+  scale_color_discrete_qualitative(palette = 'Dark2')+
+  scale_y_log10(
+      breaks = scales::trans_breaks("log10", function(x) 10^x),
+      labels = scales::trans_format("log10", scales::math_format(10^.x)),
+      limits = c(0.001, 100000)
+  ) +
+  scale_x_log10(
+      breaks = scales::trans_breaks("log10", function(x) 10^x),
+      labels = scales::trans_format("log10", scales::math_format(10^.x)),
+      limits = c(0.000001, 10)
+  ) +
+  theme(axis.text=element_text(size=20),
+      axis.title=element_text(size=24,face="bold"),
+      legend.position='none')
+
+amhg_plot <- plot_grid(theory_plot_ratings, amhg_plot, ncol=2, labels=c('~AHG Ratings', '~AMHG'))
+ggsave('outputs//k600//amhg_upscaling.jpg', amhg_plot, width=15, height=7)

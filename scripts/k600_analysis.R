@@ -16,20 +16,39 @@ ulseth_data$data <- ifelse(ulseth_data$data == 'Raymond et al. 2012', 'Raymond e
 data <- ulseth_data
 data <- filter(data, is.na(width)==0) #filter out no width measurements
 
-data$eD <- g * data$slope * data$Vms #water column turbulent dissipation rate m2/s3
-
 #width regime models for k600-----------------------------------------------------------------------
 #data$widthRegime <- ifelse(data$width < 10 & data$slope < 0.05, '1', #meters
 #                            ifelse(data$width < 10 & data$slope > 0.05, '1.5',
 #                                ifelse(data$width < 50, '2',
 #                                   ifelse(data$width < 100, '3','4'))))
 
-data$widthRegime <- ifelse(data$width < 3, '1', #meters
-                            ifelse(data$width < 5, '2',
-                              ifelse(data$width < 10, '3',
-                                  ifelse(data$width < 25, '4',
-                                    ifelse(data$width < 50, '5',
-                                      ifelse(data$width < 100, '6','7'))))))
+
+#data$widthRegime <- ifelse(data$width < 3, '1', #meters
+#                            ifelse(data$width < 5, '2',
+#                              ifelse(data$width < 10, '3',
+#                                  ifelse(data$width < 25, '4',
+#                                    ifelse(data$width < 50, '5',
+#                                      ifelse(data$width < 100, '6','7'))))))
+
+#select measurements that have ~similar slopes and consider them all at the 'same xs'
+swing <- 0.10 #percent
+data$widthRegime <- ifelse(data$slope >= 0.0004 & data$slope <= 0.0004+(0.0004*swing), '1',
+                              ifelse(data$slope >= 0.001 & data$slope <= 0.001+(0.001*swing), '2',
+                                ifelse(data$slope >= 0.003 & data$slope <= 0.003+(0.003*swing), '3',
+                                  ifelse(data$slope >= 0.005 & data$slope <= 0.005+(0.005*swing), '4',
+                                    ifelse(data$slope >= 0.008 & data$slope <= 0.008+(0.008*swing), '5',
+                                      ifelse(data$slope >= 0.01 & data$slope <= 0.01+(0.01*swing), '6',
+                                        ifelse(data$slope >= 0.01 & data$slope <= 0.01+(0.01*swing), '7',
+                                          ifelse(data$slope >= 0.03 & data$slope <= 0.03+(0.03*swing), '8',
+                                            ifelse(data$slope >= 0.05 & data$slope <= 0.05+(0.05*swing), '9',
+                                              ifelse(data$slope >= 0.1 & data$slope <= 0.1+(0.1*swing), '10',
+                                                ifelse(data$slope >= 0.13 & data$slope <= 0.13+(0.13*swing), '11',NA)))))))))))
+
+#impose river-wide slope model
+#data$slope <- 0.5*data$Qm3s^0.4
+
+#calculate eD
+data$eD <- g * data$slope * data$Vms #water column turbulent dissipation rate m2/s3
 
 #log transform some variables-----------------------------------------------------------
 data$log_eD <- log(data$eD)
@@ -398,15 +417,15 @@ r2_amhg <- round(summary(lm(log10(k_model$a)~k_model$b))$r.squared,2)
 amhg_plot <- ggplot(k_model, aes(x=a, y=b, color=widthRegime)) +
   geom_point(size=8)+
   geom_smooth(method='lm', se=F, color='black') +
-  xlab('log10 Upscaling Coefficient') +
-  ylab('Upscaling exponent')+
+  xlab('Rating Curve Coefficient') +
+  ylab('Rating Curve exponent')+
   scale_color_discrete_qualitative(palette='Dark2')+
   geom_richtext(aes(x=10^1.3, y=1), label=paste0('r<sup>2</sup>: ', r2_amhg), color='black') +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
   ) +
-  ylim(0,1.5)+
+#  ylim(0,1.5)+
   theme(axis.text=element_text(size=20),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
@@ -433,5 +452,21 @@ theory_plot_ratings <- ggplot(data, aes(x=(eD), y=(k600), color=factor(widthRegi
       axis.title=element_text(size=24,face="bold"),
       legend.position='none')
 
-amhg_plot <- plot_grid(theory_plot_ratings, amhg_plot, ncol=2, labels=c('~AHG Ratings', '~AMHG'))
-ggsave('outputs//k600//amhg_upscaling.jpg', amhg_plot, width=15, height=7)
+slope_cdfs <- ggplot(data, aes(x=slope, color=factor(widthRegime))) +
+  stat_ecdf(size=2) +
+  scale_color_discrete_qualitative(palette = 'Dark2')+
+  scale_x_log10(
+      breaks = scales::trans_breaks("log10", function(x) 10^x),
+      labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  theme(axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        legend.position = 'none')
+
+amhg_plot <- plot_grid(theory_plot_ratings, amhg_plot, slope_cdfs, ncol=2, labels=c('~AHG Ratings', '~AMHG'))
+ggsave('outputs//k600//amhg_k600_obsS_bad.jpg', amhg_plot, width=11, height=9)
+
+
+print(k_model)

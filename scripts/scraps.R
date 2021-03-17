@@ -1,5 +1,81 @@
 #scrap-------------------------------------------------
 
+#select measurements that have ~similar slopes and consider them all at the 'same xs'
+swing <- 0.10 #percent
+data$widthRegime <- ifelse(data$slope >= 0.0004 & data$slope <= 0.0004+(0.0004*swing), '1',
+                              ifelse(data$slope >= 0.001 & data$slope <= 0.001+(0.001*swing), '2',
+                                ifelse(data$slope >= 0.003 & data$slope <= 0.003+(0.003*swing), '3',
+                                  ifelse(data$slope >= 0.005 & data$slope <= 0.005+(0.005*swing), '4',
+                                    ifelse(data$slope >= 0.008 & data$slope <= 0.008+(0.008*swing), '5',
+                                      ifelse(data$slope >= 0.01 & data$slope <= 0.01+(0.01*swing), '6',
+                                        ifelse(data$slope >= 0.01 & data$slope <= 0.01+(0.01*swing), '7',
+                                          ifelse(data$slope >= 0.03 & data$slope <= 0.03+(0.03*swing), '8',
+                                            ifelse(data$slope >= 0.05 & data$slope <= 0.05+(0.05*swing), '9',
+                                              ifelse(data$slope >= 0.1 & data$slope <= 0.1+(0.1*swing), '10',
+                                                ifelse(data$slope >= 0.13 & data$slope <= 0.13+(0.13*swing), '11',NA)))))))))))
+
+
+                                                #amhg test...-----------------
+                                                r2_amhg <- round(summary(lm(log10(k_model$a)~k_model$b))$r.squared,2)
+                                                amhg_plot <- ggplot(k_model, aes(x=a, y=b, color=widthRegime)) +
+                                                  geom_point(size=8)+
+                                                  geom_smooth(method='lm', se=F, color='black') +
+                                                  xlab('Rating Curve Coefficient') +
+                                                  ylab('Rating Curve exponent')+
+                                                  scale_color_discrete_qualitative(palette='Dark2')+
+                                                  geom_richtext(aes(x=10^1.3, y=1), label=paste0('r<sup>2</sup>: ', r2_amhg), color='black') +
+                                                  scale_x_log10(
+                                                    breaks = scales::trans_breaks("log10", function(x) 10^x),
+                                                    labels = scales::trans_format("log10", scales::math_format(10^.x))
+                                                  ) +
+                                                #  ylim(0,1.5)+
+                                                  theme(axis.text=element_text(size=20),
+                                                        axis.title=element_text(size=24,face="bold"),
+                                                        legend.text = element_text(size=17),
+                                                        legend.title = element_text(size=17, face='bold'),
+                                                        legend.position = 'none')
+
+                                                theory_plot_ratings <- ggplot(data, aes(x=(eD), y=(k600), color=factor(widthRegime))) +
+                                                  geom_point(size=4, alpha=0.50) +
+                                                  geom_smooth(size=3, method='lm', se=F, fullrange=TRUE) +
+                                                  xlab('eD [m2/s3]') +
+                                                  ylab('k600 [m/dy]') +
+                                                  scale_color_discrete_qualitative(palette = 'Dark2')+
+                                                  scale_y_log10(
+                                                      breaks = scales::trans_breaks("log10", function(x) 10^x),
+                                                      labels = scales::trans_format("log10", scales::math_format(10^.x)),
+                                                      limits = c(0.001, 100000)
+                                                  ) +
+                                                  scale_x_log10(
+                                                      breaks = scales::trans_breaks("log10", function(x) 10^x),
+                                                      labels = scales::trans_format("log10", scales::math_format(10^.x)),
+                                                      limits = c(0.000001, 10)
+                                                  ) +
+                                                  theme(axis.text=element_text(size=20),
+                                                      axis.title=element_text(size=24,face="bold"),
+                                                      legend.position='none')
+
+                                                slope_cdfs <- ggplot(data, aes(x=slope, color=factor(widthRegime))) +
+                                                  stat_ecdf(size=2) +
+                                                  scale_color_discrete_qualitative(palette = 'Dark2')+
+                                                  scale_x_log10(
+                                                      breaks = scales::trans_breaks("log10", function(x) 10^x),
+                                                      labels = scales::trans_format("log10", scales::math_format(10^.x))
+                                                  ) +
+                                                  theme(axis.text=element_text(size=20),
+                                                        axis.title=element_text(size=24,face="bold"),
+                                                        legend.text = element_text(size=17),
+                                                        legend.title = element_text(size=17, face='bold'),
+                                                        legend.position = 'none')
+
+                                                amhg_plot <- plot_grid(theory_plot_ratings, amhg_plot, slope_cdfs, ncol=2, labels=c('~AHG Ratings', '~AMHG'))
+                                                ggsave('outputs//k600//amhg_k600_obsS_bad.jpg', amhg_plot, width=11, height=9)
+
+
+                                                print(k_model)
+
+
+
 # #Is dataset representative for SWOT observable rivers?
 # ggplot(data, aes(x=width)) +
 #   stat_ecdf(size=2)+
@@ -160,6 +236,6 @@ ggsave('outputs/flux_implications/FCO2_by_river.jpg', plotRivs, width=10, height
 #   geom_vline(xintercept = mean(mean_modelSD_by_riv$meanSD), size=1.3, color='darkred') +
 #   xlab('BIKER k600 ln(sd)') +
 #   ylab('Count')
-# 
+#
 # RS_uncertainity <- plot_grid(uncertainity_comparison_alltimesteps, uncertainity_comparison_byRiv, ncol=2, labels = 'auto')
 # ggsave('outputs//validation/validation_uncertainity.jpg', RS_uncertainity)

@@ -22,9 +22,6 @@ data$widthRegime <- ifelse(data$width < 10 & data$slope < 0.05, '1', #meters
                                 ifelse(data$width < 50, '2',
                                    ifelse(data$width < 100, '3','4'))))
 
-#impose river-wide slope model
-#data$slope <- 0.5*data$Qm3s^0.4
-
 #calculate eD and power
 data$eD <- g * data$slope * data$Vms #water column turbulent dissipation rate m2/s3
 data$omega <- g * data$slope * 998 * data$width * data$depth * data$Vms
@@ -276,19 +273,28 @@ data$Re_flag <- ifelse(data$Re <= 2000, 'Laminar',
 data$eD_flag <- ifelse(data$eD <= 0.00148253769, 'Other factors',
                   ifelse(data$eD >= 0.09594309727, 'Bubble-Mediated', 'Water Column Turbulence'))
 
-
 #Figure S4: bed roughness vs. k600-------------------------------------------
 data$keulegan <- 11*data$depth*(1/exp(data$Vms/(2.5*(9.8*data$depth*data$slope)^(1/2))))
-data$D84 <- data$keulegan/3.25
+#data$keulegan <- data$keulegan/data$width
 data$tau <- data$depth * 998 * data$slope
 
-lm_roughness <- lm(log10(data$k600)~log10(data$keulegan))
+#slope thresholds
+t1 <- 0.001
+t2 <- 0.01
+t3 <- 0.05
+t4 <- 0.1
+t5 <- 0.2
+
+data_1 <- data
+lm_roughness <- lm(log10(k600)~log10(keulegan), data = data_1)
 r2_roughness <- round(summary(lm_roughness)$r.squared, 2)
-roughness_0 <- ggplot(data, aes(x=keulegan, y=k600)) +
-  geom_point() +
-  geom_smooth(method='lm', se=F)+
-  geom_richtext(aes(x=10^-1.5, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
-  coord_cartesian(x=c(10^-2.5, 10^1.5), c(10^-2, 10^5)) +
+roughness_1 <- ggplot(data_1, aes(x=keulegan, y=k600, color= swotFlag)) +
+  geom_point(size=3) +
+  geom_smooth(method='lm', se=F, color='black')+
+  geom_richtext(aes(x=10^0, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
+  geom_hline(yintercept=35, color='black', linetype='dashed', size=1)+
+  scale_color_brewer(palette='Set2') +
+  #coord_cartesian(x=c(10^-1.5, 10^1.5), c(10^-2, 10^5)) +
   ylab('K600 [m/dy]') +
   xlab('') +
   ggtitle('All Data')+
@@ -299,39 +305,22 @@ roughness_0 <- ggplot(data, aes(x=keulegan, y=k600)) +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
-  )
-
-data_1 <- filter(data, slope > 0.001)
-lm_roughness <- lm(log10(k600)~log10(keulegan), data = data_1)
-r2_roughness <- round(summary(lm_roughness)$r.squared, 2)
-roughness_1 <- ggplot(data_1, aes(x=keulegan, y=k600)) +
-  geom_point() +
-  geom_smooth(method='lm', se=F)+
-  geom_richtext(aes(x=10^-1.5, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
-  coord_cartesian(x=c(10^-2.5, 10^1.5), c(10^-2, 10^5)) +
-  ylab('') +
-  xlab('') +
-  ggtitle('Slope > 0.001')+
-  scale_y_log10(
-    breaks = scales::trans_breaks("log10", function(x) 10^x),
-    labels = scales::trans_format("log10", scales::math_format(10^.x))
   ) +
-  scale_x_log10(
-    breaks = scales::trans_breaks("log10", function(x) 10^x),
-    labels = scales::trans_format("log10", scales::math_format(10^.x))
-  )
+  theme(legend.position='none')
 
-data_2 <- filter(data, slope > 0.01)
+data_2 <- filter(data, slope >= t1)
 lm_roughness <- lm(log10(k600)~log10(keulegan), data = data_2)
 r2_roughness <- round(summary(lm_roughness)$r.squared, 2)
-roughness_2 <- ggplot(data_2, aes(x=keulegan, y=k600)) +
-  geom_point() +
-  geom_smooth(method='lm', se=F)+
-  geom_richtext(aes(x=10^-1.5, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
-  coord_cartesian(x=c(10^-2.5, 10^1.5), c(10^-2, 10^5)) +
-  ylab('K600 [m/dy]') +
-  xlab('Effective Bed Roughness height [m]') +
-  ggtitle('Slope > 0.01')+
+roughness_2 <- ggplot(data_2, aes(x=keulegan, y=k600, color= swotFlag)) +
+  geom_point(size=3) +
+  geom_smooth(method='lm', se=F, color='black')+
+  geom_richtext(aes(x=10^0, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
+  geom_hline(yintercept=35, color='black', linetype='dashed', size=1)+
+  scale_color_brewer(palette='Set2') +
+  #coord_cartesian(x=c(10^-1.5, 10^1.5), c(10^-2, 10^5)) +
+  ylab('') +
+  xlab('')+
+  ggtitle(paste0('Slope >= ', t1))+
   scale_y_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
@@ -339,19 +328,22 @@ roughness_2 <- ggplot(data_2, aes(x=keulegan, y=k600)) +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
-  )
+  ) +
+  theme(legend.position='none')
 
-data_3 <- filter(data, slope > 0.1)
+data_3 <- filter(data, slope >= t2)
 lm_roughness <- lm(log10(k600)~log10(keulegan), data = data_3)
 r2_roughness <- round(summary(lm_roughness)$r.squared, 2)
-roughness_3 <- ggplot(data_3, aes(x=keulegan, y=k600)) +
-  geom_point() +
-  geom_smooth(method='lm', se=F)+
-  geom_richtext(aes(x=10^-1.5, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
-  coord_cartesian(x=c(10^-2.5, 10^1.5), c(10^-2, 10^5)) +
-  ylab('') +
-  xlab('Effective Bed Roughness height [m]') +
-  ggtitle('Slope > 0.1')+
+roughness_3 <- ggplot(data_3, aes(x=keulegan, y=k600, color= swotFlag)) +
+  geom_point(size=3) +
+  geom_smooth(method='lm', se=F, color='black')+
+  geom_richtext(aes(x=10^-1, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
+  geom_hline(yintercept=35, color='black', linetype='dashed', size=1)+
+  scale_color_brewer(palette='Set2') +
+#  coord_cartesian(x=c(10^-1.5, 10^1.5), c(10^-2, 10^5)) +
+  xlab('')+
+  ylab('K600 [m/dy]') +
+  ggtitle(paste0('Slope >= ', t2))+
   scale_y_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
@@ -359,19 +351,22 @@ roughness_3 <- ggplot(data_3, aes(x=keulegan, y=k600)) +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
-  )
+  ) +
+  theme(legend.position='none')
 
-data_4 <- filter(data, slope > 0.15)
+data_4 <- filter(data, slope >= t3)
 lm_roughness <- lm(log10(k600)~log10(keulegan), data = data_4)
 r2_roughness <- round(summary(lm_roughness)$r.squared, 2)
-roughness_4 <- ggplot(data_4, aes(x=keulegan, y=k600)) +
-  geom_point() +
-  geom_smooth(method='lm', se=F)+
-  geom_richtext(aes(x=10^-1.5, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
-  coord_cartesian(x=c(10^-2.5, 10^1.5), c(10^-2, 10^5)) +
+roughness_4 <- ggplot(data_4, aes(x=keulegan, y=k600, color= swotFlag)) +
+  geom_point(size=3) +
+  geom_smooth(method='lm', se=F, color='black')+
+  geom_richtext(aes(x=10^-1, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
+  geom_hline(yintercept=35, color='black', linetype='dashed', size=1)+
+  scale_color_brewer(palette='Set2') +
+#  coord_cartesian(x=c(10^-1.5, 10^1.5), c(10^-2, 10^5)) +
   ylab('') +
-  xlab('Effective Bed Roughness height [m]') +
-  ggtitle('Slope > 0.15')+
+  xlab('') +
+  ggtitle(paste0('Slope >= ', t3))+
   scale_y_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
@@ -379,19 +374,22 @@ roughness_4 <- ggplot(data_4, aes(x=keulegan, y=k600)) +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
-  )
+  ) +
+  theme(legend.position='none')
 
-data_5 <- filter(data, slope > 0.2)
+data_5 <- filter(data, slope >= t4)
 lm_roughness <- lm(log10(k600)~log10(keulegan), data = data_5)
 r2_roughness <- round(summary(lm_roughness)$r.squared, 2)
-roughness_5 <- ggplot(data_5, aes(x=keulegan, y=k600)) +
-  geom_point() +
-  geom_smooth(method='lm', se=F)+
-  geom_richtext(aes(x=10^-1.5, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
-  coord_cartesian(x=c(10^-2.5, 10^1.5), c(10^-2, 10^5)) +
-  ylab('') +
-  xlab('Effective Bed Roughness height [m]') +
-  ggtitle('Slope > 0.2')+
+roughness_5 <- ggplot(data_5, aes(x=keulegan, y=k600, color= swotFlag)) +
+  geom_point(size=3) +
+  geom_smooth(method='lm', se=F, color='black')+
+  geom_richtext(aes(x=10^-1, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
+  geom_hline(yintercept=35, color='black', linetype='dashed', size=1)+
+  scale_color_brewer(palette='Set2') +
+#  coord_cartesian(x=c(10^-1.5, 10^1.5), c(10^-2, 10^5)) +
+  ylab('K600 [m/dy]') +
+  xlab('Effective Bed Roughness [m]') +
+  ggtitle(paste0('Slope >= ', t4))+
   scale_y_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
@@ -399,9 +397,33 @@ roughness_5 <- ggplot(data_5, aes(x=keulegan, y=k600)) +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
-  )
+  ) +
+  theme(legend.position='none')
 
-roughness_plot <- plot_grid(roughness_0, roughness_1, roughness_2, roughness_3, roughness_4, roughness_5, ncol=2)
+data_6 <- filter(data, slope >= t5)
+lm_roughness <- lm(log10(k600)~log10(keulegan), data = data_6)
+r2_roughness <- round(summary(lm_roughness)$r.squared, 2)
+roughness_6 <- ggplot(data_6, aes(x=keulegan, y=k600, color= swotFlag)) +
+  geom_point(size=3) +
+  geom_smooth(method='lm', se=F, color='black')+
+  geom_richtext(aes(x=10^-1, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
+  geom_hline(yintercept=35, color='black', linetype='dashed', size=1)+
+  scale_color_brewer(palette='Set2') +
+#  coord_cartesian(x=c(10^-1.5, 10^1.5), c(10^-2, 10^5)) +
+  ylab('') +
+  xlab('Effective Bed Roughness [m]') +
+  ggtitle(paste0(t5, ' <= Slope'))+
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  theme(legend.position='none')
+
+roughness_plot <- plot_grid(roughness_1, roughness_2, roughness_3, roughness_4, roughness_5, roughness_6, ncol=2)
 ggsave('outputs/k600/roughness.jpg', roughness_plot, width=8, height=9)
 
 #Save results to file for manuscript-----------------------------------
@@ -514,9 +536,11 @@ ggsave('outputs//k600//theory_plot4.jpg', theory_plot4, width=9, height=7)
   #gas transfer velocity with increasing stream order
   #(Fig. 4). This finding is inconsistent with the conceptual
   #theory of turbulent dissipation (Fig. 2).
-theory_plot5 <- ggplot(data, aes(x=depth*width, y=k600_craig_power)) +
+theory_plot5 <- ggplot(data, aes(x=k600, y=k600_craig_power)) +
   geom_point(size=4, alpha=0.50) +
-  xlab('Channel Area')+
+  geom_smooth(method='lm', se=F, color='darkblue', size=2)+
+  geom_abline(color='darkgrey', linetype='dashed',size=2)+
+  xlab('Observed k600 [m/day]')+
   ylab('Power modeled K600 [m/day]') +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
@@ -532,9 +556,11 @@ theory_plot5 <- ggplot(data, aes(x=depth*width, y=k600_craig_power)) +
         legend.title = element_text(size=17, face='bold'),
         legend.position = 'bottom')
 
-theory_plot6 <- ggplot(data, aes(x=depth*width, y=k600_craig)) +
+theory_plot6 <- ggplot(data, aes(x=k600, y=k600_craig)) +
   geom_point(size=4, alpha=0.50) +
-  xlab('Channel Area')+
+  geom_smooth(method='lm', se=F,color='darkblue', size=2)+
+  geom_abline(color='darkgrey', linetype='dashed',size=2)+
+  xlab('Observed k600 [m/day]')+
   ylab('eD modeled K600 [m/day]') +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
@@ -550,23 +576,5 @@ theory_plot6 <- ggplot(data, aes(x=depth*width, y=k600_craig)) +
         legend.title = element_text(size=17, face='bold'),
         legend.position = 'bottom')
 
-theory_plot7 <- ggplot(data, aes(x=depth*width, y=k600)) +
-  geom_point(size=4, alpha=0.50) +
-  xlab('Channel Area')+
-  ylab('Observed K600 [m/day]') +
- scale_x_log10(
-      breaks = scales::trans_breaks("log10", function(x) 10^x),
-      labels = scales::trans_format("log10", scales::math_format(10^.x))
-  ) +
-  scale_y_log10(
-      breaks = scales::trans_breaks("log10", function(x) 10^x),
-      labels = scales::trans_format("log10", scales::math_format(10^.x))
-  ) +
-  theme(axis.text=element_text(size=20),
-      axis.title=element_text(size=24,face="bold"),
-      legend.text = element_text(size=17),
-      legend.title = element_text(size=17, face='bold'),
-      legend.position = 'bottom')
-
-theory_check <- plot_grid(theory_plot5, theory_plot6, theory_plot7, ncol=3)
-ggsave('outputs//k600//theory_plot5.jpg', theory_check, width=11, height=)
+theory_check <- plot_grid(theory_plot5, theory_plot6, ncol=2)
+ggsave('outputs//k600//theory_plot5.jpg', theory_check, width=12, height=6)

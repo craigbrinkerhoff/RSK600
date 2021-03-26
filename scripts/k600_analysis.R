@@ -22,9 +22,8 @@ data$widthRegime <- ifelse(data$width < 10 & data$slope < 0.05, '1', #meters
                                 ifelse(data$width < 50, '2',
                                    ifelse(data$width < 100, '3','4'))))
 
-#calculate eD and power
-data$eD <- g * data$slope * data$Vms #water column turbulent dissipation rate m2/s3
-data$omega <- g * data$slope * 998 * data$width * data$depth * data$Vms
+#calculate eD
+data$eD <- g * data$slope * data$Vms #water column turbulent dissipation rate m2/s3 or W/kg
 
 #log transform some variables-----------------------------------------------------------
 data$log_eD <- log(data$eD)
@@ -288,8 +287,8 @@ t5 <- 0.2
 data_1 <- data
 lm_roughness <- lm(log10(k600)~log10(keulegan), data = data_1)
 r2_roughness <- round(summary(lm_roughness)$r.squared, 2)
-roughness_1 <- ggplot(data_1, aes(x=keulegan, y=k600, color= swotFlag)) +
-  geom_point(size=3) +
+roughness_1 <- ggplot(data_1, aes(x=keulegan, y=k600)) +
+  geom_point(size=3, alpha=0.4) +
   geom_smooth(method='lm', se=F, color='black')+
   geom_richtext(aes(x=10^0, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
   geom_hline(yintercept=35, color='black', linetype='dashed', size=1)+
@@ -311,8 +310,8 @@ roughness_1 <- ggplot(data_1, aes(x=keulegan, y=k600, color= swotFlag)) +
 data_2 <- filter(data, slope >= t1)
 lm_roughness <- lm(log10(k600)~log10(keulegan), data = data_2)
 r2_roughness <- round(summary(lm_roughness)$r.squared, 2)
-roughness_2 <- ggplot(data_2, aes(x=keulegan, y=k600, color= swotFlag)) +
-  geom_point(size=3) +
+roughness_2 <- ggplot(data_2, aes(x=keulegan, y=k600)) +
+  geom_point(size=3, alpha=0.4) +
   geom_smooth(method='lm', se=F, color='black')+
   geom_richtext(aes(x=10^0, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
   geom_hline(yintercept=35, color='black', linetype='dashed', size=1)+
@@ -334,8 +333,8 @@ roughness_2 <- ggplot(data_2, aes(x=keulegan, y=k600, color= swotFlag)) +
 data_3 <- filter(data, slope >= t2)
 lm_roughness <- lm(log10(k600)~log10(keulegan), data = data_3)
 r2_roughness <- round(summary(lm_roughness)$r.squared, 2)
-roughness_3 <- ggplot(data_3, aes(x=keulegan, y=k600, color= swotFlag)) +
-  geom_point(size=3) +
+roughness_3 <- ggplot(data_3, aes(x=keulegan, y=k600)) +
+  geom_point(size=3, alpha=0.4) +
   geom_smooth(method='lm', se=F, color='black')+
   geom_richtext(aes(x=10^-1, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
   geom_hline(yintercept=35, color='black', linetype='dashed', size=1)+
@@ -357,8 +356,8 @@ roughness_3 <- ggplot(data_3, aes(x=keulegan, y=k600, color= swotFlag)) +
 data_4 <- filter(data, slope >= t3)
 lm_roughness <- lm(log10(k600)~log10(keulegan), data = data_4)
 r2_roughness <- round(summary(lm_roughness)$r.squared, 2)
-roughness_4 <- ggplot(data_4, aes(x=keulegan, y=k600, color= swotFlag)) +
-  geom_point(size=3) +
+roughness_4 <- ggplot(data_4, aes(x=keulegan, y=k600)) +
+  geom_point(size=3, alpha=0.4) +
   geom_smooth(method='lm', se=F, color='black')+
   geom_richtext(aes(x=10^-1, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
   geom_hline(yintercept=35, color='black', linetype='dashed', size=1)+
@@ -380,8 +379,8 @@ roughness_4 <- ggplot(data_4, aes(x=keulegan, y=k600, color= swotFlag)) +
 data_5 <- filter(data, slope >= t4)
 lm_roughness <- lm(log10(k600)~log10(keulegan), data = data_5)
 r2_roughness <- round(summary(lm_roughness)$r.squared, 2)
-roughness_5 <- ggplot(data_5, aes(x=keulegan, y=k600, color= swotFlag)) +
-  geom_point(size=3) +
+roughness_5 <- ggplot(data_5, aes(x=keulegan, y=k600)) +
+  geom_point(size=3, alpha=0.4) +
   geom_smooth(method='lm', se=F, color='black')+
   geom_richtext(aes(x=10^-1, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
   geom_hline(yintercept=35, color='black', linetype='dashed', size=1)+
@@ -403,8 +402,8 @@ roughness_5 <- ggplot(data_5, aes(x=keulegan, y=k600, color= swotFlag)) +
 data_6 <- filter(data, slope >= t5)
 lm_roughness <- lm(log10(k600)~log10(keulegan), data = data_6)
 r2_roughness <- round(summary(lm_roughness)$r.squared, 2)
-roughness_6 <- ggplot(data_6, aes(x=keulegan, y=k600, color= swotFlag)) +
-  geom_point(size=3) +
+roughness_6 <- ggplot(data_6, aes(x=keulegan, y=k600)) +
+  geom_point(size=3, alpha=0.4) +
   geom_smooth(method='lm', se=F, color='black')+
   geom_richtext(aes(x=10^-1, y=10^3), label=paste0('r<sup>2</sup>: ', r2_roughness), color='black') +
   geom_hline(yintercept=35, color='black', linetype='dashed', size=1)+
@@ -432,9 +431,7 @@ results <- data.frame('r2'=c(r2_me, NA, r2_raymond2, r2_raymond3, r2_ulseth),
                       'Model'=c('RS-able', 'Raymond_1', 'Raymond_2', 'Raymond_3','Ulseth'))
 write.csv(results, 'outputs//k600//results.csv')
 
-
-#New theory regressions--------------------------------------------
-#3 piece linear fit
+#3 piece linear fit for eD
 linearModel <- lm(log_k600~log_eD, data=data)
 lm_craig <- segmented(linearModel, npsi = 2) # two breakpoints
 r2_craig <- round(summary(lm_craig)$r.squared, 2)
@@ -445,15 +442,14 @@ summary(lm_craig)
 data$k600_craig <- exp(predict(lm_craig, data))
 
 #plot
-theory_plot2 <- ggplot(data, aes(x=eD, y=k600, color=Re_flag)) +
+theory_plot2 <- ggplot(data, aes(x=eD, y=k600)) +
   geom_point(size=4, alpha=0.50) +
-  geom_line(aes(x=eD, y=k600_craig), color='darkgreen', size=2.5) +
+  geom_line(aes(x=eD, y=k600_craig), color='darkgreen', size=3) +
   geom_hline(yintercept=35, color='black', linetype='dashed', size=2)+
-  annotate("text", label = "Observed maximum \ndiffusive gas exchange (35 m/dy)", x = 10^-3, y = 10^2, size = 5, colour = "black") +
-  xlab('eD [m2/s3]') +
+  annotate("text", label = "Ulseth: ~maximum \ndiffusive gas exchange (35 m/dy)", x = 10^-3, y = 10^2, size = 5, colour = "black") +
+  xlab('eD [W/kg]') +
   ylab('k600 [m/dy]') +
   geom_richtext(aes(x=10^-4, y=10^3), label=paste0('r<sup>2</sup>: ', r2_craig), color='darkgreen') +
-  scale_color_brewer(palette='Set2')+
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x))
@@ -468,113 +464,3 @@ theory_plot2 <- ggplot(data, aes(x=eD, y=k600, color=Re_flag)) +
         legend.title = element_text(size=17, face='bold'),
         legend.position = 'bottom')
 ggsave('outputs//k600//theory_plot2.jpg', theory_plot2, width=9, height=7)
-
-theory_plot3 <- ggplot(data, aes(x=eD, y=k600, color=swotFlag)) +
-  geom_point(size=4, alpha=0.50) +
-  geom_line(aes(x=eD, y=k600_craig), color='darkgreen', size=2.5) +
-  geom_hline(yintercept=35, color='black', linetype='dashed', size=2)+
-  annotate("text", label = "Observed maximum \ndiffusive gas exchange (35 m/dy)", x = 10^-3, y = 10^2, size = 5, colour = "black") +
-  geom_richtext(aes(x=10^-4, y=10^3), label=paste0('r<sup>2</sup>: ', r2_craig), color='darkgreen') +
-  xlab('eD [m2/s3]') +
-  ylab('k600 [m/dy]') +
-  scale_color_brewer(palette='Set2')+
-  scale_x_log10(
-    breaks = scales::trans_breaks("log10", function(x) 10^x),
-    labels = scales::trans_format("log10", scales::math_format(10^.x))
-  ) +
-  scale_y_log10(
-    breaks = scales::trans_breaks("log10", function(x) 10^x),
-    labels = scales::trans_format("log10", scales::math_format(10^.x))
-  ) +
-  theme(axis.text=element_text(size=20),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'),
-        legend.position = 'bottom')
-ggsave('outputs//k600//theory_plot3.jpg', theory_plot3, width=9, height=7)
-
-
-#3 piece linear fit
-data$omega_norm <- data$omega / data$width
-data$log_omega_norm <- log(data$omega_norm)
-linearModel <- lm(log_k600~log_omega_norm, data=data)
-lm_craig <- segmented(linearModel, npsi = 2)
-r2_craig_power <- round(summary(lm_craig)$r.squared, 2)
-
-summary(lm_craig)
-
-#predict
-data$k600_craig_power <- exp(predict(lm_craig, data))
-theory_plot4 <- ggplot(data, aes(x=omega_norm, y=k600, color=Re_flag)) +
-  geom_point(size=4, alpha=0.50) +
-  geom_line(aes(x=omega_norm, y=k600_craig_power), color='darkgreen', size=2.5) +
-  geom_richtext(aes(x=10^-1, y=10^3), label=paste0('r<sup>2</sup>: ', r2_craig_power), color='darkgreen') +
-  geom_hline(yintercept=35, color='black', linetype='dashed', size=2)+
-  annotate("text", label = "Observed maximum \ndiffusive gas exchange (35 m/dy)", x = 10^-1, y = 10^2, size = 5, colour = "black") +
-  scale_color_brewer(palette='Set2')+
-  xlab('Unit Stream Power')+
-  ylab('K600 [m/day]') +
-  scale_x_log10(
-    breaks = scales::trans_breaks("log10", function(x) 10^x),
-    labels = scales::trans_format("log10", scales::math_format(10^.x))
-  ) +
-  scale_y_log10(
-    breaks = scales::trans_breaks("log10", function(x) 10^x),
-    labels = scales::trans_format("log10", scales::math_format(10^.x))
-  ) +
-  theme(axis.text=element_text(size=20),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'),
-        legend.position = 'bottom')
-ggsave('outputs//k600//theory_plot4.jpg', theory_plot4, width=9, height=7)
-
-
-#raymond 2012 depth inconsistency
-#we found that for most hydrologic regions,
-  #the models with a depth term predict an increase in the
-  #gas transfer velocity with increasing stream order
-  #(Fig. 4). This finding is inconsistent with the conceptual
-  #theory of turbulent dissipation (Fig. 2).
-theory_plot5 <- ggplot(data, aes(x=k600, y=k600_craig_power)) +
-  geom_point(size=4, alpha=0.50) +
-  geom_smooth(method='lm', se=F, color='darkblue', size=2)+
-  geom_abline(color='darkgrey', linetype='dashed',size=2)+
-  xlab('Observed k600 [m/day]')+
-  ylab('Power modeled K600 [m/day]') +
-  scale_x_log10(
-    breaks = scales::trans_breaks("log10", function(x) 10^x),
-    labels = scales::trans_format("log10", scales::math_format(10^.x))
-  ) +
-  scale_y_log10(
-    breaks = scales::trans_breaks("log10", function(x) 10^x),
-    labels = scales::trans_format("log10", scales::math_format(10^.x))
-  ) +
-  theme(axis.text=element_text(size=20),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'),
-        legend.position = 'bottom')
-
-theory_plot6 <- ggplot(data, aes(x=k600, y=k600_craig)) +
-  geom_point(size=4, alpha=0.50) +
-  geom_smooth(method='lm', se=F,color='darkblue', size=2)+
-  geom_abline(color='darkgrey', linetype='dashed',size=2)+
-  xlab('Observed k600 [m/day]')+
-  ylab('eD modeled K600 [m/day]') +
-  scale_x_log10(
-    breaks = scales::trans_breaks("log10", function(x) 10^x),
-    labels = scales::trans_format("log10", scales::math_format(10^.x))
-  ) +
-  scale_y_log10(
-    breaks = scales::trans_breaks("log10", function(x) 10^x),
-    labels = scales::trans_format("log10", scales::math_format(10^.x))
-  ) +
-  theme(axis.text=element_text(size=20),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'),
-        legend.position = 'bottom')
-
-theory_check <- plot_grid(theory_plot5, theory_plot6, ncol=2)
-ggsave('outputs//k600//theory_plot5.jpg', theory_check, width=12, height=6)

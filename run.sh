@@ -1,4 +1,5 @@
-Rscript scripts/k600_analysis.R
+Rscript scripts/roughness_k600.R
+#Rscript scripts/k600_analysis.R
 #Rscript scripts/MonteCarlo_analysis.R
 #Rscript scripts/runBIKER.R
 #Rscript scripts/validation.R

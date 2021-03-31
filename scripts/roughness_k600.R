@@ -25,6 +25,7 @@ data$eD <- g * data$slope * data$Vms #dissipation rate of surface turbulence ori
 data$eS <- (sqrt(data$depth*g*data$slope))^3/data$depth #dissipation rate of surface turbulence originating from bed friction [W/kg]
 data$Rh <- (data$depth*data$width)/(data$width + 2*data$depth) #hydraulic radius [m]
 data$area <- data$width*data$depth #channel area [m2]
+data$keulegan <- 11*data$depth*(1/exp(data$Vms/(2.5*(9.8*data$depth*data$slope)^(1/2)))) #[m]
 
 #log transform some variables-----------------------------------------------------------
 data$log_eD <- log(data$eD)
@@ -36,26 +37,32 @@ data$log_area <- log(data$area)
 #partitoning of eD and eS---------------------------------------------------------
 #Similar to Brinkerhoffetal 2019 function. Calibrating a Shield's grain size using Manning's equation, Shield's parameter, and Henderson relation f~(D/depth)^(1/3)
   #See math notes for the two velocity derivations and the math solving for the Henderson coefficient multiple ways. We ultimately use Cf=0.100
-grainSizer <- function(v,s, cf, Sg){
-  D <- 10^(seq(-10, 2, 0.02)) #virtual grain size [m] Tests 601 values
+grainSizer <- function(v,s, d,cf, Sg){
+  D <- 10^(seq(-5, 2, 0.005)) #virtual grain size [m] Tests 601 values
 
-  #test grain sizes through two methods to solve for d'
-  #ASSUMPTIONS: Manning's parameters + Henderson relation
-  d_prime_1 <- v^(3/2) * (sqrt((8*g*s)/(cf)))^(-3/2) * (1/D^(1/6))^(-3/2)
+  #first method
+  d_prime <- v^(3/2) * (sqrt((8*g*s)/(cf)))^(-3/2) * (1/D^(1/6))^(-3/2) #[m] #eq 15
+  d_double_prime <- d - d_prime #[m]
+  inverse_shields_prime <- ((Sg-1)*D)/(s*d_prime) #eq 16
 
-  #ASSUMPTIONS: Manning's parameters + Henderson relation + Shield's parameter for sediment entrainment (shields is inverted for algebraic convenience)
-  inverse_shields_prime <- (1/v)*sqrt((8*g*D)/cf)*(((Sg-1)^(2/3))/(s^(1/6)))
-  d_prime_2 <- inverse_shields_prime^(-1) * s^(-1) * ((Sg-1)*D)
+  C_1 <- ifelse(inverse_shields_prime < 1.6, 41, 29)#eqs 20-22
+                #ifelse(inverse_shields_prime < 17.8, 29, 23))
+  C_2 <- ifelse(inverse_shields_prime < 1.6, 1.26,0.5)
+                #ifelse(inverse_shields_prime < 17.8, 0.5, 0.415))
+  v_m_double_prime_1 <- C_1/inverse_shields_prime^C_2 #eq 19, approximation of Einstein & Barbarossa sediment regimes
+
+  #2nd method
+  v_m_double_prime_2 <- v / sqrt(g*d_double_prime*s) #eq 14, closed form solution of v/m''
 
   #get calibrated value
-  diff <- abs(d_prime_1-d_prime_2) #minimal difference b/w skin friction depth estimates
-  D_fin <- D[which.min(diff)]
+  diff <- abs(v_m_double_prime_1-v_m_double_prime_2) #minimal difference b/w skin friction depth estimates
+  D_fin <- D[which.min(diff)] #[m]
 
   return(D_fin)
 }
 
 #run grain sizer
-data$D <- mapply(grainSizer,data$Vms,data$slope, cf, Sg)
+data$D <- mapply(grainSizer,data$Vms,data$slope, data$depth, cf, Sg)
 summary(data$D)
 data$log_D <- log(data$D)
 
@@ -166,12 +173,12 @@ eM_partition <- ggplot(data, aes(x=eM, y=partition*100, color=eM_regime_craig)) 
         legend.title = element_text(size=17, face='bold'))
 ggsave('outputs//k600//roughness_theory//eM_partition.jpg', eM_partition, width=9, height=7)
 
-eM_D <- ggplot(data, aes(x=D*1000, y=k600, color=slope)) +
+eM_D <- ggplot(data, aes(x=D, y=k600, color=slope)) +
   geom_point(size=4, alpha=0.75) +
-  geom_line(aes(x=D*1000, y=k600_D), color='darkgreen', size=3) +
+  geom_line(aes(x=D, y=k600_D), color='darkgreen', size=3) +
   geom_hline(yintercept=35, color='black', linetype='dashed', size=2)+
   annotate("text", label = "Ulseth: ~maximum \ndiffusive gas exchange (35 m/dy)", x = 10^-3, y = 10^2, size = 5, colour = "black") +
-  xlab('D [mm]') +
+  xlab('Characteristic/Bulk D [m]') +
   ylab('k600 [m/dy]') +
   geom_richtext(aes(x=10^-4, y=10^3), label=paste0('r<sup>2</sup>: ', r2_craig_D), color='darkgreen') +
   scale_color_distiller(palette='Spectral')+
@@ -187,6 +194,28 @@ eM_D <- ggplot(data, aes(x=D*1000, y=k600, color=slope)) +
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
+
+eM_keuglan <- ggplot(data, aes(x=keuglan, y=k600, color=slope)) +
+  geom_point(size=4, alpha=0.75) +
+  geom_line(aes(x=D, y=k600_D), color='darkgreen', size=3) +
+  geom_hline(yintercept=35, color='black', linetype='dashed', size=2)+
+  annotate("text", label = "Ulseth: ~maximum \ndiffusive gas exchange (35 m/dy)", x = 10^-3, y = 10^2, size = 5, colour = "black") +
+  xlab('Characteristic/Bulk D [m]') +
+  ylab('k600 [m/dy]') +
+  geom_richtext(aes(x=10^-4, y=10^3), label=paste0('r<sup>2</sup>: ', r2_craig_D), color='darkgreen') +
+  scale_color_distiller(palette='Spectral')+
+  scale_x_log10(
+      breaks = scales::trans_breaks("log10", function(x) 10^x),
+      labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_y_log10(
+      breaks = scales::trans_breaks("log10", function(x) 10^x),
+      labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+ theme(axis.text=element_text(size=20),
+      axis.title=element_text(size=24,face="bold"),
+      legend.text = element_text(size=17),
+      legend.title = element_text(size=17, face='bold'))
 ggsave('outputs//k600//roughness_theory//eM_D.jpg', eM_D, width=9, height=7)
 
 partitionPlot <- ggplot(data, aes(x=partition*100, color=eM_regime_craig)) +

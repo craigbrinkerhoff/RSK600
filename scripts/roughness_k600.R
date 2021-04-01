@@ -58,19 +58,27 @@ grainSizer <- function(v,s, d,cf, Sg){
   diff <- abs(v_m_double_prime_1-v_m_double_prime_2) #minimal difference b/w skin friction depth estimates
   D_fin <- D[which.min(diff)] #[m]
 
-  return(D_fin)
+  #percent difference between estimates
+  perc <- diff/v_m_double_prime_2
+  perc <- min(perc, na.rm=T)*100
+
+  return(c(D_fin, perc))
 }
 
 #run grain sizer
-data$D <- mapply(grainSizer,data$Vms,data$slope, data$depth, cf, Sg)
-summary(data$D)
-data$log_D <- log(data$D)
+grainResults <- mapply(grainSizer,data$Vms,data$slope, data$depth, cf, Sg)
+data$D35 <- grainResults[1,]
+data$grain_perc_diff <- grainResults[2,]
+summary(data$D35)
+summary(data$grain_perc_diff)
 
-#calculate resistance partition coefficient using calibrated D and d'
-data$inverse_shields_prime <- data$Vms^(3/2) * (cf/(8*g*data$D))^(3/4) * data$slope^(1/4) * (Sg-1)^(-1) #in the actual implementation we use all three assumptions
-data$d_prime <- data$inverse_shields_prime * data$slope^(-1) * (Sg-1) * data$D #ASSUMPTIONS: Manning's parameters + Henderson relation + Shield's parameter for sediment entrainment
+data$log_D35 <- log(data$D35)
 
-data$f_prime <- cf *(data$D/data$d_prime)^(1/3) #Henderson 1966
+#calculate resistance partition coefficient using calibrated D35 (and its associated d')
+data$inverse_shields_prime <- data$Vms^(3/2) * (cf/(8*g*data$D35))^(3/4) * data$slope^(1/4) * (Sg-1)^(-1)
+data$d_prime <- data$inverse_shields_prime * data$slope^(-1) * (Sg-1) * data$D35 #calculated via shield's parameter and so D35. Remeber error is less than 5% so we good
+
+data$f_prime <- cf *(data$D35/data$d_prime)^(1/3) #Henderson 1966
 
 data$partition <- 1-((data$f_prime*data$Vms^2)/(8*g*data$Rh*data$slope)) #Moog & Jirka 19999
 data$partition <- ifelse(data$partition < 0, 0, data$partition)
@@ -91,12 +99,12 @@ data$k600_eM <- exp(predict(lm_craig_eM, data))
 data$eM_regime_craig <- ifelse(data$eM < 10^-3.3, 'Small',
                           ifelse(data$eM < 10^-1, 'Medium', 'High'))
 
-#3 piece D fit
-linearModel_D <- lm(log_k600~log_D, data=data)
-lm_craig_D <- segmented(linearModel_D, npsi = 1) # two breakpoints
-r2_craig_D <- round(summary(lm_craig_D)$r.squared, 2)
-summary(lm_craig_D)
-data$k600_D <- exp(predict(lm_craig_D, data))
+#2 piece D35 fit
+linearModel_D35 <- lm(log_k600~log_D35, data=data)
+lm_craig_D35 <- segmented(linearModel_D35, npsi = 1) # two breakpoints
+r2_craig_D35 <- round(summary(lm_craig_D35)$r.squared, 2)
+summary(lm_craig_D35)
+data$k600_D35 <- exp(predict(lm_craig_D35, data))
 
 #3 piece area fits
 linearModel_area <- lm(log_area~log_eM, data=data)
@@ -173,14 +181,18 @@ eM_partition <- ggplot(data, aes(x=eM, y=partition*100, color=eM_regime_craig)) 
         legend.title = element_text(size=17, face='bold'))
 ggsave('outputs//k600//roughness_theory//eM_partition.jpg', eM_partition, width=9, height=7)
 
-eM_D <- ggplot(data, aes(x=D, y=k600, color=slope)) +
+ulseth_line <- data.frame('D'=seq(0.02, 0.1, 0.01))
+ulseth_line$k600 <- exp(3.41+30.52*ulseth_line$D)
+
+eM_D35 <- ggplot(data, aes(x=D35, y=k600, color=slope)) +
   geom_point(size=4, alpha=0.75) +
-  geom_line(aes(x=D, y=k600_D), color='darkgreen', size=3) +
+  geom_line(aes(x=D35, y=k600_D35), color='darkgreen', size=3) +
+  geom_line(data=ulseth_line, aes(x=D, y=k600), color='darkblue', size=2)+ #Ulseth roughness model
   geom_hline(yintercept=35, color='black', linetype='dashed', size=2)+
   annotate("text", label = "Ulseth: ~maximum \ndiffusive gas exchange (35 m/dy)", x = 10^-3, y = 10^2, size = 5, colour = "black") +
-  xlab('Characteristic/Bulk D [m]') +
+  xlab('Bed D35 [m]') +
   ylab('k600 [m/dy]') +
-  geom_richtext(aes(x=10^-4, y=10^3), label=paste0('r<sup>2</sup>: ', r2_craig_D), color='darkgreen') +
+  geom_richtext(aes(x=10^-4, y=10^3), label=paste0('r<sup>2</sup>: ', r2_craig_D35), color='darkgreen') +
   scale_color_distiller(palette='Spectral')+
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
@@ -194,29 +206,7 @@ eM_D <- ggplot(data, aes(x=D, y=k600, color=slope)) +
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
-
-eM_keuglan <- ggplot(data, aes(x=keuglan, y=k600, color=slope)) +
-  geom_point(size=4, alpha=0.75) +
-  geom_line(aes(x=D, y=k600_D), color='darkgreen', size=3) +
-  geom_hline(yintercept=35, color='black', linetype='dashed', size=2)+
-  annotate("text", label = "Ulseth: ~maximum \ndiffusive gas exchange (35 m/dy)", x = 10^-3, y = 10^2, size = 5, colour = "black") +
-  xlab('Characteristic/Bulk D [m]') +
-  ylab('k600 [m/dy]') +
-  geom_richtext(aes(x=10^-4, y=10^3), label=paste0('r<sup>2</sup>: ', r2_craig_D), color='darkgreen') +
-  scale_color_distiller(palette='Spectral')+
-  scale_x_log10(
-      breaks = scales::trans_breaks("log10", function(x) 10^x),
-      labels = scales::trans_format("log10", scales::math_format(10^.x))
-  ) +
-  scale_y_log10(
-      breaks = scales::trans_breaks("log10", function(x) 10^x),
-      labels = scales::trans_format("log10", scales::math_format(10^.x))
-  ) +
- theme(axis.text=element_text(size=20),
-      axis.title=element_text(size=24,face="bold"),
-      legend.text = element_text(size=17),
-      legend.title = element_text(size=17, face='bold'))
-ggsave('outputs//k600//roughness_theory//eM_D.jpg', eM_D, width=9, height=7)
+ggsave('outputs//k600//roughness_theory//eM_D35.jpg', eM_D35, width=9, height=7)
 
 partitionPlot <- ggplot(data, aes(x=partition*100, color=eM_regime_craig)) +
     stat_ecdf(size=2) +

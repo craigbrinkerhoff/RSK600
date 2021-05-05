@@ -8,6 +8,34 @@ print('starting k600 theory...')
 
 options(scipen = 999)
 
+#Raymond 2012 morphology stuff----------------------------------------------------
+raymond2012 <- read.csv('inputs/k600/raymond2012.csv')
+raymond2012 <- filter(raymond2012, is.na(k600)==0 & k600 > 0)
+raymond2012$Reach.Control <- as.character(raymond2012$Reach.Control)
+raymond2012$Bottom.Description <- as.character(raymond2012$Bottom.Description)
+
+raymond2012$Reach.Control <- ifelse(raymond2012$Reach.Control != 'Channel Control' & raymond2012$Reach.Control != 'Pool and Riffle', 'Hybrid', raymond2012$Reach.Control)
+
+raymond_summary <- group_by(raymond2012, Reach.Control) %>%
+  tally()
+
+qual_plot <- ggplot(raymond2012, aes(x=Reach.Control, fill=Reach.Control, y=k600)) +
+  geom_violin(size=1.2, color='black', draw_quantiles=c(0.50)) +
+  scale_fill_brewer(palette = 'Set2', name='') +
+  geom_text(data = raymond_summary, aes(Reach.Control, Inf, label = n), vjust = 1, size=8)+
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  xlab('') +
+  ylab('K600 [m/day]') +
+  theme(legend.position = 'none',
+        axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'))
+ggsave('outputs//k600//roughness_theory//qualPlot.jpg', qual_plot, width=9, height=7)
+
 #Ulseth etal 2019------------------------------------------------------------
 ulseth_data <- read.csv('data/k600/Ulseth_etal_2019.csv', fileEncoding="UTF-8-BOM") #contains data from 5 studies
 ulseth_data <- ulseth_data[,-8]
@@ -148,7 +176,8 @@ eD_eS <- ggplot(data, aes(x=eD, y=eS, color=slope)) +
         legend.title = element_text(size=17, face='bold'))
 ggsave('cache/k600/roughness_theory/eD_eS.jpg', eD_eS, width=9, height=7)
 
-eM_k600 <- ggplot(data, aes(x=eM, y=k600)) +
+data$depthFlag <- ifelse(data$depth < 10, 'Roughness-based', 'Wind-based')
+eM_k600 <- ggplot(data, aes(x=eM, y=k600, color=depthFlag)) +
   geom_point(size=4, alpha=0.50) +
   geom_line(aes(x=eM, y=k600_eM), color='darkgreen', size=3) +
   geom_hline(yintercept=35, color='black', linetype='dashed', size=2)+
@@ -189,13 +218,13 @@ eM_partition <- ggplot(data, aes(x=eM, y=partition*100, color=eM_regime_craig)) 
         legend.title = element_text(size=17, face='bold'))
 ggsave('cache/k600/roughness_theory/eM_partition.jpg', eM_partition, width=9, height=7)
 
-ulseth_line <- data.frame('D'=seq(0.02, 0.1, 0.01))
-ulseth_line$k600 <- exp(3.41+30.52*ulseth_line$D)
+#ulseth_line <- data.frame('D'=seq(0.02, 0.1, 0.01))
+#ulseth_line$k600 <- exp(3.41+30.52*ulseth_line$D)
 
 eM_D35 <- ggplot(data, aes(x=D35, y=k600, color=slope)) +
   geom_point(size=4, alpha=0.75) +
   geom_line(aes(x=D35, y=k600_D35), color='darkgreen', size=3) +
-  geom_line(data=ulseth_line, aes(x=D, y=k600), color='darkblue', size=2)+ #Ulseth roughness model
+#  geom_line(data=ulseth_line, aes(x=D, y=k600), color='darkblue', size=2)+ #Ulseth roughness model
   geom_hline(yintercept=35, color='black', linetype='dashed', size=2)+
   annotate("text", label = "Ulseth: ~maximum \ndiffusive gas exchange (35 m/dy)", x = 10^-3, y = 10^2, size = 5, colour = "black") +
   xlab('Bed D35 [m]') +

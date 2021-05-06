@@ -34,11 +34,11 @@ run_BIKER <- function(currPepsi, errFlag, kmodel) {
   Q_obs[Q_obs<0]=NA
 
   #Sample every 11 days (SWOT-style)------------------------
-  W_obs = W_obs[,seq(1, ncol(W_obs), 11)]
-  S_obs = S_obs[,seq(1, ncol(S_obs), 11)]
-  H_obs = H_obs[,seq(1, ncol(H_obs), 11)]
-  Q_obs = Q_obs[,seq(1, ncol(Q_obs), 11)]
-  area = area[,seq(1, ncol(area), 11)]
+#  W_obs = W_obs[,seq(1, ncol(W_obs), 11)]
+#  S_obs = S_obs[,seq(1, ncol(S_obs), 11)]
+#  H_obs = H_obs[,seq(1, ncol(H_obs), 11)]
+#  Q_obs = Q_obs[,seq(1, ncol(Q_obs), 11)]
+#  area = area[,seq(1, ncol(area), 11)]
 
   #Some NA handling in slopes
   if (any(apply(S_obs,2,sum,na.rm=TRUE) ==0)){
@@ -86,9 +86,9 @@ run_BIKER <- function(currPepsi, errFlag, kmodel) {
 #    k_obs <- (792.63149 * (g*S_obs * (V_obs))^1.3160065)
 #  }
 
-  k_obs <- k600_craig(S_obs, V_obs) #k600 equation
-  #D_obs <- area / W_obs
-  #k_obs <- ko2_craig(D_obs, S_obs) #k600 equation
+  #k_obs <- k600_craig(S_obs, V_obs) #k600 equation
+  D_obs <- area / W_obs
+  k_obs <- ko2_craig(D_obs, S_obs) #k600 equation
 
   k_obs <- colMeans(k_obs, na.rm=T)
 
@@ -131,10 +131,10 @@ run_BIKER <- function(currPepsi, errFlag, kmodel) {
 
 #Run parallelized function------------------------------
 system.time(
-  results <- mclapply(files, run_BIKER, 0, 'k600', mc.cores=cores) #run no measurement errors + k600
+  results <- mclapply(files, run_BIKER, 0, 'ko2', mc.cores=cores) #run no measurement errors + k600
 )
 system.time(
-  results <- mclapply(files, run_BIKER, 1, 'k600', mc.cores=cores) #run with SWOT measurement errors + k600
+  results <- mclapply(files, run_BIKER, 1, 'ko2', mc.cores=cores) #run with SWOT measurement errors + k600
 )
 
 #results <- run_BIKER(files[1], 1, 1)

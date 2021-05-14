@@ -71,27 +71,40 @@ fun_FCO2_analysis <- function(river) {
 
   #calculate observed average flow velocity
   V_obs <- Q_obs / area #m/s
+  D_obs <- area / W_obs #m
 
   #Calculate rating curves following raymond 2012 model
   V_raymond2012 <- exp(-1.64)*Q_obs^0.285
   V_raymond2012_low <- exp(-1.64+1.96*0.03)*Q_obs^(0.285+1.96*0.0091) #95% CIs
   V_raymond2012_high <- exp(-1.64-1.96*0.03)*Q_obs^(0.285-1.96*0.0091)
 
+  D_raymond2012 <- exp(-0.895)*Q_obs^0.294
+
   #Calculate velocity using global rating curve from 1/2 the raymond 2013 model (used in Lauerwald 2015)
   V_raymond2013 <- exp(-1.06)*Q_obs^0.12
   V_raymond2013_low <- exp(-1.06)*Q_obs^(0.12+1.96*0.0091) #95% CIs but these are using 2012 uncertainities b/c there are no CIs published for these
   V_raymond2013_high <- exp(-1.06)*Q_obs^(0.12-1.96*0.0091)
 
+  D_raymond2013 <- exp(1/(1.86*-1.06))*Q_obs^(1-0.51-0.12)
+
   V_lauerwald2015 <- V_raymond2013
   V_lauerwald2015_low <- V_raymond2013_low
   V_lauerwald2015_high <- V_raymond2013_high
 
-  #avgerage of the models was the actual implemntation in Raymond 2013
+  D_lauerwald2015 <- D_raymond2013
+
+  #avgerage of the models was the actual implementation in Raymond 2013
   d <- data.frame(V_raymond2012, V_raymond2013)
   V_raymond2013 <- rowMeans(d)
 
+  d <- data.frame(D_raymond2012, D_raymond2013)
+  D_raymond2013 <- rowMeans(d)
+
   #eD
   eD <- g * V_obs * S_obs
+
+  #ustar
+  Ustar <- sqrt(g*S_obs*D_obs)
 
   #Generate k600 estimates---------------------------
   k600_ulseth <- k600_craig(S_obs, V_obs)
@@ -109,21 +122,33 @@ fun_FCO2_analysis <- function(river) {
   k600_Lauerwald2015_low <- k600_craig(S_obs, V_lauerwald2015_low)
   k600_Lauerwald2015_high <- k600_craig(S_obs, V_lauerwald2015_high)
 
+  #Generate kL20 estimates---------------------------
+  kL20_ulseth <- ko2_craig(D_obs, S_obs)
+  kL20_BIKER <- filter(BIKER_results, river == name)$kest_mean
+  kL20_BIKER <- kL20_BIKER[seq(1, length(kL20_BIKER), 11)]
+  kL20_BIKER_low <- filter(BIKER_results, river == name)$kest_low
+  kL20_BIKER_low <- kL20_BIKER_low[seq(1, length(kL20_BIKER_low), 11)]
+  kL20_BIKER_high <- filter(BIKER_results, river == name)$kest_high
+  kL20_BIKER_high <- kL20_BIKER_high[seq(1, length(kL20_BIKER_high), 11)]
+  kL20_raymond2012 <- ko2_craig(D_raymond2012, S_obs)
+  kL20_raymond2013 <- ko2_craig(D_raymond2013, S_obs)
+  kL20_Lauerwald2015 <- ko2_craig(D_lauerwald2015, S_obs)
+
   #Calculate FCO2 and Sc using Beauliu data-------------------------------------------
   #sort by starting mmonth here
   Data_sort <- Data[(as.numeric(river_start_date)*2):nrow(Data),]
-  co2 <- Data_sort$CO2_uatm[1:length(k600_BIKER)] #measured co2
+  co2 <- Data_sort$CO2_uatm[1:length(kL20_BIKER)] #measured co2
   Sc_co2 <- Sc_co2_func(Data_sort$Water_temp_C) #Sc from measured water temperature
-  Sc_co2 <- Sc_co2[1:length(k600_BIKER)]
+  Sc_co2 <- Sc_co2[1:length(kL20_BIKER)]
   henrys_law <- henrys_law_func(Data_sort$Water_temp_C) #Henry's solubility coefficient from measured water temperature
-  henrys_law <- henrys_law[1:length(k600_BIKER)]
+  henrys_law <- henrys_law[1:length(kL20_BIKER)]
 
   #Convert to kco2--------------------------
-  kco2_ulseth <- colMeans((Sc_co2/600)^(-1/2)/k600_ulseth, na.rm=T)
-  kco2_BIKER <- (Sc_co2/600)^(-1/2)/k600_BIKER
-  kco2_raymond2012 <- colMeans((Sc_co2/600)^(-1/2)/k600_raymond2012, na.rm=T)
-  kco2_raymond2013 <- colMeans((Sc_co2/600)^(-1/2)/k600_raymond2013, na.rm=T)
-  kco2_Lauerwald2015 <- colMeans((Sc_co2/600)^(-1/2)/k600_Lauerwald2015, na.rm=T)
+#  kco2_ulseth <- colMeans((Sc_co2/600)^(-1/2)/k600_ulseth, na.rm=T)
+#  kco2_BIKER <- (Sc_co2/600)^(-1/2)/k600_BIKER
+#  kco2_raymond2012 <- colMeans((Sc_co2/600)^(-1/2)/k600_raymond2012, na.rm=T)
+#  kco2_raymond2013 <- colMeans((Sc_co2/600)^(-1/2)/k600_raymond2013, na.rm=T)
+#  kco2_Lauerwald2015 <- colMeans((Sc_co2/600)^(-1/2)/k600_Lauerwald2015, na.rm=T)
 
   kco2_BIKER_low <- (Sc_co2/600)^(-1/2)/k600_BIKER_low
   kco2_BIKER_high <- (Sc_co2/600)^(-1/2)/k600_BIKER_high
@@ -133,6 +158,14 @@ fun_FCO2_analysis <- function(river) {
   kco2_raymond2013_high <- colMeans((Sc_co2/600)^(-1/2)/k600_raymond2013_high, na.rm=T)
   kco2_Lauerwald2015_low <- colMeans((Sc_co2/600)^(-1/2)/k600_Lauerwald2015_low, na.rm=T)
   kco2_Lauerwald2015_high <- colMeans((Sc_co2/600)^(-1/2)/k600_Lauerwald2015_high, na.rm=T)
+
+  kco2_ulseth <- colMeans((Sc_co2/530)^(-1/2)*kL20_ulseth, na.rm=T)
+  kco2_BIKER <- (Sc_co2/530)^(-1/2)*kL20_BIKER
+  kco2_raymond2012 <- colMeans((Sc_co2/530)^(-1/2)*kL20_raymond2012, na.rm=T)
+  kco2_raymond2013 <- colMeans((Sc_co2/530)^(-1/2)*kL20_raymond2013, na.rm=T)
+  kco2_Lauerwald2015 <- colMeans((Sc_co2/530)^(-1/2)*kL20_Lauerwald2015, na.rm=T)
+  kco2_BIKER_low <- (Sc_co2/530)^(-1/2)*kL20_BIKER_low
+  kco2_BIKER_high <- (Sc_co2/530)^(-1/2)*kL20_BIKER_high
 
   #Obtain actual CO2 fluxes--------------------------------------------
   FCO2_ulseth <- kco2_ulseth*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2
@@ -151,7 +184,7 @@ fun_FCO2_analysis <- function(river) {
   FCO2_Lauerwald2015_high <- kco2_Lauerwald2015_high*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2
 
   #Surface area
-  #first, get reach lengths from the cummulative reach lengths in river data
+  #first, get reach lengths from the cumulative reach lengths in river data
   r <- reaches
   for (i in 2:length(reaches)) {
     r[i] <- reaches[i] - reaches[i-1]
@@ -159,7 +192,7 @@ fun_FCO2_analysis <- function(river) {
   r <- r[-1]
 
   #then calculate surface area
-  sa <- sum(rowMeans(W_obs, na.rm = T) * r) #m2
+  sa <- sum(mean(W_obs, na.rm = T) * r) #m2
 
   #plot------------------------
   for_plot <- data.frame('river' = name, 'timestep'=1:length(FCO2_BIKER), 'sa'=sa,
@@ -276,8 +309,8 @@ ggsave('cache/FCO2/FCO2_models.jpg', FCO2_models, width=12, height=6)
 
 #error stats and plot across all rivers and timesteps
 lm <- lm(log10(FCO2_BIKER)~log10(FCO2_ulset), data=output)
-lmr2 <- round(summary(lm)$r.squared,2)
-rmse <- round((Metrics::rmse(log10(output$FCO2_ulset), log10(output$FCO2_BIKER))), 2) #g/m2/dy
+lmr2 <- round(summary(lm((FCO2_BIKER)~(FCO2_ulset), data=output))$r.squared,2)
+rmse <- round((Metrics::rmse((output$FCO2_ulset), (output$FCO2_BIKER))), 2) #g/m2/dy
 
 predInts <- predict(lm, interval='prediction')
 output <- cbind(output, predInts)
@@ -301,48 +334,48 @@ flux_plot<- ggplot(output, aes(x=(FCO2_ulset), y=(FCO2_BIKER), color=key)) +
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold')) +
-  annotate("text", label = paste0('RMSE: 10^', rmse, ' g/m2*dy'), x = 10^-0.4, y = 10^1, size = 5, colour = "black")+
+  annotate("text", label = paste0('RMSE: ', rmse, ' g/m2*dy'), x = 10^-0.4, y = 10^1, size = 5, colour = "black")+
   annotate("text", label = paste0('r2: ', lmr2), x = 10^-0.5, y = 10^0.8, size = 5, colour = "black")
 
 #add some individual river plots (same rivers has randomly sampled from the k600 validation)
-#Kanawha
-t <- filter(output, river=='Kanawha') %>%
+#OhioSection3
+t <- filter(output, river=='OhioSection3') %>%
   gather(key=key, value=value, c(FCO2_ulset, FCO2_BIKER))
-Kanawha_plot <- ggplot(t, aes(x=timestep, y=value, color=key)) +
+OhioSection3_plot <- ggplot(t, aes(x=timestep, y=value, color=key)) +
   geom_line(size=1.5) +
   geom_pointrange(aes(ymin=FCO2_BIKER_low, ymax=FCO2_BIKER_high), fatten=10)+
   ylab('FCO2 [g/m2*dy]') +
   xlab('Timestep') +
   scale_color_brewer(palette='Set2', name='', labels=legend_labels) +
-  ggtitle('Kanawha')
+  ggtitle('OhioSection3')
 
-#Ohio Section 2
-t <- filter(output, river=='OhioSection2') %>%
+#SacramentoDownstream
+t <- filter(output, river=='SacramentoDownstream') %>%
   gather(key=key, value=value, c(FCO2_ulset, FCO2_BIKER))
-OhioSection2_plot <- ggplot(t, aes(x=timestep, y=value, color=key)) +
+SacramentoDownstream_plot <- ggplot(t, aes(x=timestep, y=value, color=key)) +
   geom_line(size=1.5) +
   geom_pointrange(aes(ymin=FCO2_BIKER_low, ymax=FCO2_BIKER_high), fatten=10)+
   ylab('FCO2 [g/m2*dy]') +
   xlab('Timestep') +
   theme(legend.position = 'none') +
   scale_color_brewer(palette='Set2', name='', labels=legend_labels) +
-  ggtitle('OhioSection2')
+  ggtitle('SacramentoDownstream')
 
-#Mississippi Downstream
-t <- filter(output, river=='MississippiDownstream') %>%
+#SeineDownstream
+t <- filter(output, river=='SeineDownstream') %>%
   gather(key=key, value=value, c(FCO2_ulset, FCO2_BIKER))
-MississippiDownstream_plot <- ggplot(t, aes(x=timestep, y=value, color=key)) +
+SeineDownstream_plot <- ggplot(t, aes(x=timestep, y=value, color=key)) +
   geom_line(size=1.5) +
   geom_pointrange(aes(ymin=FCO2_BIKER_low, ymax=FCO2_BIKER_high), fatten=10)+
   ylab('FCO2 [g/m2*dy]') +
   xlab('Timestep') +
   theme(legend.position = 'none') +
   scale_color_brewer(palette='Set2', name='', labels=legend_labels) +
-  ggtitle('MississippiDownstream')
+  ggtitle('SeineDownstream')
 
 #bring it together
-legend <- get_legend(Kanawha_plot + theme(legend.box.margin = margin(0, 3, 3, 5)))
-plot_fin <- plot_grid(Kanawha_plot + theme(legend.position = 'none'), OhioSection2_plot, MississippiDownstream_plot, legend, ncol=2,
+legend <- get_legend(OhioSection3_plot + theme(legend.box.margin = margin(0, 3, 3, 5)))
+plot_fin <- plot_grid(OhioSection3_plot + theme(legend.position = 'none'), SacramentoDownstream_plot, SeineDownstream_plot, legend, ncol=2,
                       labels=c('b', 'c', 'd', NA))
 plot_fin <- plot_grid(flux_plot, plot_fin, ncol=2, labels=c('a', NA))
 ggsave('cache/FCO2/FCO2_plot.jpg', plot_fin, width=14, height=8)

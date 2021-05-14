@@ -89,7 +89,7 @@ plotSWOTreaches <- ggplot(plot_stats, aes(x=key, y=value, fill=factor(errFlag)))
         legend.title = element_text(size=17, face='bold'))
 
 # example timeseries plot per river------------------------------------------------------------------------------------
-set.seed(700)
+set.seed(650)
 
 kge_bins <- quantile(stats_by_reach[stats_by_reach$errFlag ==0,]$kge, c(0.33, 0.66), na.rm = T)
 kge_bad <- filter(stats_by_reach[stats_by_reach$errFlag ==0,], kge <= kge_bins[1]) %>% select(river)
@@ -98,10 +98,12 @@ kge_eh <- filter(stats_by_reach[stats_by_reach$errFlag ==0,], kge >= kge_bins[1]
 
 badRiver <- filter(full_output, river == sample(kge_bad$river, 1)) %>%
   gather(key=key, value=value, c(kobs, kest_mean))
-
+badRiver$kest_low <- ifelse(badRiver$key == 'kobs', NA, badRiver$kest_low)
+badRiver$kest_high <- ifelse(badRiver$key == 'kobs', NA, badRiver$kest_high)
 riv <- as.character(badRiver[1,]$river)
 badRiverPlot <- ggplot(badRiver, aes(x=time, y=value, color=key)) + #model
-  geom_pointrange(aes(ymin = kest_low, ymax = kest_high), fatten=10) +
+  geom_point(size=3) +
+  geom_ribbon(aes(ymin = kest_low, ymax = kest_high), alpha=0.75, fill='grey')+
   geom_line(size=1) +
   ylab('k600 [m/dy]') +
   xlab('Timestep') +
@@ -111,9 +113,12 @@ badRiverPlot <- ggplot(badRiver, aes(x=time, y=value, color=key)) + #model
 
 ehRiver <- filter(full_output, river == sample(kge_eh$river, 1)) %>%
   gather(key=key, value=value, c(kobs, kest_mean))
+ehRiver$kest_low <- ifelse(ehRiver$key == 'kobs', NA, ehRiver$kest_low)
+ehRiver$kest_high <- ifelse(ehRiver$key == 'kobs', NA, ehRiver$kest_high)
 riv <- as.character(ehRiver[1,]$river)
 ehRiverPlot <- ggplot(ehRiver, aes(x=time, y=value, color=key)) + #model
-  geom_pointrange(aes(ymin = kest_low, ymax = kest_high), fatten=10) +
+  geom_point(size=3) +
+  geom_ribbon(aes(ymin = kest_low, ymax = kest_high), alpha=0.75, fill='grey')+
   geom_line(size=1) +
   ylab('k600 [m/dy]') +
   xlab('Timestep') +
@@ -123,9 +128,12 @@ ehRiverPlot <- ggplot(ehRiver, aes(x=time, y=value, color=key)) + #model
 
 goodRiver <- filter(full_output, river == sample(kge_good$river, 1)) %>%
   gather(key=key, value=value, c(kobs, kest_mean))
+goodRiver$kest_low <- ifelse(goodRiver$key == 'kobs', NA, goodRiver$kest_low)
+goodRiver$kest_high <- ifelse(goodRiver$key == 'kobs', NA, goodRiver$kest_high)
 riv <- as.character(goodRiver[1,]$river)
 goodRiverPlot <- ggplot(goodRiver, aes(x=time, y=value, color=key)) + #model
-  geom_pointrange(aes(ymin = kest_low, ymax = kest_high), fatten=10) +
+  geom_point(size=3) +
+  geom_ribbon(aes(ymin = kest_low, ymax = kest_high), alpha=0.75, fill='grey')+
   geom_line(size=1) +
   ylab('k600 [m/dy]') +
   xlab('Timestep') +
@@ -158,6 +166,7 @@ data <- filter(data, is.na(width)==0) #filter out no width measurements
 
 #calculate eD and other hydraulics---------------------------------------------------------
 data$eD <- g * data$slope * data$Vms #dissipation rate of surface turbulence originating from depth-scale form drag [W/kg]
+data$ustar <- sqrt(g*data$slope*data$depth)
 data$eS <- (sqrt(data$depth*g*data$slope))^3/data$depth #dissipation rate of surface turbulence originating from bed friction [W/kg]
 data$Rh <- (data$depth*data$width)/(data$width + 2*data$depth) #hydraulic radius [m]
 data$area <- data$width*data$depth #channel area [m2]
@@ -176,18 +185,18 @@ lseq <- function(from, to, length.out) {
   exp(seq(log(from), log(to), length.out = length.out))
 }
 
-test <- data.frame('eD'=lseq(10^-5, 10^1, 100))
-test$k600_1d <- exp(4.44383)*test$eD^0.59957
-test$k600_2d <- ifelse(test$eD < exp(-6.494), exp(0.6277)*test$eD^(0.030075),
-                          ifelse(test$eD< exp(-2.220), exp(4.7048)*test$eD^(0.65790), exp(7.1266)*test$eD^(1.7489)))
+test <- data.frame('ustar'=seq(0,0.8, 0.1)) #data.frame('eD'=lseq(10^-5, 10^1, 100))
+test$k600_1d <- 48*test$ustar #exp(4.44383)*test$eD^0.59957
+#test$k600_2d <- ifelse(test$eD < exp(-6.494), exp(0.6277)*test$eD^(0.030075),
+#                          ifelse(test$eD< exp(-2.220), exp(4.7048)*test$eD^(0.65790), exp(7.1266)*test$eD^(1.7489)))
 
 weirdPlot <- ggplot() +
-  geom_point(data=data, aes(y=k600, x=eD), alpha=0.4, size=3, color='blue')+
-  geom_pointrange(data=full_output, mapping=aes(y=kest_mean, x=((kobs/85.10025)^(1/0.59957)), ymin = kest_low, ymax = kest_high), fatten=10, fill='#1b9e77', pch=21, color='black') +
-  geom_line(data=test, aes(x=eD, y=k600_1d), color='darkred', size=3) +
-  geom_line(data=test, aes(x=eD, y=k600_2d), color='darkblue', size=3) +
-  xlab('eD [W/kg]') +
-  ylab('BIKER k600 [m/dy]') +
+  geom_point(data=data, aes(y=k600, x=ustar), alpha=0.4, size=3, color='blue')+
+  geom_pointrange(data=full_output, mapping=aes(y=kest_mean, x=(kobs/48), ymin = kest_low, ymax = kest_high), fatten=10, fill='#1b9e77', pch=21, color='black') +
+#  geom_line(data=test, aes(x=ustar, y=k600_1d), color='darkred', size=3) +
+  #geom_line(data=test, aes(x=eD, y=k600_2d), color='darkblue', size=3) +
+  xlab('Ustar [m/s]') +
+  ylab('BIKER ko2 [m/dy]') +
   scale_y_log10(
       breaks = scales::trans_breaks("log10", function(x) 10^x),
       labels = scales::trans_format("log10", scales::math_format(10^.x)),
@@ -195,7 +204,7 @@ weirdPlot <- ggplot() +
   scale_x_log10(
       breaks = scales::trans_breaks("log10", function(x) 10^x),
       labels = scales::trans_format("log10", scales::math_format(10^.x)),
-      limits=c(10^-5, 10^0.5))+
+      limits=c(10^-2.5, 10^0.5))+
     scale_color_discrete_qualitative(palette = 'Harmonic') +
   theme(legend.position = "none",
         axis.text=element_text(size=20),

@@ -12,7 +12,7 @@ theme_set(theme_cowplot())
 #source(here::here('src' , 'MonteCarlo_analysis.R'))
 #source(here::here('src' , 'runBIKER.R'))
 source(here::here('src' , 'validation.R'))
-source(here::here('src' , 'FCO2_analysis.R'))
+#source(here::here('src' , 'FCO2_analysis.R'))
 
 
 #OUT OF DATE I THINK source(here::here('src' , 'k600_analysis.R'))

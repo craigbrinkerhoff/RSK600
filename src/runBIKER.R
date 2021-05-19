@@ -50,7 +50,7 @@ run_BIKER <- function(currPepsi, errFlag, kmodel) {
   }
 
   #calculate observed k (depending on measurements error)------------------------------------------------------------------------
-  if (meas_err == 1){
+  if (errFlag == 1){
     Wtrue=ncvar_get(data_in,'Reach_Timeseries/Wtrue') #observed W and S with no measurement error
     Strue = ncvar_get(data_in, 'Reach_Timeseries/Strue')
 
@@ -78,6 +78,7 @@ run_BIKER <- function(currPepsi, errFlag, kmodel) {
     k_obs <- ko2_craig(D_obs, Strue) #kL20 equation
     k_obs <- colMeans(k_obs, na.rm=T)
   }
+
   else { #no measurement error
     D_obs <- area / W_obs
     k_obs <- ko2_craig(D_obs, S_obs) #kL20 equation
@@ -107,7 +108,7 @@ run_BIKER <- function(currPepsi, errFlag, kmodel) {
 
 #Run parallelized function on k02 model------------------------------
 files <- list.files('data/Frasson_etal_2021/IdealDataxxxxxx', pattern="*.nc", full.names = TRUE) #pepsi 2
-files <- files[-1] #remove Arial Khan
+#files <- files[-1] #remove Arial Khan
 files2 <- list.files('data/Durand_etal_2016/xxxxxxxxxxxxxxxx', pattern="*.nc", full.names = TRUE) #pepsi 1
 files <- c(files, files2)
 system.time(
@@ -117,7 +118,7 @@ system.time(
 #results <- run_BIKER(files, 0, 'ko2')
 
 files <- list.files('data/Frasson_etal_2021/FullUncertainty', pattern="*.nc", full.names = TRUE)
-files <- files[-1] #remove Arial Khan
+#files <- files[-1] #remove Arial Khan
 system.time(
   results <- mclapply(files, run_BIKER, 1, 'ko2', mc.cores=cores) #run with SWOT measurement errors
 )

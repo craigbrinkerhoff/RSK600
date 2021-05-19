@@ -268,7 +268,7 @@ plotRivs <- ggplot(plot_stats, aes(x=key2, y=value, fill=key)) +
   geom_hline(yintercept=-0.41, linetype='dashed') +
   xlab('Metric') +
   ylab('Value') +
-  coord_cartesian(ylim = c(-1,1.5))+
+  coord_cartesian(ylim = c(-2,1.5))+
   scale_fill_brewer(palette = 'Set1', name='') +
   theme(legend.position = "none",
         axis.text=element_text(size=20),
@@ -309,45 +309,45 @@ flux_plot<- ggplot(output, aes(x=(FCO2_ulset), y=(FCO2_BIKER), color=key)) +
   annotate("text", label = paste0('RMSE: ', rmse, ' g/m2*dy'), x = 10^0, y = 10^1.5, size = 5, colour = "black")+
   annotate("text", label = paste0('r2: ', lmr2), x = 10^0, y = 10^1.2, size = 5, colour = "black")
 
-#add some individual river plots (same rivers has randomly sampled from the k600 validation)
-#OhioSection3
-t <- filter(output, river=='OhioSection3') %>%
+#add some individual river plots (same rivers has randomly sampled from the k validation)
+#MissouriDownstream
+t <- filter(output, river=='MissouriDownstream') %>%
   gather(key=key, value=value, c(FCO2_ulset, FCO2_BIKER))
-OhioSection3_plot <- ggplot(t, aes(x=timestep, y=value, color=key)) +
+MissouriDownstream_plot <- ggplot(t, aes(x=timestep, y=value, color=key)) +
   geom_line(size=1.5) +
   geom_pointrange(aes(ymin=FCO2_BIKER_low, ymax=FCO2_BIKER_high), fatten=10)+
   ylab('FCO2 [g/m2*dy]') +
   xlab('Timestep') +
   scale_color_brewer(palette='Set2', name='', labels=legend_labels) +
-  ggtitle('OhioSection3')
+  ggtitle('MissouriDownstream')
 
-#SacramentoDownstream
-t <- filter(output, river=='SacramentoDownstream') %>%
+#OhioSection8
+t <- filter(output, river=='OhioSection8') %>%
   gather(key=key, value=value, c(FCO2_ulset, FCO2_BIKER))
-SacramentoDownstream_plot <- ggplot(t, aes(x=timestep, y=value, color=key)) +
+OhioSection8_plot <- ggplot(t, aes(x=timestep, y=value, color=key)) +
   geom_line(size=1.5) +
   geom_pointrange(aes(ymin=FCO2_BIKER_low, ymax=FCO2_BIKER_high), fatten=10)+
   ylab('FCO2 [g/m2*dy]') +
   xlab('Timestep') +
   theme(legend.position = 'none') +
   scale_color_brewer(palette='Set2', name='', labels=legend_labels) +
-  ggtitle('SacramentoDownstream')
+  ggtitle('OhioSection8')
 
-#SeineDownstream
-t <- filter(output, river=='SeineDownstream') %>%
+#Connecticut
+t <- filter(output, river=='Connecticut') %>%
   gather(key=key, value=value, c(FCO2_ulset, FCO2_BIKER))
-SeineDownstream_plot <- ggplot(t, aes(x=timestep, y=value, color=key)) +
+Connecticut_plot <- ggplot(t, aes(x=timestep, y=value, color=key)) +
   geom_line(size=1.5) +
   geom_pointrange(aes(ymin=FCO2_BIKER_low, ymax=FCO2_BIKER_high), fatten=10)+
   ylab('FCO2 [g/m2*dy]') +
   xlab('Timestep') +
   theme(legend.position = 'none') +
   scale_color_brewer(palette='Set2', name='', labels=legend_labels) +
-  ggtitle('SeineDownstream')
+  ggtitle('Connecticut')
 
 #bring it together
-legend <- get_legend(OhioSection3_plot + theme(legend.box.margin = margin(0, 3, 3, 5)))
-plot_fin <- plot_grid(OhioSection3_plot + theme(legend.position = 'none'), SacramentoDownstream_plot, SeineDownstream_plot, legend, ncol=2,
+legend <- get_legend(MissouriDownstream_plot + theme(legend.box.margin = margin(0, 3, 3, 5)))
+plot_fin <- plot_grid(MissouriDownstream_plot + theme(legend.position = 'none'), OhioSection8_plot, Connecticut_plot, legend, ncol=2,
                       labels=c('b', 'c', 'd', NA))
 plot_fin <- plot_grid(flux_plot, plot_fin, ncol=2, labels=c('a', NA))
 ggsave('cache/FCO2/FCO2_plot.jpg', plot_fin, width=14, height=8)

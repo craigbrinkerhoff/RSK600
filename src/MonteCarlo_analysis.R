@@ -8,8 +8,8 @@ set.seed(455)
 
 #Pull in hydraulic measurements from Brinkerhoff etal 2019 to test parameter uncertainty------------------------------------------
 if(munge == 1){
-  hydraulics_init <- read.csv('cache/MonteCarlo/field_measurements.csv')
-  nhd_med <- read.csv('cache/MonteCarlo/NHD_join_table.csv')
+  hydraulics_init <- read.csv('data/MonteCarlo/field_measurements.csv')
+  nhd_med <- read.csv('data/MonteCarlo/NHD_join_table.csv')
 
   #add reach slopes from NHD
   hydraulics <- left_join(hydraulics_init, select(nhd_med, SLOPE, SOURCE_FEA, LatSite, LonSite), by = c("site_no" = "SOURCE_FEA"))
@@ -34,6 +34,12 @@ if(munge == 1){
     hydraulics$slope <- hydraulics$SLOPE
     hydraulics$depth <- hydraulics$area / hydraulics$width #m
     hydraulics$n <- (hydraulics$depth^(2/3)*hydraulics$SLOPE^(1/2))/hydraulics$velocity
+
+    #Get uncertainty from Rh~D only (for validation runs in the paper)----------------------------
+    hydraulics$Rh <- hydraulics$area / (hydraulics$width + 2*hydraulics$depth)
+    temp <- hydraulics #filter(hydraulics, width/depth > 10)
+    lm <- lm((temp$Rh)~(temp$depth))
+    print(summary(lm))
 
     #many slopes were saved with floor values of 1e-5, so I just remove these because they influence the k600 model to provide artificial results
     hydraulics <- filter(hydraulics, slope > 1e-5)
@@ -125,13 +131,6 @@ func_MC <- function(id, mannings_flag, slopeFlag) {
   #get M different model estimate uncertainties and return that------------------------------
   temp <- data.frame('sigma_logk600' = sd(logk, na.rm=T), 'mean_logk600'= mean(logk, na.rm = T), 'id'=id)
 }
-
-#Get uncertainty from Rh~D only (for validation runs in the paper)----------------------------
-hydraulics <- read.csv('data/MonteCarlo/mc_hydraulics.csv')
-hydraulics$Rh <- hydraulics$area / (hydraulics$width + 2*hydraulics$depth)
-lm <- lm(log(hydraulics$Rh)~log(hydraulics$depth))
-print(summary(lm))
-break
 
 #Run MC simulations in parallel--------------------------
 if(munge2 == 1){

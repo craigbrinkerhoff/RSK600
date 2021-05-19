@@ -25,8 +25,8 @@ valPlot <- ggplot(full_output, aes(x=(kobs), y=(kest_mean))) +
   geom_smooth(size=2, color='darkgrey', method='lm', se=F)+
   geom_line(aes(y=10^(lwr)), color='darkgrey', linetype='dashed', size=1.75) +
   geom_line(aes(y=10^(upr)), color='darkgrey', linetype='dashed', size=1.75) +
-  xlab('k600 via observed \nshear velocity [m/dy]') +
-  ylab('BIKER k600 [m/dy]') +
+  xlab('ko2 via observed \nshear velocity [m/dy]') +
+  ylab('BIKER ko2 [m/dy]') +
   scale_y_log10(
       breaks = scales::trans_breaks("log10", function(x) 10^x),
       labels = scales::trans_format("log10", scales::math_format(10^.x)))+
@@ -45,10 +45,10 @@ valPlot <- ggplot(full_output, aes(x=(kobs), y=(kest_mean))) +
 #cdfs---------------------
 t <- gather(full_output, key=key, value=value, c(kobs, kest_mean, kest_high, kest_low))
 t$flag <- ifelse(t$key == 'kobs', 1, 0)
-k600_cdfs <- ggplot(t, aes(x=value, color=key, linetype=factor(flag))) +
+k_cdfs <- ggplot(t, aes(x=value, color=key, linetype=factor(flag))) +
   stat_ecdf(size=1.25) +
   scale_color_manual(values=c('#67a9cf','#67a9cf', '#66c2a5', 'black')) +
-  xlab('k600 [m/dy]') +
+  xlab('ko2 [m/dy]') +
   ylab('Percentile') +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
@@ -60,18 +60,19 @@ k600_cdfs <- ggplot(t, aes(x=value, color=key, linetype=factor(flag))) +
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
 
-valPlot <- plot_grid(valPlot, k600_cdfs, ncol=2, labels=c('a', 'b'), label_size=18)
+valPlot <- plot_grid(valPlot, k_cdfs, ncol=2, labels=c('a', 'b'), label_size=18)
 ggsave('cache/validation/validation.jpg', valPlot, width=12, height=7)
 
 #by river metrics---------------------------------------------
 stats_by_reach <- group_by(results, river, errFlag) %>%
   summarise(kge = hydroGOF::KGE(kest_mean, kobs),
-            nrmse = sqrt(mean((kobs - kest_mean)^2)) / mean(kobs, na.rm=T),
-            rBIAS =   mean(kest_mean- kobs) / mean(kobs, na.rm=T),
-            rrmse =   sqrt(mean((kest_mean- kobs)^2 / kobs^2)),
+            nrmse = sqrt(mean((kobs - kest_mean)^2, na.rm=T)) / mean(kobs, na.rm=T),
+            rBIAS =   mean(kest_mean- kobs, na.rm=T) / mean(kobs, na.rm=T),
+            rrmse =   sqrt(mean((kobs- kest_mean)^2 / kobs^2, na.rm=T)),
             meanKobs = mean(kobs, na.rm=T),
             meanWobs = mean(Wobs, na.rm=T),
-            meanSobs = mean(Sobs, na.rm=T))
+            meanSobs = mean(Sobs, na.rm=T),
+            RE = hydroGOF::rmse(kest_mean, kobs, na.rm=T)/mean(kobs, na.rm=T))
 
 plot_stats <- gather(stats_by_reach, key=key, value=value, c('nrmse', 'rBIAS', 'rrmse', 'kge'))
 plot_stats <- filter(plot_stats, key %in% c('nrmse', 'rrmse', 'rBIAS', 'kge'))
@@ -92,7 +93,7 @@ plotSWOTreaches <- ggplot(plot_stats, aes(x=key, y=value, fill=factor(errFlag)))
         legend.title = element_text(size=17, face='bold'))
 
 # example timeseries plot per river------------------------------------------------------------------------------------
-set.seed(650)
+set.seed(5)
 
 kge_bins <- quantile(stats_by_reach[stats_by_reach$errFlag ==0,]$kge, c(0.33, 0.66), na.rm = T)
 kge_bad <- filter(stats_by_reach[stats_by_reach$errFlag ==0,], kge <= kge_bins[1]) %>% select(river)
@@ -108,7 +109,7 @@ badRiverPlot <- ggplot(badRiver, aes(x=time, y=value, color=key)) + #model
   geom_point(size=3) +
   geom_ribbon(aes(ymin = kest_low, ymax = kest_high), alpha=0.75, fill='grey')+
   geom_line(size=1) +
-  ylab('k600 [m/dy]') +
+  ylab('ko2 [m/dy]') +
   xlab('Timestep') +
   scale_color_brewer(palette='Set2') +
   theme(legend.position = "none") +
@@ -123,7 +124,7 @@ ehRiverPlot <- ggplot(ehRiver, aes(x=time, y=value, color=key)) + #model
   geom_point(size=3) +
   geom_ribbon(aes(ymin = kest_low, ymax = kest_high), alpha=0.75, fill='grey')+
   geom_line(size=1) +
-  ylab('k600 [m/dy]') +
+  ylab('ko2 [m/dy]') +
   xlab('Timestep') +
   scale_color_brewer(palette='Set2') +
   theme(legend.position = "none") +
@@ -138,9 +139,9 @@ goodRiverPlot <- ggplot(goodRiver, aes(x=time, y=value, color=key)) + #model
   geom_point(size=3) +
   geom_ribbon(aes(ymin = kest_low, ymax = kest_high), alpha=0.75, fill='grey')+
   geom_line(size=1) +
-  ylab('k600 [m/dy]') +
+  ylab('ko2 [m/dy]') +
   xlab('Timestep') +
-  scale_color_brewer(palette='Set2', name='k600 [m/dy]', labels=c('BIKER', 'Model Using \nObserved Velocity')) +
+  scale_color_brewer(palette='Set2', name='ko2 [m/dy]', labels=c('BIKER', 'Model Using \nObserved Velocity')) +
   ggtitle(riv)
 
 # extract the legend from one of the plots
@@ -250,9 +251,15 @@ riverPropertiesPlot <- plot_grid(riverPropertiesPlot_k + theme(legend.position =
 ggsave('cache/validation/riverProperties_kge.jpg', riverPropertiesPlot, width=14, height=8)
 
 
-
-
-
+#% relative error plot--------------------------------------------
+relativeError_plot <- ggplot(stats_by_reach[stats_by_reach$errFlag == 0,], aes(y=RE*100, x=river)) +
+  geom_col(color='black') +
+  coord_flip()+
+  geom_hline(yintercept=mean(c(57.31, 57.55)), linetype='dashed', size=2) +
+  xlab('River') +
+  ylab('% Relative Error')
+ggsave('cache/validation/relativeErr.jpg', relativeError_plot, width=14, height=8)
+print(stats_by_reach[stats_by_reach$errFlag == 0,])
 
 
 

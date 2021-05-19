@@ -126,6 +126,13 @@ func_MC <- function(id, mannings_flag, slopeFlag) {
   temp <- data.frame('sigma_logk600' = sd(logk, na.rm=T), 'mean_logk600'= mean(logk, na.rm = T), 'id'=id)
 }
 
+#Get uncertainty from Rh~D only (for validation runs in the paper)----------------------------
+hydraulics <- read.csv('data/MonteCarlo/mc_hydraulics.csv')
+hydraulics$Rh <- hydraulics$area / (hydraulics$width + 2*hydraulics$depth)
+lm <- lm(log(hydraulics$Rh)~log(hydraulics$depth))
+print(summary(lm))
+break
+
 #Run MC simulations in parallel--------------------------
 if(munge2 == 1){
   #No manning's or slope error

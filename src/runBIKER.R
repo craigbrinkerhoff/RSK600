@@ -49,31 +49,41 @@ run_BIKER <- function(currPepsi, errFlag, kmodel) {
     area=area[,-remove_index]
   }
 
-  #calculate observed k ------------------------------------------------------------------------
-  V_obs <- Q_obs / area #[m/s]
-  D_obs <- area / W_obs
+  #calculate observed k (depending on measurements error)------------------------------------------------------------------------
+  if (meas_err == 1){
+    Wtrue=ncvar_get(data_in,'Reach_Timeseries/Wtrue') #observed W and S with no measurement error
+    Strue = ncvar_get(data_in, 'Reach_Timeseries/Strue')
 
-  #k_obs <- k600_craig(S_obs, V_obs) #k600 equation
-  k_obs <- ko2_craig(D_obs, S_obs) #kL20 equation
+    #prep pepsi rivers------------------------------------------------
+    Strue[Strue<=0]=NA
+    Strue[is.na(Strue)] = 0.000017 #min obs SWOT slope Biancarma etal 2016
+    Wtrue[Wtrue<0]=NA
 
-  k_obs <- colMeans(k_obs, na.rm=T)
+    #Some NA handling in slopes
+    if (any(apply(Strue,2,sum,na.rm=TRUE) ==0)){
+      remove_index =  which((apply(Strue,2,sum,na.rm=TRUE) ==0) ==TRUE)
 
-#  if(errFlag == 1){
-#    #Introduce measurement errors using Durand et al. 2020 model------------------------
-#    set.seed(100)
-#    for(i in 1:nrow(S_obs)) {
-#      for(j in 1:ncol(S_obs)){
-#        S_obs[i,j] <- rnorm(1,S_obs[i,j], 1.7e-5) #Durand etal 2020 [km/km]
-#        S_obs[i,j] <- ifelse(S_obs[i,j] <= 0, 0.000017, S_obs[i,j]) #min obs slope Biancarma 2016
-#      }
-#    }
+      Wtrue=Wtrue[,-remove_index]
+      Strue=Strue[,-remove_index]
+    }
 
-#    for(i in 1:nrow(H_obs)) {
-#      for(j in 1:ncol(H_obs)){
-#        H_obs[i,j] <- rnorm(1,H_obs[i,j], 0.104) #m2
-#      }
-#    }
-#  }
+    if (any(apply(Strue,1,sum,na.rm=TRUE) ==0)){
+      remove_index =  which((apply(Strue,1,sum,na.rm=TRUE) ==0) ==TRUE)
+
+      Wtrue=Wtrue[-remove_index,]
+      Strue=Strue[-remove_index,]
+    }
+
+    D_obs <- area / Wtrue
+    k_obs <- ko2_craig(D_obs, Strue) #kL20 equation
+    k_obs <- colMeans(k_obs, na.rm=T)
+  }
+  else { #no measurement error
+    D_obs <- area / W_obs
+    k_obs <- ko2_craig(D_obs, S_obs) #kL20 equation
+    k_obs <- colMeans(k_obs, na.rm=T)
+  }
+
 
   #Calculate dA matrix from RS W and H-----------------------------------------------------------
   dA_obs <- calcdA_mat(W_obs,H_obs) #[m2]

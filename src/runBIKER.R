@@ -92,7 +92,7 @@ run_BIKER <- function(currPepsi, errFlag, kmodel) {
   #run BIKER------------------------------------------
   data <- biker_data(w=W_obs, s=S_obs, dA=dA_obs)
   priors <- biker_priors(data, Kmodel = kmodel)
-  priors$sigma_model$sigma_post = matrix(mannings_uncertainity, nrow=nrow(W_obs), ncol=ncol(W_obs)) #For this validation, we only want manning's uncertainty. Real implementation would use full model uncertainty
+  priors$sigma_model$sigma_post = matrix(Rh_uncertainity, nrow=nrow(W_obs), ncol=ncol(W_obs)) #For this validation, we only want Rh uncertainty. Real implementation would use full model uncertainty
   kest <- biker_estimate(bikerdata = data, bikerpriors = priors, meas_err=F) #meas err needs to be removed
 
   #write to file

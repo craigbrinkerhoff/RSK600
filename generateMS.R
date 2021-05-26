@@ -18,5 +18,5 @@ results_3_3_bulk$key <- as.character(results_3_3_bulk$key)
 rmarkdown::render("manuscript_v3.Rmd")
 print('Manuscript generated.')
 
-rmarkdown::render("docs//supp_v1.Rmd")
+rmarkdown::render("supp_v3.Rmd")
 print('Supplemental Information generated.')

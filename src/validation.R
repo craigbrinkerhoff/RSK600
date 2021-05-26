@@ -230,7 +230,6 @@ ggsave('cache/validation/riverProperties_rbias.jpg', riverPropertiesPlot, width=
 #########################
 riverPropertiesPlot_k <- ggplot(stats_by_reach, aes(y=kge, x=meanKobs)) +
   geom_point(size=3) +
-  geom_hline(yintercept=-0.41, linetype='dashed') +
   xlab('Mean observed k [m/dy]') +
   ylab('KGE') +
   scale_x_log10(
@@ -242,7 +241,6 @@ riverPropertiesPlot_k <- ggplot(stats_by_reach, aes(y=kge, x=meanKobs)) +
         legend.title = element_text(size=17, face='bold'))
 riverPropertiesPlot_W <- ggplot(stats_by_reach, aes(y=kge, x=meanWobs)) +
   geom_point(size=3) +
-  geom_hline(yintercept=-0.41, linetype='dashed') +
   xlab('Mean observed width [m]') +
   ylab('KGE') +
   scale_x_log10(
@@ -255,7 +253,6 @@ riverPropertiesPlot_W <- ggplot(stats_by_reach, aes(y=kge, x=meanWobs)) +
         legend.title = element_text(size=17, face='bold'))
 riverPropertiesPlot_S <- ggplot(stats_by_reach, aes(y=kge, x=meanSobs)) +
   geom_point(size=3) +
-  geom_hline(yintercept=-0.41, linetype='dashed') +
   xlab('Mean observed slope') +
   ylab('KGE') +
   scale_x_log10(
@@ -279,9 +276,8 @@ ggsave('cache/validation/riverProperties_kge.jpg', riverPropertiesPlot, width=14
 #########################
 riverPropertiesPlot_k <- ggplot(stats_by_reach, aes(y=rrmse, x=meanKobs)) +
   geom_point(size=3) +
-  geom_hline(yintercept=-0.41, linetype='dashed') +
   xlab('Mean observed k [m/dy]') +
-  ylab('KGE') +
+  ylab('RRMSE') +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x)))+
@@ -291,9 +287,8 @@ riverPropertiesPlot_k <- ggplot(stats_by_reach, aes(y=rrmse, x=meanKobs)) +
         legend.title = element_text(size=17, face='bold'))
 riverPropertiesPlot_W <- ggplot(stats_by_reach, aes(y=rrmse, x=meanWobs)) +
   geom_point(size=3) +
-  geom_hline(yintercept=-0.41, linetype='dashed') +
   xlab('Mean observed width [m]') +
-  ylab('KGE') +
+  ylab('RRMSE') +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x)))+
@@ -304,9 +299,8 @@ riverPropertiesPlot_W <- ggplot(stats_by_reach, aes(y=rrmse, x=meanWobs)) +
         legend.title = element_text(size=17, face='bold'))
 riverPropertiesPlot_S <- ggplot(stats_by_reach, aes(y=rrmse, x=meanSobs)) +
   geom_point(size=3) +
-  geom_hline(yintercept=-0.41, linetype='dashed') +
   xlab('Mean observed slope') +
-  ylab('KGE') +
+  ylab('RRMSE') +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x)))+
@@ -328,9 +322,8 @@ ggsave('cache/validation/riverProperties_rrmse.jpg', riverPropertiesPlot, width=
 #########################
 riverPropertiesPlot_k <- ggplot(stats_by_reach, aes(y=nrmse, x=meanKobs)) +
   geom_point(size=3) +
-  geom_hline(yintercept=-0.41, linetype='dashed') +
   xlab('Mean observed k [m/dy]') +
-  ylab('KGE') +
+  ylab('NRMSE') +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x)))+
@@ -340,9 +333,8 @@ riverPropertiesPlot_k <- ggplot(stats_by_reach, aes(y=nrmse, x=meanKobs)) +
         legend.title = element_text(size=17, face='bold'))
 riverPropertiesPlot_W <- ggplot(stats_by_reach, aes(y=nrmse, x=meanWobs)) +
   geom_point(size=3) +
-  geom_hline(yintercept=-0.41, linetype='dashed') +
   xlab('Mean observed width [m]') +
-  ylab('KGE') +
+  ylab('NRMSE') +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x)))+
@@ -353,9 +345,8 @@ riverPropertiesPlot_W <- ggplot(stats_by_reach, aes(y=nrmse, x=meanWobs)) +
         legend.title = element_text(size=17, face='bold'))
 riverPropertiesPlot_S <- ggplot(stats_by_reach, aes(y=nrmse, x=meanSobs)) +
   geom_point(size=3) +
-  geom_hline(yintercept=-0.41, linetype='dashed') +
   xlab('Mean observed slope') +
-  ylab('KGE') +
+  ylab('NRMSE') +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x)))+
@@ -382,7 +373,7 @@ relativeError_plot <- ggplot(stats_by_reach[stats_by_reach$errFlag == 0,], aes(y
   xlab('River') +
   ylab('% Relative Error') +
   theme(legend.position = "none",
-        axis.text=element_text(size=20),
+        axis.text.x=element_text(size=20),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))

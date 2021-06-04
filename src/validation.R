@@ -179,7 +179,7 @@ write.csv(stats_by_reach, 'cache/validation/results_by_riv.csv')
 ################
 ##RBIAS VS HYDRAULIC PROPERTIES---------------------------------------
 ################
-riverPropertiesPlot_k <- ggplot(stats_by_reach, aes(y=rBIAS, x=meanKobs)) +
+riverPropertiesPlot_k <- ggplot(stats_by_reach[stats_by_reach$errFlag==0,], aes(y=rBIAS, x=meanKobs)) +
   geom_point(size=3) +
   geom_hline(yintercept=0, linetype='dashed') +
   xlab('Mean observed k [m/dy]') +
@@ -191,7 +191,7 @@ riverPropertiesPlot_k <- ggplot(stats_by_reach, aes(y=rBIAS, x=meanKobs)) +
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
-riverPropertiesPlot_W <- ggplot(stats_by_reach, aes(y=rBIAS, x=meanWobs)) +
+riverPropertiesPlot_W <- ggplot(stats_by_reach[stats_by_reach$errFlag==0,], aes(y=rBIAS, x=meanWobs)) +
   geom_point(size=3) +
   geom_hline(yintercept=0, linetype='dashed') +
   xlab('Mean observed width [m]') +
@@ -204,7 +204,7 @@ riverPropertiesPlot_W <- ggplot(stats_by_reach, aes(y=rBIAS, x=meanWobs)) +
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
-riverPropertiesPlot_S <- ggplot(stats_by_reach, aes(y=rBIAS, x=meanSobs)) +
+riverPropertiesPlot_S <- ggplot(stats_by_reach[stats_by_reach$errFlag==0,], aes(y=rBIAS, x=meanSobs)) +
   geom_point(size=3) +
   geom_hline(yintercept=0, linetype='dashed') +
   xlab('Mean observed slope') +
@@ -228,7 +228,7 @@ ggsave('cache/validation/riverProperties_rbias.jpg', riverPropertiesPlot, width=
 #########################
 ##KGE VS HYDRAULIC properties-------------------------------------------------------
 #########################
-riverPropertiesPlot_k <- ggplot(stats_by_reach, aes(y=kge, x=meanKobs)) +
+riverPropertiesPlot_k <- ggplot(stats_by_reach[stats_by_reach$errFlag==0,], aes(y=kge, x=meanKobs)) +
   geom_point(size=3) +
   xlab('Mean observed k [m/dy]') +
   ylab('KGE') +
@@ -239,7 +239,7 @@ riverPropertiesPlot_k <- ggplot(stats_by_reach, aes(y=kge, x=meanKobs)) +
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
-riverPropertiesPlot_W <- ggplot(stats_by_reach, aes(y=kge, x=meanWobs)) +
+riverPropertiesPlot_W <- ggplot(stats_by_reach[stats_by_reach$errFlag==0,], aes(y=kge, x=meanWobs)) +
   geom_point(size=3) +
   xlab('Mean observed width [m]') +
   ylab('KGE') +
@@ -251,7 +251,7 @@ riverPropertiesPlot_W <- ggplot(stats_by_reach, aes(y=kge, x=meanWobs)) +
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
-riverPropertiesPlot_S <- ggplot(stats_by_reach, aes(y=kge, x=meanSobs)) +
+riverPropertiesPlot_S <- ggplot(stats_by_reach[stats_by_reach$errFlag==0,], aes(y=kge, x=meanSobs)) +
   geom_point(size=3) +
   xlab('Mean observed slope') +
   ylab('KGE') +
@@ -274,7 +274,7 @@ ggsave('cache/validation/riverProperties_kge.jpg', riverPropertiesPlot, width=14
 #########################
 ##RRMSE VS HYDRAULIC properties-------------------------------------------------------
 #########################
-riverPropertiesPlot_k <- ggplot(stats_by_reach, aes(y=rrmse, x=meanKobs)) +
+riverPropertiesPlot_k <- ggplot(stats_by_reach[stats_by_reach$errFlag==0,], aes(y=rrmse, x=meanKobs)) +
   geom_point(size=3) +
   xlab('Mean observed k [m/dy]') +
   ylab('RRMSE') +
@@ -285,7 +285,7 @@ riverPropertiesPlot_k <- ggplot(stats_by_reach, aes(y=rrmse, x=meanKobs)) +
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
-riverPropertiesPlot_W <- ggplot(stats_by_reach, aes(y=rrmse, x=meanWobs)) +
+riverPropertiesPlot_W <- ggplot(stats_by_reach[stats_by_reach$errFlag==0,], aes(y=rrmse, x=meanWobs)) +
   geom_point(size=3) +
   xlab('Mean observed width [m]') +
   ylab('RRMSE') +
@@ -297,7 +297,7 @@ riverPropertiesPlot_W <- ggplot(stats_by_reach, aes(y=rrmse, x=meanWobs)) +
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
-riverPropertiesPlot_S <- ggplot(stats_by_reach, aes(y=rrmse, x=meanSobs)) +
+riverPropertiesPlot_S <- ggplot(stats_by_reach[stats_by_reach$errFlag==0,], aes(y=rrmse, x=meanSobs)) +
   geom_point(size=3) +
   xlab('Mean observed slope') +
   ylab('RRMSE') +
@@ -320,7 +320,7 @@ ggsave('cache/validation/riverProperties_rrmse.jpg', riverPropertiesPlot, width=
 #########################
 ##NRMSE VS HYDRAULIC properties-------------------------------------------------------
 #########################
-riverPropertiesPlot_k <- ggplot(stats_by_reach, aes(y=nrmse, x=meanKobs)) +
+riverPropertiesPlot_k <- ggplot(stats_by_reach[stats_by_reach$errFlag==0,], aes(y=nrmse, x=meanKobs)) +
   geom_point(size=3) +
   xlab('Mean observed k [m/dy]') +
   ylab('NRMSE') +
@@ -331,7 +331,7 @@ riverPropertiesPlot_k <- ggplot(stats_by_reach, aes(y=nrmse, x=meanKobs)) +
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
-riverPropertiesPlot_W <- ggplot(stats_by_reach, aes(y=nrmse, x=meanWobs)) +
+riverPropertiesPlot_W <- ggplot(stats_by_reach[stats_by_reach$errFlag==0,], aes(y=nrmse, x=meanWobs)) +
   geom_point(size=3) +
   xlab('Mean observed width [m]') +
   ylab('NRMSE') +
@@ -343,7 +343,7 @@ riverPropertiesPlot_W <- ggplot(stats_by_reach, aes(y=nrmse, x=meanWobs)) +
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
-riverPropertiesPlot_S <- ggplot(stats_by_reach, aes(y=nrmse, x=meanSobs)) +
+riverPropertiesPlot_S <- ggplot(stats_by_reach[stats_by_reach$errFlag==0,], aes(y=nrmse, x=meanSobs)) +
   geom_point(size=3) +
   xlab('Mean observed slope') +
   ylab('NRMSE') +

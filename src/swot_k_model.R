@@ -293,3 +293,10 @@ models_eD <- group_by(data, flag_depth) %>%
             slope = model$coefficients[2],
             r2 = summary(model)$r.squared,
             name = first(flag_depth))
+
+
+lm <- lm(log_k600~log_eD, filter(data, flag_depth == 'Rh=/=H'))
+segLM <- segmented(lm, ~log_eD)
+
+summary(segLM)
+slope(segLM)

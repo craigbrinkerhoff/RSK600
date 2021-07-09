@@ -38,37 +38,13 @@ calcdA_vec <- function(w, h) {
   dA
 }
 
-#I THINK OUT OF DATE---------------------------------
-#k600_craig <- function(w, s, v) {
-#  widthRegime <- ifelse(mean(w, na.rm = T) < 10 & mean(s) < 0.05, 1,
-#                        ifelse(mean(w, na.rm = T) < 10 & mean(s, na.rm=T) >= 0.05, 5,
-#                               ifelse(mean(w, na.rm = T) < 50, 2,
-#                                      ifelse(mean(w, na.rm = T)< 100, 3, 4))))
-#  if (widthRegime == 1){
-#    k <- (111.58121 * (g*s * (v))^0.6488131)
-#  }
-#  if(widthRegime ==2 ){
-#    k <- (109.04977 * (g*s * (v))^0.6624354)
-#  }
-#  if(widthRegime == 3){
-#    k <- (31.84344 * (g*s * (v))^0.4366114)
-#  }
-#  if(widthRegime == 4) {
-#    k <- (14.16939 * (g*s * (v))^0.2724834)
-#  }
-#  if(widthRegime == 5) {
-#    k <- (792.63149 * (g*s * (v))^1.3160065)
-#  }
-#  return(k)
-#}
-
 #k600 function
 k600_craig <- function(s, v) {
   return(85.10025*(g*s*v)^0.59957)
 }
 
-#ko2 function
-ko2_craig <- function(depth, slope) {
+#k600 function using craig's model
+k600_ustar_craig <- function(depth, slope) {
   Ustar <- sqrt(g*depth*slope)
-  return(48*Ustar)
+  return(56.0294*Ustar)
 }

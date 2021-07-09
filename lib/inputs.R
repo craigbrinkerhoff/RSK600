@@ -8,7 +8,7 @@
 g <- 9.8 #gravitational acceleration [m/s2]
 molarMass <- 44.01 #[g/mol] for CO2
 pCO2_a <- 390 #[uatm]
-Rh_uncertainity <- 0.20 #see MonteCarlo_analysis.R for actual estimated uncertainty.
+uncertainity <- 0.20 #see regression model for actual uncertainity
 cf <- 0.100 #Henderson found empirically that Cf=0.113, if we use the empirical Strickler relation for n (1923- different rivers), we get Cf=0.09. So, we used Cf=0.100. See the notes!
 Sg <- 2.65 #specific gravity
 

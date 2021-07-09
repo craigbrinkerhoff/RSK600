@@ -7,7 +7,7 @@
 print('running BIKER...')
 
 #function for parallelizing BIKER runs------------------------------
-run_BIKER <- function(currPepsi, errFlag, kmodel) {
+run_BIKER <- function(currPepsi, errFlag) {
   #run model-------------------------------------------------------
   name <- substr(currPepsi, 40, nchar(currPepsi))
   name <- substr(name,1,nchar(name)-3)
@@ -75,13 +75,13 @@ run_BIKER <- function(currPepsi, errFlag, kmodel) {
     }
 
     D_obs <- area / Wtrue
-    k_obs <- ko2_craig(D_obs, Strue) #kL20 equation
+    k_obs <- k600_ustar_craig(D_obs, Strue) #k600 equation
     k_obs <- colMeans(k_obs, na.rm=T)
   }
 
   else { #no measurement error
     D_obs <- area / W_obs
-    k_obs <- ko2_craig(D_obs, S_obs) #kL20 equation
+    k_obs <- k600_ustar_craig(D_obs, S_obs) #k600 equation
     k_obs <- colMeans(k_obs, na.rm=T)
   }
 
@@ -91,9 +91,9 @@ run_BIKER <- function(currPepsi, errFlag, kmodel) {
 
   #run BIKER------------------------------------------
   data <- biker_data(w=W_obs, s=S_obs, dA=dA_obs)
-  priors <- biker_priors(data, Kmodel = kmodel)
-  priors$sigma_model$sigma_post = matrix(Rh_uncertainity, nrow=nrow(W_obs), ncol=ncol(W_obs)) #For this validation, we only want Rh uncertainty. Real implementation would use full model uncertainty
-  kest <- biker_estimate(bikerdata = data, bikerpriors = priors, meas_err=F) #meas err needs to be removed
+  priors <- biker_priors(data)
+  priors$sigma_model$sigma_post = matrix(uncertainity, nrow=nrow(W_obs), ncol=ncol(W_obs)) #For this validation, we only want Rh uncertainty. Real implementation would use full model uncertainty
+  kest <- biker_estimate(bikerdata = data, bikerpriors = priors, meas_err=F,iter = 2000L) #meas err needs to be removed
 
   #write to file
   if(errFlag == 1){
@@ -106,23 +106,21 @@ run_BIKER <- function(currPepsi, errFlag, kmodel) {
   }
 }
 
-#Run parallelized function on k02 model------------------------------
+#Run parallelized function------------------------------
 files <- list.files('data/Frasson_etal_2021/IdealDataxxxxxx', pattern="*.nc", full.names = TRUE) #pepsi 2
-#files <- files[-1] #remove Arial Khan
 files2 <- list.files('data/Durand_etal_2016/xxxxxxxxxxxxxxxx', pattern="*.nc", full.names = TRUE) #pepsi 1
 files <- c(files, files2)
-system.time(
-  results <- mclapply(files, run_BIKER, 0, 'ko2', mc.cores=cores) #run no measurement errors
-)
 
-#results <- run_BIKER(files, 0, 'ko2')
+#results <- run_BIKER(files[1], 0)
+
+system.time(
+  results <- mclapply(files, run_BIKER, 0, mc.cores=cores) #run no measurement errors
+)
 
 files <- list.files('data/Frasson_etal_2021/FullUncertainty', pattern="*.nc", full.names = TRUE)
-#files <- files[-1] #remove Arial Khan
 system.time(
-  results <- mclapply(files, run_BIKER, 1, 'ko2', mc.cores=cores) #run with SWOT measurement errors
+  results <- mclapply(files, run_BIKER, 1, mc.cores=cores) #run with SWOT measurement errors
 )
-#results <- run_BIKER(files[1], 1, 'ko2')
 
 #Make final full results file----------------------------
 df_fin <- list.files(path='cache/validation/by_river', full.names = TRUE) %>%

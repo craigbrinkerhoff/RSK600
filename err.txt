@@ -1,3 +1,7 @@
+
+The following have been reloaded with a version change:
+  1) gcc/10.2.0 => gcc/9.3.0
+
 Project name: RSK600
 Loading project configuration
 Autoloading packages
@@ -101,7 +105,824 @@ Autoloading helper functions
 Autoloading data
  Loading cached data set: Beauliu2012
  Loading cached data set: Ulseth_etal_2019
+ Loading cached data set: dataLocations
 Munging data
-`geom_smooth()` using formula 'y ~ x'
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_lauerwald2015 = col_double(),
+  FCO2_horgby2019 = col_double()
+)
+
 `summarise()` has grouped output by 'river'. You can override using the `.groups` argument.
-There were 16 warnings (use warnings() to see them)
+`geom_smooth()` using formula 'y ~ x'
+There were 50 or more warnings (use warnings() to see the first 50)

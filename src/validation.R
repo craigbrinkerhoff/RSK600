@@ -29,8 +29,8 @@ valPlot <- ggplot(full_output, aes(x=(kobs), y=(kest_mean))) +
   geom_smooth(size=2, color='darkgrey', method='lm', se=F)+
   geom_line(aes(y=10^(lwr)), color='darkgrey', linetype='dashed', size=1.75) +
   geom_line(aes(y=10^(upr)), color='darkgrey', linetype='dashed', size=1.75) +
-  xlab('ko2 via observed \nshear velocity [m/dy]') +
-  ylab('BIKER ko2 [m/dy]') +
+  xlab('k600 via observed \nshear velocity [m/dy]') +
+  ylab('BIKER k600 [m/dy]') +
   scale_y_log10(
       breaks = scales::trans_breaks("log10", function(x) 10^x),
       labels = scales::trans_format("log10", scales::math_format(10^.x)))+
@@ -54,7 +54,7 @@ t$flag <- ifelse(t$key == 'kobs', 1, 0)
 k_cdfs <- ggplot(t, aes(x=value, color=key, linetype=factor(flag))) +
   stat_ecdf(size=1.25) +
   scale_color_manual(values=c('#67a9cf','#67a9cf', '#66c2a5', 'black')) +
-  xlab('ko2 [m/dy]') +
+  xlab('k600 [m/dy]') +
   ylab('Percentile') +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
@@ -124,7 +124,7 @@ badRiverPlot <- ggplot(badRiver, aes(x=time, y=value, color=key)) + #model
   geom_point(size=3) +
   geom_ribbon(aes(ymin = kest_low, ymax = kest_high), alpha=0.75, fill='grey')+
   geom_line(size=1) +
-  ylab('ko2 [m/dy]') +
+  ylab('k600 [m/dy]') +
   xlab('Timestep') +
   scale_color_brewer(palette='Set2') +
   theme(legend.position = "none") +
@@ -140,7 +140,7 @@ ehRiverPlot <- ggplot(ehRiver, aes(x=time, y=value, color=key)) + #model
   geom_point(size=3) +
   geom_ribbon(aes(ymin = kest_low, ymax = kest_high), alpha=0.75, fill='grey')+
   geom_line(size=1) +
-  ylab('ko2 [m/dy]') +
+  ylab('k600 [m/dy]') +
   xlab('Timestep') +
   scale_color_brewer(palette='Set2') +
   theme(legend.position = "none") +
@@ -156,9 +156,9 @@ goodRiverPlot <- ggplot(goodRiver, aes(x=time, y=value, color=key)) + #model
   geom_point(size=3) +
   geom_ribbon(aes(ymin = kest_low, ymax = kest_high), alpha=0.75, fill='grey')+
   geom_line(size=1) +
-  ylab('ko2 [m/dy]') +
+  ylab('k600 [m/dy]') +
   xlab('Timestep') +
-  scale_color_brewer(palette='Set2', name='ko2 [m/dy]', labels=c('BIKER', 'Model Using \nObserved Velocity')) +
+  scale_color_brewer(palette='Set2', name='k600 [m/dy]', labels=c('BIKER', 'Model Using \nObserved Velocity')) +
   ggtitle(riv)
 
 # extract the legend from one of the plots

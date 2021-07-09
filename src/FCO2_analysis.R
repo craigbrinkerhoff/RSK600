@@ -104,57 +104,51 @@ fun_FCO2_analysis <- function(river) {
   Ustar <- sqrt(g*S_obs*D_obs)
 
   #Generate k600 estimates---------------------------
-#  k600_obs <- k600_craig(S_obs, V_obs)
-#  k600_BIKER <- filter(BIKER_results, river == name)$kest_mean
-#  k600_raymond2012 <- k600_craig(S_obs, V_raymond2012)
-#  k600_raymond2013 <- k600_craig(S_obs, V_raymond2013)
-#  k600_Lauerwald2015 <- k600_craig(S_obs, V_lauerwald2015)
-
-  #Generate kL20 estimates---------------------------
-  kL20_obs <- ko2_craig(D_obs, S_obs)
-  kL20_obs <- colMeans(kL20_obs, na.rm=T)
-  kL20_BIKER <- filter(BIKER_results, river == name)$kest_mean
-  kL20_BIKER <- kL20_BIKER[seq(1, length(kL20_BIKER), 11)]
-  kL20_BIKER_low <- filter(BIKER_results, river == name)$kest_low
-  kL20_BIKER_low <- kL20_BIKER_low[seq(1, length(kL20_BIKER_low), 11)]
-  kL20_BIKER_high <- filter(BIKER_results, river == name)$kest_high
-  kL20_BIKER_high <- kL20_BIKER_high[seq(1, length(kL20_BIKER_high), 11)]
-  kL20_raymond2012 <- ko2_craig(D_raymond2012, S_obs)
-  kL20_raymond2012 <- colMeans(kL20_raymond2012, na.rm=T)
-  kL20_raymond2013 <- ko2_craig(D_raymond2013, S_obs)
-  kL20_raymond2013 <- colMeans(kL20_raymond2013, na.rm=T)
-  kL20_lauerwald2015 <- ko2_craig(D_lauerwald2015, S_obs)
-  kL20_lauerwald2015 <- colMeans(kL20_lauerwald2015, na.rm=T)
-  kL20_horgby2019 <- ko2_craig(D_horgby2019, S_obs)
-  kL20_horgby2019 <- colMeans(kL20_horgby2019, na.rm=T)
+  k600_obs <- k600_ustar_craig(D_obs, S_obs)
+  k600_obs <- colMeans(k600_obs, na.rm=T)
+  k600_BIKER <- filter(BIKER_results, river == name)$kest_mean
+  k600_BIKER <- k600_BIKER[seq(1, length(k600_BIKER), 11)]
+  k600_BIKER_low <- filter(BIKER_results, river == name)$kest_low
+  k600_BIKER_low <- k600_BIKER_low[seq(1, length(k600_BIKER_low), 11)]
+  k600_BIKER_high <- filter(BIKER_results, river == name)$kest_high
+  k600_BIKER_high <- k600_BIKER_high[seq(1, length(k600_BIKER_high), 11)]
+  k600_raymond2012 <- k600_ustar_craig(D_raymond2012, S_obs)
+  k600_raymond2012 <- colMeans(k600_raymond2012, na.rm=T)
+  k600_raymond2013 <- k600_ustar_craig(D_raymond2013, S_obs)
+  k600_raymond2013 <- colMeans(k600_raymond2013, na.rm=T)
+  k600_lauerwald2015 <- k600_ustar_craig(D_lauerwald2015, S_obs)
+  k600_lauerwald2015 <- colMeans(k600_lauerwald2015, na.rm=T)
+  k600_horgby2019 <- k600_ustar_craig(D_horgby2019, S_obs)
+  k600_horgby2019 <- colMeans(k600_horgby2019, na.rm=T)
 
   #Calculate FCO2 and Sc using Beauliu data-------------------------------------------
   #sort by starting mmonth here
   Data_sort <- Data[(as.numeric(river_start_date)*2):nrow(Data),]
-  co2 <- Data_sort$CO2_uatm[1:length(kL20_BIKER)] #measured co2
+  co2 <- Data_sort$CO2_uatm[1:length(k600_BIKER)] #measured co2
   Sc_co2 <- Sc_co2_func(Data_sort$Water_temp_C) #Sc from measured water temperature
-  Sc_co2 <- Sc_co2[1:length(kL20_BIKER)]
+  Sc_co2 <- Sc_co2[1:length(k600_BIKER)]
   henrys_law <- henrys_law_func(Data_sort$Water_temp_C) #Henry's solubility coefficient from measured water temperature
-  henrys_law <- henrys_law[1:length(kL20_BIKER)]
+  henrys_law <- henrys_law[1:length(k600_BIKER)]
 
   #Convert to kco2--------------------------
-#  kco2_obs <- colMeans((Sc_co2/600)^(-1/2)/k600_obs, na.rm=T)
-#  kco2_BIKER <- (Sc_co2/600)^(-1/2)/k600_BIKER
-#  kco2_raymond2012 <- colMeans((Sc_co2/600)^(-1/2)/k600_raymond2012, na.rm=T)
-#  kco2_raymond2013 <- colMeans((Sc_co2/600)^(-1/2)/k600_raymond2013, na.rm=T)
-#  kco2_Lauerwald2015 <- colMeans((Sc_co2/600)^(-1/2)/k600_Lauerwald2015, na.rm=T)
-#  kco2_BIKER_low <- (Sc_co2/600)^(-1/2)/k600_BIKER_low
-#  kco2_BIKER_high <- (Sc_co2/600)^(-1/2)/k600_BIKER_high
+  kco2_obs <- (Sc_co2/600)^(-1/2)/k600_obs
+  kco2_BIKER <- (Sc_co2/600)^(-1/2)/k600_BIKER
+  kco2_raymond2012 <- (Sc_co2/600)^(-1/2)/k600_raymond2012
+  kco2_raymond2013 <- (Sc_co2/600)^(-1/2)/k600_raymond2013
+  kco2_lauerwald2015 <- (Sc_co2/600)^(-1/2)/k600_lauerwald2015
+  kco2_horgby2019 <- (Sc_co2/600)^(-1/2)/k600_horgby2019
+  kco2_BIKER_low <- (Sc_co2/600)^(-1/2)/k600_BIKER_low
+  kco2_BIKER_high <- (Sc_co2/600)^(-1/2)/k600_BIKER_high
 
   #convert k for o2 at 20deg to kco2 at x deg
-  kco2_obs <- (Sc_co2/530)^(-1/2)*kL20_obs
-  kco2_BIKER <- (Sc_co2/530)^(-1/2)*kL20_BIKER
-  kco2_raymond2012 <- (Sc_co2/530)^(-1/2)*kL20_raymond2012
-  kco2_raymond2013 <- (Sc_co2/530)^(-1/2)*kL20_raymond2013
-  kco2_lauerwald2015 <- (Sc_co2/530)^(-1/2)*kL20_lauerwald2015
-  kco2_horgby2019 <- (Sc_co2/530)^(-1/2)*kL20_horgby2019
-  kco2_BIKER_low <- (Sc_co2/530)^(-1/2)*kL20_BIKER_low
-  kco2_BIKER_high <- (Sc_co2/530)^(-1/2)*kL20_BIKER_high
+#  kco2_obs <- (Sc_co2/530)^(-1/2)*k600_obs
+#  kco2_BIKER <- (Sc_co2/530)^(-1/2)*k600_BIKER
+#  kco2_raymond2012 <- (Sc_co2/530)^(-1/2)*k600_raymond2012
+#  kco2_raymond2013 <- (Sc_co2/530)^(-1/2)*k600_raymond2013
+#  kco2_lauerwald2015 <- (Sc_co2/530)^(-1/2)*k600_lauerwald2015
+#  kco2_horgby2019 <- (Sc_co2/530)^(-1/2)*k600_horgby2019
+#  kco2_BIKER_low <- (Sc_co2/530)^(-1/2)*k600_BIKER_low
+#  kco2_BIKER_high <- (Sc_co2/530)^(-1/2)*k600_BIKER_high
 
   #Obtain actual CO2 fluxes--------------------------------------------
   FCO2_obs <- kco2_obs*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2

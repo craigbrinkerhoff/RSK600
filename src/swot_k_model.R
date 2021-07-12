@@ -67,7 +67,7 @@ data$Gtotal <- data$Vms*data$ustar^2
 
 ###########SOME FLAGS-------------------------------
 data$flag_swot <- ifelse(data$width > 100, 'SWOT', 'Small')
-data$flag_depth <- ifelse(round(data$Rh/data$depth, 2) == 1, 'Rh=H', 'Rh=/=H')
+data$flag_depth <- ifelse(round(data$Rh/data$depth, 3) >= 0.995, 'Rh=H', 'Rh=/=H')
 
 #LOG TRANSFORM SOME VARIABLES-----------------------------------------------------------
 data$log_eD <- log(data$eD)
@@ -136,19 +136,19 @@ data$Td <- data$eD - data$Gtotal/data$depth #its impossible (at the free surface
 #TKE production vs TKE form-drag dissipation
 #My analytical solution suggests these should be ~equal when depth equals Rh
 #binning the Rh/H ratios for visualzing
-data$figureFlag <- ifelse(round(data$Rh/data$depth, 2) == 1, 'Rh=H',
-                          ifelse(round(data$Rh/data$depth, 2) >= 0.90, '90-99%',
-                          ifelse(round(data$Rh/data$depth, 2) >= 0.80, '80-89%',
-                                 ifelse(round(data$Rh/data$depth, 2) >= 0.70, '70-79%',
-                                        ifelse(round(data$Rh/data$depth, 2) >= 0.60, '60-69%',
-                                               ifelse(round(data$Rh/data$depth, 2) >= 0.50, '50-59%',
-                                                      ifelse(round(data$Rh/data$depth, 2) >= 0.40, '40-49%',
-                                                             ifelse(round(data$Rh/data$depth, 2) >= 0.30, '30-39%',
-                                                                    ifelse(round(data$Rh/data$depth, 2) >=0.20, '20-29%',
-                                                                           ifelse(round(data$Rh/data$depth, 2) >= 0.10, '10-19%', '0-9%'))))))))))
+data$figureFlag <- ifelse(round(data$Rh/data$depth, 3) == 1, 'Rh=H',
+                          ifelse(round(data$Rh/data$depth, 3) >= 0.90, '90-99%',
+                          ifelse(round(data$Rh/data$depth, 3) >= 0.80, '80-89%',
+                                 ifelse(round(data$Rh/data$depth, 3) >= 0.70, '70-79%',
+                                        ifelse(round(data$Rh/data$depth, 3) >= 0.60, '60-69%',
+                                               ifelse(round(data$Rh/data$depth, 3) >= 0.50, '50-59%',
+                                                      ifelse(round(data$Rh/data$depth, 3) >= 0.40, '40-49%',
+                                                             ifelse(round(data$Rh/data$depth, 3) >= 0.30, '30-39%',
+                                                                    ifelse(round(data$Rh/data$depth, 3) >=0.20, '20-29%',
+                                                                           ifelse(round(data$Rh/data$depth, 3) >= 0.10, '10-19%', '0-9%'))))))))))
 #create boxplots
 boxes <- ggplot(data, aes(x=figureFlag, y=Td, fill=study)) +
-  geom_hline(yintercept = 1e-5, linetype='dashed', color='darkgrey', size=2)+
+  #geom_hline(yintercept = 1e-5, linetype='dashed', color='darkgrey', size=2)+
   geom_boxplot(size=1.2) +
   scale_y_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
@@ -285,6 +285,7 @@ models_ustar <- group_by(data, flag_depth) %>%
   do(model=lm(k600~ustar+0, data=.)) %>%
   summarise(slope = model$coefficients[1],
             r2 = summary(model)$r.squared,
+            log_SE = log(sqrt(deviance(model)/df.residual(model))),
             name = first(flag_depth))
 
 models_eD <- group_by(data, flag_depth) %>%
@@ -292,11 +293,20 @@ models_eD <- group_by(data, flag_depth) %>%
   summarise(int = 10^model$coefficients[1],
             slope = model$coefficients[2],
             r2 = summary(model)$r.squared,
+            log_SE = sqrt(deviance(model)/df.residual(model)),
             name = first(flag_depth))
 
 
-lm <- lm(log_k600~log_eD, filter(data, flag_depth == 'Rh=/=H'))
-segLM <- segmented(lm, ~log_eD)
+#khat prior model
+lm <- lm(log(ustar)~log_slope, data=wideRegime)
+summary(lm)
 
-summary(segLM)
-slope(segLM)
+#log_khat prior uncertainity
+#Using error propogation for the ustar~slope model and the k600~ustar model
+sqrt(sqrt(deviance(lm)/df.residual(lm))^2 + (models_ustar[2,]$SE)^2)
+
+#plot
+ggplot(wideRegime, aes(x=56.0294*exp(-0.69945)*slope^0.29587, y=56.0294*ustar)) +
+  geom_point(size=3) +
+  geom_abline()
+

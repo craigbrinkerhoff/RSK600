@@ -120,8 +120,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -137,8 +136,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -154,8 +152,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -171,8 +168,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -188,8 +184,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -205,8 +200,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -222,8 +216,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -239,8 +232,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -256,8 +248,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -273,8 +264,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -290,8 +280,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -307,8 +296,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -324,8 +312,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -341,8 +328,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -358,8 +344,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -375,8 +360,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -392,8 +376,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -409,8 +392,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -426,8 +408,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -443,8 +424,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -460,8 +440,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -477,8 +456,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -494,8 +472,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -511,8 +488,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -528,8 +504,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -545,8 +520,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -562,8 +536,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -579,8 +552,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -596,8 +568,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -613,8 +584,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -630,8 +600,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -647,8 +616,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -664,8 +632,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -681,8 +648,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -698,8 +664,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -715,8 +680,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -732,8 +696,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -749,8 +712,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -766,8 +728,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -783,8 +744,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -800,8 +760,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -817,8 +776,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -834,8 +792,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -851,8 +808,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -868,8 +824,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -885,8 +840,7 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 
@@ -902,27 +856,9 @@ cols(
   FCO2_BIKER_high = col_double(),
   FCO2_raymond2012 = col_double(),
   FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
-)
-
-
--- Column specification --------------------------------------------------------
-cols(
-  X1 = col_double(),
-  river = col_character(),
-  timestep = col_double(),
-  sa = col_double(),
-  FCO2_obs = col_double(),
-  FCO2_BIKER = col_double(),
-  FCO2_BIKER_low = col_double(),
-  FCO2_BIKER_high = col_double(),
-  FCO2_raymond2012 = col_double(),
-  FCO2_raymond2013 = col_double(),
-  FCO2_lauerwald2015 = col_double(),
-  FCO2_horgby2019 = col_double()
+  FCO2_brinkerhoff2019 = col_double()
 )
 
 `summarise()` has grouped output by 'river'. You can override using the `.groups` argument.
 `geom_smooth()` using formula 'y ~ x'
-There were 50 or more warnings (use warnings() to see the first 50)
+There were 48 warnings (use warnings() to see them)

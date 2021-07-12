@@ -97,11 +97,13 @@ run_BIKER <- function(currPepsi, errFlag) {
 
   #write to file
   if(errFlag == 1){
-    temp <- data.frame('river'= rep(name, length(k_obs)), 'time'=kest$time, 'kobs'=k_obs, 'kest_mean'=kest$mean, 'kest_low'=kest$conf.low, 'kest_high'=kest$conf.high, 'kest_sd'=kest$sigma, 'errFlag'=1, 'Wobs'=colMeans(W_obs, na.rm=T), 'Sobs'=colMeans(S_obs, na.rm=T))
+    temp <- data.frame('river'= rep(name, length(k_obs)), 'time'=kest$time, 'kobs'=k_obs, 'kest_mean'=kest$mean, 'kest_low'=kest$conf.low, 'kest_high'=kest$conf.high, 'kest_sd'=kest$sigma, 'errFlag'=1, 'Wobs'=colMeans(W_obs, na.rm=T), 'Sobs'=colMeans(S_obs, na.rm=T), 'Dobs'=colMeans(area, na.rm=T)/colMeans(W_obs, na.rm=T))
+    temp$Rhobs <- (temp$Wobs * temp$Dobs)/(temp$Wobs + 2*temp$Dobs)
     write.csv(temp, paste0('cache/validation/by_river/results_', name, '_err.csv'))
   }
   else{
-    temp <- data.frame('river'= rep(name, length(k_obs)), 'time'=kest$time, 'kobs'=k_obs, 'kest_mean'=kest$mean, 'kest_low'=kest$conf.low, 'kest_high'=kest$conf.high, 'kest_sd'=kest$sigma, 'errFlag'=0, 'Wobs'=colMeans(W_obs, na.rm=T), 'Sobs'=colMeans(S_obs, na.rm=T))
+    temp <- data.frame('river'= rep(name, length(k_obs)), 'time'=kest$time, 'kobs'=k_obs, 'kest_mean'=kest$mean, 'kest_low'=kest$conf.low, 'kest_high'=kest$conf.high, 'kest_sd'=kest$sigma, 'errFlag'=0, 'Wobs'=colMeans(W_obs, na.rm=T), 'Sobs'=colMeans(S_obs, na.rm=T), 'Dobs'=colMeans(area, na.rm=T)/colMeans(W_obs, na.rm=T))
+    temp$Rhobs <- (temp$Wobs * temp$Dobs)/(temp$Wobs + 2*temp$Dobs)
     write.csv(temp, paste0('cache/validation/by_river/results_', name, '.csv'))
   }
 }
@@ -111,7 +113,8 @@ files <- list.files('data/Frasson_etal_2021/IdealDataxxxxxx', pattern="*.nc", fu
 files2 <- list.files('data/Durand_etal_2016/xxxxxxxxxxxxxxxx', pattern="*.nc", full.names = TRUE) #pepsi 1
 files <- c(files, files2)
 
-#results <- run_BIKER(files[1], 0)
+#print(files)
+#results <- run_BIKER(files[32], 0)
 
 system.time(
   results <- mclapply(files, run_BIKER, 0, mc.cores=cores) #run no measurement errors

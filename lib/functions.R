@@ -38,13 +38,17 @@ calcdA_vec <- function(w, h) {
   dA
 }
 
-#k600 function
-k600_craig <- function(s, v) {
-  return(85.10025*(g*s*v)^0.59957)
-}
-
 #k600 function using craig's model
 k600_ustar_craig <- function(depth, slope) {
   Ustar <- sqrt(g*depth*slope)
   return(56.0294*Ustar)
+}
+
+
+
+
+
+#k600 function OLD
+k600_craig <- function(s, v) {
+  return(85.10025*(g*s*v)^0.59957)
 }

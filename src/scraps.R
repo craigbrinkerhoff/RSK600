@@ -59,3 +59,119 @@
 #        legend.text = element_text(size=17),
 #        legend.title = element_text(size=17, face='bold'))
 #ggsave('cache/validation/test.jpg', weirdPlot, width=9, height=7)
+
+
+
+#############
+##FIGURES----------------
+################
+#to compare against Wang 2021
+relativeError_plot <- ggplot(stats_by_reach[stats_by_reach$errFlag == 0,], aes(y=RE*100, x=river)) +
+  geom_col(color='black') +
+  coord_flip()+
+  geom_hline(yintercept=mean(c(57.31, 57.55)), linetype='dashed', size=2) +
+  xlab('River') +
+  ylab('% Relative Error') +
+  theme(legend.position = "none",
+        axis.text.x=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'))
+ggsave('cache/validation/relativeErr.jpg', relativeError_plot, width=14, height=8)
+print(stats_by_reach[stats_by_reach$errFlag == 0,])
+
+################
+##RBIAS VS HYDRAULIC PROPERTIES---------------------------------------
+################
+riverPropertiesPlot_k <- ggplot(stats_by_reach[stats_by_reach$errFlag==0,], aes(y=rBIAS, x=meanKobs)) +
+  geom_point(size=3) +
+  geom_hline(yintercept=0, linetype='dashed') +
+  xlab('Mean observed k [m/dy]') +
+  ylab('rBIAS') +
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x)))+
+  theme(axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'))
+riverPropertiesPlot_W <- ggplot(stats_by_reach[stats_by_reach$errFlag==0,], aes(y=rBIAS, x=meanWobs)) +
+  geom_point(size=3) +
+  geom_hline(yintercept=0, linetype='dashed') +
+  xlab('Mean observed width [m]') +
+  ylab('rBIAS') +
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x)))+
+  theme(legend.position = "none",
+        axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'))
+riverPropertiesPlot_S <- ggplot(stats_by_reach[stats_by_reach$errFlag==0,], aes(y=rBIAS, x=meanSobs)) +
+  geom_point(size=3) +
+  geom_hline(yintercept=0, linetype='dashed') +
+  xlab('Mean observed slope') +
+  ylab('rBIAS') +
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x)))+
+  theme(legend.position = "none",
+        axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'))
+
+# extract the legend from one of the plots
+legend <- get_legend(riverPropertiesPlot_k + theme(legend.box.margin = margin(0, 0, 0, 100)))
+
+#bring it alllllll together via cowplot
+riverPropertiesPlot <- plot_grid(riverPropertiesPlot_k + theme(legend.position = 'none'), riverPropertiesPlot_W, riverPropertiesPlot_S, legend, ncol=2, labels=c('b','c','d',NA), label_size = 18)
+ggsave('cache/validation/riverProperties_rbias.jpg', riverPropertiesPlot, width=14, height=8)
+
+
+#########################
+##RRMSE VS HYDRAULIC properties-------------------------------------------------------
+#########################
+riverPropertiesPlot_k <- ggplot(stats_by_reach[stats_by_reach$errFlag==0,], aes(y=rrmse, x=meanKobs)) +
+  geom_point(size=3) +
+  xlab('Mean observed k [m/dy]') +
+  ylab('RRMSE') +
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x)))+
+  theme(axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'))
+riverPropertiesPlot_W <- ggplot(stats_by_reach[stats_by_reach$errFlag==0,], aes(y=rrmse, x=meanWobs)) +
+  geom_point(size=3) +
+  xlab('Mean observed width [m]') +
+  ylab('RRMSE') +
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x)))+
+  theme(legend.position = "none",
+        axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'))
+riverPropertiesPlot_S <- ggplot(stats_by_reach[stats_by_reach$errFlag==0,], aes(y=rrmse, x=meanSobs)) +
+  geom_point(size=3) +
+  xlab('Mean observed slope') +
+  ylab('RRMSE') +
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x)))+
+  theme(legend.position = "none",
+        axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'))
+
+# extract the legend from one of the plots
+legend <- get_legend(riverPropertiesPlot_k + theme(legend.box.margin = margin(0, 0, 0, 100)))
+
+#bring it alllllll together via cowplot
+riverPropertiesPlot <- plot_grid(riverPropertiesPlot_k + theme(legend.position = 'none'), riverPropertiesPlot_W, riverPropertiesPlot_S, legend, ncol=2, labels=c('b','c','d',NA), label_size = 18)
+ggsave('cache/validation/riverProperties_rrmse.jpg', riverPropertiesPlot, width=14, height=8)

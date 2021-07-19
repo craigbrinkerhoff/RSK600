@@ -1,0 +1,46 @@
+---
+title: "Supplemental Information: remote sensing riverine gas exchange and carbon efflux in ungauged rivers from SWOT observations"
+author: "CB Brinkerhoff, CJ Gleason, PA Raymond, MH Harlan"
+date: "`r Sys.Date()`"
+csl: rse_citation_style.csl
+output:
+  word_document: 
+      reference_docx: word-styles-reference.docx
+bibliography: References.bib
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Contents
+This supplementary information contains 7 figures and 1 table. Please consult https://github.com/craigbrinkerhoff/RSK600 for all code to build and generate results, figures, and the manuscript.
+
+##Figures
+![Figure S1 Timeseries of the biweekly CO2 data from @beaulieuControlsGasTransfer2012a. Sampling took place 2008-2009 in the Ohio River (upstream of Cincinnati, Ohio, United States). Each point here was joined to the 11-day SWOT observations used in this study (section 2.4).](cache/FCO2/Beaulieu_timeseries.jpg)
+ 
+![Figure S2. k600 versus the turbulent dissipation rate eD using the data from @ulsethDistinctAirWater2019a. Colors correspond to whether a measurement is SWOT-observable, i.e. the river's width is > 100m. The k600 ~ eD model fundamentally breaks down in SWOT-observable rivers](cache/k_eD/eD_k600.jpg)
+
+![Figure S3: Flowchart detailing the workflow to approximate estimate uncertainity for equation 5 in the main text. Uncertainity can stem from 1) parameter uncertainity and 2) error in our assumption that the hydraulic radius approximates the channel area divided by width. We performed 8,000 different Monte carlo simulations (themselves 10,000 runs each) on 8,000 river channel measurements in the dataset from @brinkerhoffReconcilingAtaStationAtManyStations2019](cache/suppFlowchart.jpg)
+
+![Figure S4: plot of overall BIKER uncertainity. THESE ARE STAND IN RESULTS AND NEED TO BE UPDATED](cache/MonteCarlo/MC_results.jpg)
+
+![Figure S5: BIKER performance, defined by KGE (see Table 1 in the main text for the metric definition) versus mean river ko2, width, and slope.](cache/validation/riverProperties_kge.jpg)
+
+![Figure S6: BIKER performance, defined by NRMSE (see Table 1 in the main text for the metric definition) versus mean river ko2, width, and slope.](cache/validation/riverProperties_nrmse.jpg)
+
+![Figure S7: BIKER performance, defined by RRMSE (see Table 1 in the main text for the metric definition) versus mean river ko2, width, and slope.](cache/validation/riverProperties_rrmse.jpg)
+
+
+##Tables
+*Table S1: Details on the 3 velocity hydraulic geometry models used to estimate FCO2 from the SWOT rivers (section 2.4).*
+
+|**Name**|**Equation**|**Description**|**Reference**|
+|-------------|-------------|-------------|-------------|-------------|
+|Raymond 2012|$D=0.409Q^{0.294}$|1,026 measurements across the United States|@raymondScalingGasTransfer2012a|
+|Raymond 2013|$D=0.409Q^{0.294},  D=0.449Q^{0.37}$ |Average of the Raymond 2012 equation and one using 9,811 measurements at US streamgauges|@raymondGlobalCarbonDioxide2013a|
+|Lauerwald 2015|$D=0.449Q^{0.37}$ |Borrowed from 1/2 of the Raymond 2013 calculation (trained on 9,811 measurements at US streamgauges). This was used on all rivers of at least stream order 4, which we assume applies to all of these SWOT-observable rivers|@lauerwaldSpatialPatternsCO22015|
+|Horgby 2019|$D=0.298Q^{0.222}$ |141 measurements made in 12 mountain streams in the Swiss Alps|@horgbyUnexpectedLargeEvasion2019|
+
+##References

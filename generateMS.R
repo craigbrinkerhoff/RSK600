@@ -5,8 +5,9 @@
 setwd('C:\\Users\\craig\\Documents\\GitHub\\RSK600')
 
 #Move all results to global environment
-#results_3_1 <- read.csv('cache//k600//results.csv')
-#results_3_1_MC <- read.csv('cache//MonteCarlo//results.csv')
+models_ulseth <- read.csv('cache\\k600_theory\\ulseth_models.csv')
+models_ustar <- read.csv('cache\\k600_theory\\ustar_models.csv')
+models_eD4 <- read.csv('cache\\k600_theory\\eD_models.csv')
 results_3_2_rivs <- read.csv('cache//validation//results_by_riv.csv')
 results_3_2_all <- read.csv('cache//validation//results_all_riv.csv')
 results_3_3_all <- read.csv('cache//FCO2//fco2_stats_all.csv')
@@ -15,8 +16,8 @@ results_3_3_bulk <- read.csv('cache//FCO2//bulkFluxes.csv')
 results_3_3_bulk$key <- as.character(results_3_3_bulk$key)
 
 #knit manuscript
-rmarkdown::render("manuscript_v3.Rmd")
+rmarkdown::render("manuscript_v4.Rmd")
 print('Manuscript generated.')
 
-rmarkdown::render("supp_v3.Rmd")
+rmarkdown::render("supp_v4.Rmd")
 print('Supplemental Information generated.')

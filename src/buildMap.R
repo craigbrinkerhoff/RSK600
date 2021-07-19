@@ -39,4 +39,4 @@ rivers <- tm_shape(data) +
   tm_symbols(col =  "Data", size=0.5, shape=21, palette = c('#e31a1c', '#33a02c', '#1f78b4'), border.col = 'black', border.lwd = 1)
 map <- base + map + rivers
 
-tmap_save(map, 'cache/map.jpg')
+tmap_save(map, 'cache/maps/map.jpg')

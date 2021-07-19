@@ -3,3 +3,5 @@
 .RData
 .Ruserdata
 packrat/lib*/
+data/Brinkerhoff_etal_2019/field_measurements.csv
+data/Brinkerhoff_etal_2019/NHD_join_table.csv

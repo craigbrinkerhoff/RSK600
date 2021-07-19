@@ -14,12 +14,10 @@ setwd('C:\\Users\\craig\\Documents\\GitHub\\RSK600\\')
 
 #some constants
 g <- 9.8
-cf <- 0.100 #Henderson found empirically that Cf=0.113, if we use the empirical Strickler relation for n (1923- different rivers), we get Cf=0.09. So, we used Cf=0.100. See the notes!
-Sg <- 2.65 #specific gravity
 
 #########READ IN HYDRAULICS DATA FROM BRINKERHOFF ETAL 2019------------------------------
-data <- read.csv('C:\\Users\\craig\\Documents\\OneDrive - University of Massachusetts\\Published\\2019_AMHG_GRL\\working\\final\\field_measurements.csv')
-nhd_med <- read.csv('C:\\Users\\craig\\Documents\\OneDrive - University of Massachusetts\\Published\\2019_AMHG_GRL\\working\\final\\NHD_join_table.csv')
+data <- read.csv('data\\Brinkerhoff_etal_2019\\field_measurements.csv')
+nhd_med <- read.csv('data\\Brinkerhoff_etal_2019\\NHD_join_table.csv')
 data <- left_join(data, select(nhd_med, SLOPE, SOURCE_FEA), by = c("site_no" = "SOURCE_FEA"))
 
 data <- filter(data, is.finite(chan_width) ==1) %>%
@@ -41,8 +39,7 @@ data$Vms <- data$chan_velocity*0.305 #m/s
 data$depth <- data$chan_area / data$width
 data$slope <- data$SLOPE
 
-
-######READ IN DATA WITH K600-------------------
+######READ IN FIELD DATA WITH K600-------------------
 #Ulseth etal 2019
 ulseth_data <- read.csv('data/Ulseth_etal_2019.csv', fileEncoding="UTF-8-BOM") #contains data from 5 studies
 ulseth_data <- ulseth_data[,-8]
@@ -63,10 +60,10 @@ data$eD <- g * data$slope * data$Vms #dissipation rate of surface turbulence ori
 data$Rh <- (data$depth*data$width)/(data$width + 2*data$depth) #hydraulic radius [m]
 data$ustar <- sqrt(g*data$Rh*data$slope)
 data$eS <- (data$ustar^3)/(0.41*data$depth) #dissipation rate of surface turbulence originating from bed friction [W/kg]
-data$Gtotal <- data$Vms*data$ustar^2
+data$Gtotal <- (data$Vms*data$ustar^2)/data$depth
 
 ###########SOME FLAGS-------------------------------
-data$flag_swot <- ifelse(data$width > 100, 'SWOT', 'Small')
+data$flag_swot <- ifelse(data$width >= 100, 'SWOT', 'Small')
 data$flag_depth <- ifelse(round(data$Rh/data$depth, 3) >= 0.995, 'Rh=H', 'Rh=/=H')
 
 #LOG TRANSFORM SOME VARIABLES-----------------------------------------------------------
@@ -74,7 +71,249 @@ data$log_eD <- log(data$eD)
 data$log_eS <- log(data$eS)
 data$log_slope <- log(data$slope)
 
+##########GET ADDITIONAL HYDRAULICS FROM EM------------------------------
+data$Td <- data$eD - data$Gtotal
+
+##########TKE PLOT---------------
+#binning the Rh/H ratios for visualzing
+data$figureFlag <- ifelse(round(data$Rh/data$depth, 3) >= 0.995, 'Rh=H',
+                          ifelse(round(data$Rh/data$depth, 3) >= 0.90, '90-99%',
+                          ifelse(round(data$Rh/data$depth, 3) >= 0.80, '80-89%',
+                                 ifelse(round(data$Rh/data$depth, 3) >= 0.70, '70-79%',
+                                        ifelse(round(data$Rh/data$depth, 3) >= 0.60, '60-69%',
+                                               ifelse(round(data$Rh/data$depth, 3) >= 0.50, '50-59%',
+                                                      ifelse(round(data$Rh/data$depth, 3) >= 0.40, '40-49%',
+                                                             ifelse(round(data$Rh/data$depth, 3) >= 0.30, '30-39%',
+                                                                    ifelse(round(data$Rh/data$depth, 3) >=0.20, '20-29%',
+                                                                           ifelse(round(data$Rh/data$depth, 3) >= 0.10, '10-19%', '0-9%'))))))))))
+
+#useful stats
+data$w_d <- data$width/data$depth
+group_by(data, figureFlag) %>% 
+  summarise(mean = mean(Td),
+            median = median(Td),
+            sd = sd(Td),
+            n=n(),
+            meanW = mean(w_d),
+            medianW = median(w_d))
+
+#create boxplots
+boxes <- ggplot(data, aes(x=figureFlag, y=Td, fill=study)) +
+  #geom_hline(yintercept = 1e-5, linetype='dashed', color='darkgrey', size=2)+
+  geom_boxplot(size=1.2) +
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_fill_brewer(palette='Accent', name='')+
+  annotate('text', label='Brinkerhoff et al. 2019 (n=530,945)', x='20-29%', y=10^-8, color='#7fc97f', size=8)+
+  annotate('text', label='Ulseth et al. 2019 (n=701)', x='20-29%', y=10^-9, color='#beaed4', size=8)+
+  ylab('eD-G [J/kg*s]') +
+  xlab('Rh/H [%]') +
+  theme(axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        legend.position = 'none')
+ggsave('cache\\k600_theory\\turbulence.jpg', boxes, width=13, height=8)
+
+swotPlot <- ggplot(data, aes(x=width, linetype=flag_depth, color=study)) +
+  stat_ecdf(size=2) +
+  scale_linetype_manual(values=c("dotted", "solid"), labels=c('Rh =/= H', 'Rh = H'), name='River Regime')+
+  geom_vline(xintercept = 100, linetype='dashed', size=2)+
+  annotate('text', label='Observable\nvia SWOT', x=3000, y=0.3, size=8, color='black')+
+  annotate('text', label='Not Observable\nvia SWOT', x=1, y=0.8, size=8, color='black')+
+  scale_color_brewer(name='Dataset', palette = 'Accent', labels=c('Brinkerhoff et al. (2019)', 'Ulseth et al. (2019)'))+
+  xlab('River width [m]')+
+  ylab('Percentile')+
+  scale_x_log10() +
+  theme(axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'))
+ggsave('cache\\k600_theory\\swotPlot.jpg', swotPlot, width=11, height=8)
+
+###################### K MODELS PLOTS-------------------------------
+data <- filter(data, study == 'Ulseth_etal_2019')
+data$log_k600 <- log(data$k600)
+data$eD4 <- data$eD^(1/4)
+
+#models
+wideRegime <- data[data$flag_depth == 'Rh=H',]
+lm_ustar <- lm(k600~ustar+0, data=wideRegime)
+lm_eD4 <- lm(k600~eD4+0, data=wideRegime)
+lm_eD <- lm(log10(k600)~log10(eD), data=wideRegime)
+wideRegime$k600_pred_ustar <- predict(lm_ustar, wideRegime)
+wideRegime$k600_pred_eD4 <- predict(lm_eD4, wideRegime)
+wideRegime$k600_pred_eD <- predict(lm_eD, wideRegime)
+
+ustar_k600_wide <- ggplot(wideRegime) +
+  geom_point(aes(x=ustar, y=k600, color='darkgreen'), size=5) +
+  geom_line(aes(x=ustar, y=k600_pred_ustar), size=2, color='black') +
+  scale_color_brewer(palette='Dark2')+
+  annotate("text", label = paste0('r2: ', round(summary(lm_ustar)$r.squared,2)), x = 0.05, y = 17, size = 8, colour = "purple")+
+  xlab('') +
+  ylab('k600 [m/dy]') +
+  theme(axis.text=element_text(size=19),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        legend.position = 'none')
+
+eD4_k600_wide <- ggplot(wideRegime) +
+  geom_point(aes(x=eD4, y=k600, color='darkgreen'), size=5) +
+  geom_line(aes(x=eD4, y=k600_pred_eD4), size=2, color='black') +
+  scale_color_brewer(palette='Dark2')+
+  annotate("text", label = paste0('r2: ', round(summary(lm_eD4)$r.squared,2)), x = 0.2, y = 17, size = 8, colour = "purple")+
+  xlab('') +
+  ylab('') +
+  theme(axis.text=element_text(size=19),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        legend.position = 'none')
+
+ulseth_k600_wide <- ggplot(wideRegime) +
+  geom_point(aes(x=eD, y=k600, color='darkgreen'), size=5) +
+  geom_line(aes(x=eD, y=10^k600_pred_eD), size=2, color='black') +
+  scale_color_brewer(palette='Dark2')+
+  annotate("text", label = paste0('r2: ', round(summary(lm_eD)$r.squared,2)), x = 10^-4, y = 17, size = 8, colour = "darkred")+
+  xlab('') +
+  ylab('') +
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
+               labels = scales::label_comma(drop0trailing = TRUE)) +
+  scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
+               labels = scales::label_comma(drop0trailing = TRUE))+
+  theme(axis.text=element_text(size=19),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        legend.position = 'none')
+
+#not big rivers
+narrowRegime <- data[data$flag_depth == 'Rh=/=H',]
+lm_ustar <- lm(k600~ustar+0, data=narrowRegime)
+lm_eD4 <- lm(k600~eD4+0, data=narrowRegime)
+lm_eD <- lm(log10(k600)~log10(eD), data=narrowRegime)
+narrowRegime$k600_pred_ustar <- predict(lm_ustar, narrowRegime)
+narrowRegime$k600_pred_eD4 <- predict(lm_eD4, narrowRegime)
+narrowRegime$k600_pred_eD <- predict(lm_eD, narrowRegime)
+
+ustar_k600_narrow <- ggplot(narrowRegime) +
+  geom_point(aes(x=ustar, y=k600, color='darkgreen'), size=5) +
+  geom_line(aes(x=ustar, y=k600_pred_ustar), size=2, color='black') +
+  scale_color_brewer(palette='Dark2')+
+  annotate("text", label = paste0('r2: ', round(summary(lm_ustar)$r.squared,2)), x = 0.15, y = 2000, size = 8, colour = "purple")+
+  xlab('Ustar [m/s]') +
+  ylab('k600 [m/dy]') +
+  theme(axis.text=element_text(size=19),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        legend.position = 'none')
+
+eD4_k600_narrow <- ggplot(narrowRegime) +
+  geom_point(aes(x=eD4, y=k600, color='darkgreen'), size=5) +
+  geom_line(aes(x=eD4, y=k600_pred_eD), size=2, color='black') +
+  scale_color_brewer(palette='Dark2', name='')+
+  annotate("text", label = paste0('r2: ', round(summary(lm_eD4)$r.squared,2)), x = 0.25, y = 2000, size = 8, colour = "purple")+
+  xlab('eD^(1/4) [J/kg*s]^(1/4)') +
+  ylab('') +
+  theme(axis.text=element_text(size=19),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        legend.position = 'none')
+
+ulseth_k600_narrow <- ggplot(narrowRegime) +
+  geom_point(aes(x=eD, y=k600, color='darkgreen'), size=5) +
+  geom_line(aes(x=eD, y=10^k600_pred_eD), size=2, color='black') +
+  scale_color_brewer(palette='Dark2')+
+  annotate("text", label = paste0('r2: ', round(summary(lm_eD)$r.squared,2)), x = 10^-4, y = 100, size = 8, colour = "darkred")+
+  xlab('eD [J/kg*s]') +
+  ylab('') +
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::label_comma(drop0trailing = TRUE)) +
+  scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::label_comma(drop0trailing = TRUE))+
+  theme(axis.text=element_text(size=19),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        legend.position = 'none')
+
+#bringin' it allllll together
+text1 <- ggdraw() + draw_label("Big River Condition", fontface = 'bold', x = 0.5, y=0.65, size = 20)
+text2 <- ggdraw() + draw_label("All Other Rivers", fontface = 'bold', x = 0.5, y=0.75, size=20)
+
+
+k600Plot <- plot_grid(text1, ustar_k600_wide, eD4_k600_wide, ulseth_k600_wide, text2, ustar_k600_narrow, eD4_k600_narrow, ulseth_k600_narrow, labels=c(NA, 'a', 'b', 'c', NA, 'd', 'e', 'f'), ncol=4)
+ggsave('cache\\k600_theory\\k600Plot.jpg', k600Plot, width=18, height=9)
+
+# ggplot(wideRegime, aes(x=ustar, y=eD4, color='darkgreen')) +
+#   geom_point(size=5) +
+#   scale_color_brewer(palette='Dark2')+
+#   geom_smooth(method='lm', se=F, color='black') +
+#   xlab('ustar [m/s]') +
+#   ylab('eD^(1/4) [J/kg*s]') +
+#   theme(axis.text=element_text(size=19),
+#         axis.title=element_text(size=24,face="bold"),
+#         legend.text = element_text(size=17),
+#         legend.title = element_text(size=17, face='bold'),
+#         legend.position = 'none')
+# 
+# summary(lm(eD4~ustar+0, data=wideRegime))
+
+
+###########SAVE THE ACTUAL MODELS-------------------------------
+models_ustar <- group_by(data, flag_depth) %>%
+  do(model=lm(k600~ustar+0, data=.)) %>%
+  summarise(int = model$coefficients[1],
+            slope = 1.0,
+            r2 = summary(model)$r.squared,
+            log_SE = log(sqrt(deviance(model)/df.residual(model))),
+            name = first(flag_depth))
+
+models_eD4 <- group_by(data, flag_depth) %>%
+  do(model=lm(k600~eD4+0, data=.)) %>%
+  summarise(int = model$coefficients[1],
+            slope=0.25,
+            r2 = summary(model)$r.squared,
+            log_SE = sqrt(deviance(model)/df.residual(model)),
+            name = first(flag_depth))
+
+models_ulseth <- group_by(data, flag_depth) %>%
+  do(model=lm(log10(k600)~log10(eD), data=.)) %>%
+  summarise(int = 10^model$coefficients[1],
+            slope = model$coefficients[2],
+            r2 = summary(model)$r.squared,
+            log_SE = sqrt(deviance(model)/df.residual(model)),
+            name = first(flag_depth))
+
+write.csv(models_ustar, 'cache\\k600_theory\\ustar_models.csv')
+write.csv(models_ulseth, 'cache\\k600_theory\\ulseth_models.csv')
+write.csv(models_eD4, 'cache\\k600_theory\\eD_models.csv')
+
+#khat prior model for BIKER
+lmPrior <- lm(log(ustar)~log_slope, data=wideRegime)
+summary(lmPrior)
+
+#log_khat prior uncertainity (Using error propogation and model standard errors for ustar~slope model and the k600~ustar model)
+sqrt(sqrt(deviance(lmPrior)/df.residual(lmPrior))^2 + (models_ustar[2,]$log_SE)^2)
+
+#Ulseth breakpoint model
+lm <- lm(log_k600~log_eD, data=narrowRegime)
+lm.seg <- segmented(lm, npsi=1)
+
+summary(lm.seg)
+
+
+
+
 #####PARTIONING OF ED AND ES---------------------------------------------------------
+#cf <- 0.100 #Henderson found empirically that Cf=0.113, if we use the empirical Strickler relation for n (1923- different rivers), we get Cf=0.09. So, we used Cf=0.100. See the notes!
+#Sg <- 2.65 #specific gravity
+
 #Similar to Brinkerhoff etal 2019 function. Calibrating a Shield's grain size using Manning's equation, Shield's parameter, and Henderson relation f~(D/depth)^(1/3)
 #See math notes for the two velocity derivations and the math solving for the Henderson coefficient multiple ways. We ultimately use Cf=0.100
 
@@ -128,185 +367,3 @@ data$log_slope <- log(data$slope)
 # #eM model vs k600------------------------------------------------
 # data$eM <- (1-data$partition)*data$eS + data$partition*data$eD #combined Moog and Jirka 1999 macroroughness model
 # data$log_eM <- log(data$eM)
-
-##########GET ADDITIONAL HYDRAULICS FROM EM------------------------------
-data$Td <- data$eD - data$Gtotal/data$depth #its impossible (at the free surface) for dissipation to be less than generation, so filter these out
-
-##########PLOTS---------------
-#TKE production vs TKE form-drag dissipation
-#My analytical solution suggests these should be ~equal when depth equals Rh
-#binning the Rh/H ratios for visualzing
-data$figureFlag <- ifelse(round(data$Rh/data$depth, 3) == 1, 'Rh=H',
-                          ifelse(round(data$Rh/data$depth, 3) >= 0.90, '90-99%',
-                          ifelse(round(data$Rh/data$depth, 3) >= 0.80, '80-89%',
-                                 ifelse(round(data$Rh/data$depth, 3) >= 0.70, '70-79%',
-                                        ifelse(round(data$Rh/data$depth, 3) >= 0.60, '60-69%',
-                                               ifelse(round(data$Rh/data$depth, 3) >= 0.50, '50-59%',
-                                                      ifelse(round(data$Rh/data$depth, 3) >= 0.40, '40-49%',
-                                                             ifelse(round(data$Rh/data$depth, 3) >= 0.30, '30-39%',
-                                                                    ifelse(round(data$Rh/data$depth, 3) >=0.20, '20-29%',
-                                                                           ifelse(round(data$Rh/data$depth, 3) >= 0.10, '10-19%', '0-9%'))))))))))
-#create boxplots
-boxes <- ggplot(data, aes(x=figureFlag, y=Td, fill=study)) +
-  #geom_hline(yintercept = 1e-5, linetype='dashed', color='darkgrey', size=2)+
-  geom_boxplot(size=1.2) +
-  scale_y_log10(
-    breaks = scales::trans_breaks("log10", function(x) 10^x),
-    labels = scales::trans_format("log10", scales::math_format(10^.x))
-  ) +
-  scale_fill_brewer(palette='Accent', name='')+
-  annotate('text', label='n=530,945', x='10-19%', y=10^-8, color='#7fc97f', size=8)+
-  annotate('text', label='n=701', x='10-19%', y=10^-9, color='#beaed4', size=8)+
-  ylab('eD-G [J/kg*s]') +
-  xlab('Rh/H [%]') +
-  theme(axis.text=element_text(size=20),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'),
-        legend.position = 'none')
-boxes
-
-# scatter <- ggplot(data, aes(x=Rh/depth, y=Td, color=log10(Td))) +
-#   geom_hline(yintercept = 1e-5, linetype='dashed', color='darkgrey', size=2)+
-#   geom_point(size=5) +
-#   geom_smooth(color='black', method='gam')+
-#   annotate("text", label = '~0 J/kg*s', x = 0.6, y = 10^-4.75, size = 8, colour = "darkgrey")+
-#   scale_y_log10(
-#     breaks = scales::trans_breaks("log10", function(x) 10^x),
-#     labels = scales::trans_format("log10", scales::math_format(10^.x))
-#   ) +
-#   scale_color_distiller(palette='RdPu', name='log10 eD-G')+
-#   ylab('e - G [J/kg*s]') +
-#   xlab('Rh/H') +
-#   theme(axis.text=element_text(size=20),
-#         axis.title=element_text(size=24,face="bold"),
-#         legend.text = element_text(size=17),
-#         legend.title = element_text(size=17, face='bold'))
-# 
-# legend <- get_legend(scatter)
-# 
-# finalPlot <- plot_grid(scatter + theme(legend.position='none'), boxes, ncol=2)
-# finalPlot <- finalPlot + draw_grob(legend, x=0.125, y=-0.275, width=1, height=1)
-
-ggplot(data, aes(x=width, linetype=flag_depth, color=study)) +
-  stat_ecdf(size=2) +
-  scale_linetype_manual(values=c("dotted", "solid"))+
-  geom_vline(xintercept = 100, linetype='dashed', size=2)+
-  annotate('text', label='Observable\nvia SWOT', x=3000, y=0.3, size=8, color='black')+
-  annotate('text', label='Not Observable\nvia SWOT', x=1, y=0.8, size=8, color='black')+
-  scale_color_brewer(name='River Regime', palette = 'Accent')+
-  scale_x_log10()
-
-
-#k models plot----------------------------------------
-data <- filter(data, study == 'Ulseth_etal_2019')
-data$log_k600 <- log(data$k600)
-
-#models
-wideRegime <- data[data$flag_depth == 'Rh=H',]
-lm_ustar <- lm(k600~ustar+0, data=wideRegime)
-lm_eD <- lm(log10(k600)~log10(eD), data=wideRegime)
-wideRegime$k600_pred_ustar <- predict(lm_ustar, wideRegime)
-wideRegime$k600_pred_eD <- predict(lm_eD, wideRegime)
-
-ustar_k600_wide <- ggplot(wideRegime) +
-  geom_point(aes(x=ustar, y=k600, color=flag_swot), size=5) +
-  geom_line(aes(x=ustar, y=k600_pred_ustar), size=2, color='black') +
-  scale_color_brewer(palette='Dark2')+
-  annotate("text", label = paste0('r2: ', round(summary(lm_ustar)$r.squared,2)), x = 0.05, y = 17, size = 8, colour = "purple")+
-  xlab('') +
-  ylab('k600 [m/dy]') +
-  ggtitle('U*-Wide')+
-  theme(axis.text=element_text(size=20),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'),
-        legend.position = 'none')
-
-eD_k600_wide <- ggplot(wideRegime) +
-  geom_point(aes(x=eD, y=k600, color=flag_swot), size=5) +
-  geom_line(aes(x=eD, y=10^k600_pred_eD), size=2, color='black') +
-  scale_color_brewer(palette='Dark2')+
-  annotate("text", label = paste0('r2: ', round(summary(lm_eD)$r.squared,2)), x = 10^-4, y = 17, size = 8, colour = "purple")+
-  xlab('') +
-  ylab('') +
-  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
-                labels = scales::trans_format("log10", scales::math_format(10^.x))) +
-  scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
-                labels = scales::trans_format("log10", scales::math_format(10^.x)))+
-  ggtitle('eD-Wide')+
-  theme(axis.text=element_text(size=20),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'),
-        legend.position = 'none')
-
-narrowRegime <- data[data$flag_depth == 'Rh=/=H',]
-lm_ustar <- lm(k600~ustar+0, data=narrowRegime)
-lm_eD <- lm(log10(k600)~log10(eD), data=narrowRegime)
-narrowRegime$k600_pred_ustar <- predict(lm_ustar, narrowRegime)
-narrowRegime$k600_pred_eD <- predict(lm_eD, narrowRegime)
-
-ustar_k6002_narrow <- ggplot(narrowRegime) +
-  geom_point(aes(x=ustar, y=k600, color=flag_swot), size=5) +
-  geom_line(aes(x=ustar, y=k600_pred_ustar), size=2, color='black') +
-  scale_color_brewer(palette='Dark2')+
-  annotate("text", label = paste0('r2: ', round(summary(lm_ustar)$r.squared,2)), x = 0.1, y = 3000, size = 8, colour = "purple")+
-  xlab('Ustar [m/s]') +
-  ylab('k600 [m/dy]') +
-  ggtitle('U*-Narrow')+
-  theme(axis.text=element_text(size=20),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'),
-        legend.position = 'none')
-
-eD_k6002_narrow <- ggplot(narrowRegime) +
-  geom_point(aes(x=eD, y=k600, color=flag_swot), size=5) +
-  geom_line(aes(x=eD, y=10^k600_pred_eD), size=2, color='black') +
-  scale_color_brewer(palette='Dark2', name='')+
-  annotate("text", label = paste0('r2: ', round(summary(lm_eD)$r.squared,2)), x = 10^-4, y = 2000, size = 8, colour = "purple")+
-  xlab('eD [J/kg*s]') +
-  ylab('') +
-  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
-                labels = scales::trans_format("log10", scales::math_format(10^.x))) +
-  scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
-                labels = scales::trans_format("log10", scales::math_format(10^.x)))+
-  ggtitle('eD-Narrow')+
-  theme(axis.text=element_text(size=20),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'))
-
-plot_grid(ustar_k600_wide, eD_k600_wide, ustar_k6002_narrow, eD_k6002_narrow, ncol=2)
-
-#save the actual model parameters
-models_ustar <- group_by(data, flag_depth) %>%
-  do(model=lm(k600~ustar+0, data=.)) %>%
-  summarise(slope = model$coefficients[1],
-            r2 = summary(model)$r.squared,
-            log_SE = log(sqrt(deviance(model)/df.residual(model))),
-            name = first(flag_depth))
-
-models_eD <- group_by(data, flag_depth) %>%
-  do(model=lm(log10(k600)~log10(eD), data=.)) %>%
-  summarise(int = 10^model$coefficients[1],
-            slope = model$coefficients[2],
-            r2 = summary(model)$r.squared,
-            log_SE = sqrt(deviance(model)/df.residual(model)),
-            name = first(flag_depth))
-
-
-#khat prior model
-lm <- lm(log(ustar)~log_slope, data=wideRegime)
-summary(lm)
-
-#log_khat prior uncertainity
-#Using error propogation for the ustar~slope model and the k600~ustar model
-sqrt(sqrt(deviance(lm)/df.residual(lm))^2 + (models_ustar[2,]$SE)^2)
-
-#plot
-ggplot(wideRegime, aes(x=56.0294*exp(-0.69945)*slope^0.29587, y=56.0294*ustar)) +
-  geom_point(size=3) +
-  geom_abline()
-

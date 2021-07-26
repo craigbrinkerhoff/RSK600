@@ -59,7 +59,7 @@ data <- rbind(data, ulseth_data_s)
 data$eD <- g * data$slope * data$Vms #dissipation rate of surface turbulence originating from depth-scale form drag [W/kg]
 data$Rh <- (data$depth*data$width)/(data$width + 2*data$depth) #hydraulic radius [m]
 data$ustar <- sqrt(g*data$Rh*data$slope)
-data$eS <- (data$ustar^3)/(0.41*data$depth) #dissipation rate of surface turbulence originating from bed friction [W/kg]
+data$eS <- (data$ustar^3)/(data$depth) #dissipation rate of surface turbulence originating from bed friction [W/kg]
 data$Gtotal <- (data$Vms*data$ustar^2)/data$depth
 
 ###########SOME FLAGS-------------------------------
@@ -87,15 +87,13 @@ data$figureFlag <- ifelse(round(data$Rh/data$depth, 3) >= 0.995, 'Rh=H',
                                                                     ifelse(round(data$Rh/data$depth, 3) >=0.20, '20-29%',
                                                                            ifelse(round(data$Rh/data$depth, 3) >= 0.10, '10-19%', '0-9%'))))))))))
 
-#useful stats
-data$w_d <- data$width/data$depth
-group_by(data, figureFlag) %>% 
+#useful stats across both datasets tested
+turbulence_stats <- group_by(data, figureFlag) %>% 
   summarise(mean = mean(Td),
             median = median(Td),
             sd = sd(Td),
-            n=n(),
-            meanW = mean(w_d),
-            medianW = median(w_d))
+            n=n())
+write.csv(turbulence_stats, 'cache\\k600_theory\\turbulence_stats.csv')
 
 #create boxplots
 boxes <- ggplot(data, aes(x=figureFlag, y=Td, fill=study)) +
@@ -250,21 +248,6 @@ text2 <- ggdraw() + draw_label("All Other Rivers", fontface = 'bold', x = 0.5, y
 k600Plot <- plot_grid(text1, ustar_k600_wide, eD4_k600_wide, ulseth_k600_wide, text2, ustar_k600_narrow, eD4_k600_narrow, ulseth_k600_narrow, labels=c(NA, 'a', 'b', 'c', NA, 'd', 'e', 'f'), ncol=4)
 ggsave('cache\\k600_theory\\k600Plot.jpg', k600Plot, width=18, height=9)
 
-# ggplot(wideRegime, aes(x=ustar, y=eD4, color='darkgreen')) +
-#   geom_point(size=5) +
-#   scale_color_brewer(palette='Dark2')+
-#   geom_smooth(method='lm', se=F, color='black') +
-#   xlab('ustar [m/s]') +
-#   ylab('eD^(1/4) [J/kg*s]') +
-#   theme(axis.text=element_text(size=19),
-#         axis.title=element_text(size=24,face="bold"),
-#         legend.text = element_text(size=17),
-#         legend.title = element_text(size=17, face='bold'),
-#         legend.position = 'none')
-# 
-# summary(lm(eD4~ustar+0, data=wideRegime))
-
-
 ###########SAVE THE ACTUAL MODELS-------------------------------
 models_ustar <- group_by(data, flag_depth) %>%
   do(model=lm(k600~ustar+0, data=.)) %>%
@@ -307,63 +290,88 @@ lm.seg <- segmented(lm, npsi=1)
 
 summary(lm.seg)
 
+#small rivers
+data$Rh_H <- data$Rh/data$depth
+data$eO <- data$eD*data$Td #data$eS * data$Td #see math but equivlanet to Td^0.5 ish
 
+ggplot(data, aes(x=eO, y=k600, color=flag_depth)) +
+  geom_point(size=3)+
+   geom_smooth(method='lm', se=F) +
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_x_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  theme(axis.text=element_text(size=19),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        legend.position = 'none')
 
+group_by(data, flag_depth) %>%
+  do(model=lm(log10(k600)~log10(eO), data=.)) %>%
+  summarise(int = 10^model$coefficients[1],
+            slope = model$coefficients[2],
+            slope2 = model$coefficients[3],
+            r2 = summary(model)$r.squared,
+            log_SE = sqrt(deviance(model)/df.residual(model)),
+            name = first(flag_depth))
 
 #####PARTIONING OF ED AND ES---------------------------------------------------------
-#cf <- 0.100 #Henderson found empirically that Cf=0.113, if we use the empirical Strickler relation for n (1923- different rivers), we get Cf=0.09. So, we used Cf=0.100. See the notes!
-#Sg <- 2.65 #specific gravity
+# cf <- 0.100 #Henderson found empirically that Cf=0.113, if we use the empirical Strickler relation for n (1923- different rivers), we get Cf=0.09. So, we used Cf=0.100. See the notes!
+# Sg <- 2.65 #specific gravity
+# 
+# #Similar to Brinkerhoff etal 2019 function. Calibrating a Shield's grain size using Manning's equation, Shield's parameter, and Henderson relation f~(D/depth)^(1/3)
+# #See math notes for the two velocity derivations and the math solving for the Henderson coefficient multiple ways. We ultimately use Cf=0.100
+# 
+#  #function to calibrate grain size
+#  grainSizer <- function(v,s, d,cf, Sg){
+#    D <- 10^(seq(-5, 2, 0.005)) #virtual grain size [m] Tests 601 values
+# 
+#    #first method
+#    d_prime <- v^(3/2) * (sqrt((8*g*s)/(cf)))^(-3/2) * (1/D^(1/6))^(-3/2) #[m] #eq 15
+#    d_double_prime <- d - d_prime #[m]
+#    inverse_shields_prime <- ((Sg-1)*D)/(s*d_prime) #eq 16
+# 
+#    C_1 <- ifelse(inverse_shields_prime < 1.6, 41, 29)#eqs 20-22
+#    #ifelse(inverse_shields_prime < 17.8, 29, 23))
+#    C_2 <- ifelse(inverse_shields_prime < 1.6, 1.26,0.5)
+#    #ifelse(inverse_shields_prime < 17.8, 0.5, 0.415))
+#    v_m_double_prime_1 <- C_1/inverse_shields_prime^C_2 #eq 19, approximation of Einstein & Barbarossa sediment regimes
+# 
+#    #2nd method
+#    v_m_double_prime_2 <- v / sqrt(g*d_double_prime*s) #eq 14, closed form solution of v/m''
+# 
+#    #get calibrated value
+#    diff <- abs(v_m_double_prime_1-v_m_double_prime_2) #minimal difference b/w skin friction depth estimates
+#    D_fin <- D[which.min(diff)] #[m]
+# 
+#    #percent difference between estimates
+#    perc <- diff/v_m_double_prime_2
+#    perc <- min(perc, na.rm=T)*100
+# 
+#    return(c(D_fin, perc))
+#  }
+# 
+#  #run grain sizer function
+# grainResults <- mapply(grainSizer,data$Vms,data$slope, data$depth, cf, Sg)
+# 
+#  data$D35 <- grainResults[1,]
+#  data$grain_perc_diff <- grainResults[2,]
+#  summary(data$D35)
+#  summary(data$grain_perc_diff)
+#  data$log_D35 <- log(data$D35)
+#  
 
-#Similar to Brinkerhoff etal 2019 function. Calibrating a Shield's grain size using Manning's equation, Shield's parameter, and Henderson relation f~(D/depth)^(1/3)
-#See math notes for the two velocity derivations and the math solving for the Henderson coefficient multiple ways. We ultimately use Cf=0.100
-
-# #function to calibrate grain size
-# grainSizer <- function(v,s, d,cf, Sg){
-#   D <- 10^(seq(-5, 2, 0.005)) #virtual grain size [m] Tests 601 values
-#   
-#   #first method
-#   d_prime <- v^(3/2) * (sqrt((8*g*s)/(cf)))^(-3/2) * (1/D^(1/6))^(-3/2) #[m] #eq 15
-#   d_double_prime <- d - d_prime #[m]
-#   inverse_shields_prime <- ((Sg-1)*D)/(s*d_prime) #eq 16
-#   
-#   C_1 <- ifelse(inverse_shields_prime < 1.6, 41, 29)#eqs 20-22
-#   #ifelse(inverse_shields_prime < 17.8, 29, 23))
-#   C_2 <- ifelse(inverse_shields_prime < 1.6, 1.26,0.5)
-#   #ifelse(inverse_shields_prime < 17.8, 0.5, 0.415))
-#   v_m_double_prime_1 <- C_1/inverse_shields_prime^C_2 #eq 19, approximation of Einstein & Barbarossa sediment regimes
-#   
-#   #2nd method
-#   v_m_double_prime_2 <- v / sqrt(g*d_double_prime*s) #eq 14, closed form solution of v/m''
-#   
-#   #get calibrated value
-#   diff <- abs(v_m_double_prime_1-v_m_double_prime_2) #minimal difference b/w skin friction depth estimates
-#   D_fin <- D[which.min(diff)] #[m]
-#   
-#   #percent difference between estimates
-#   perc <- diff/v_m_double_prime_2
-#   perc <- min(perc, na.rm=T)*100
-#   
-#   return(c(D_fin, perc))
-# }
-# 
-# #run grain sizer function
-#grainResults <- mapply(grainSizer,data$Vms,data$slope, data$depth, cf, Sg)
-
-# data$D35 <- grainResults[1,]
-# data$grain_perc_diff <- grainResults[2,]
-# summary(data$D35)
-# summary(data$grain_perc_diff)
-# data$log_D35 <- log(data$D35)
-# 
-# #calculate resistance partition coefficient using calibrated D35 (and its associated d')
-# data$inverse_shields_prime <- data$Vms^(3/2) * (cf/(8*g*data$D35))^(3/4) * data$slope^(1/4) * (Sg-1)^(-1)
-# data$d_prime <- data$inverse_shields_prime * data$slope^(-1) * (Sg-1) * data$D35 #calculated via shield's parameter and so D35. Remeber error is less than 5% so we good
-# 
-# data$f_prime <- cf *(data$D35/data$d_prime)^(1/3) #Henderson 1966
-# 
-# data$partition <- 1-((data$f_prime*data$Vms^2)/(8*g*data$Rh*data$slope)) #Moog & Jirka 19999
-# data$partition <- ifelse(data$partition < 0, 0, data$partition)
-# 
-# #eM model vs k600------------------------------------------------
-# data$eM <- (1-data$partition)*data$eS + data$partition*data$eD #combined Moog and Jirka 1999 macroroughness model
-# data$log_eM <- log(data$eM)
+#calculate resistance partition coefficient using calibrated D35 (and its associated d')
+ # data$inverse_shields_prime <- data$Vms^(3/2) * (cf/(8*g*data$D35))^(3/4) * data$slope^(1/4) * (Sg-1)^(-1)
+ # data$d_prime <- data$inverse_shields_prime * data$slope^(-1) * (Sg-1) * data$D35 #calculated via shield's parameter and so D35. Remeber error is less than 5% so we good
+ # 
+ # data$f_prime <- cf *(data$D35/data$d_prime)^(1/3) #Henderson 1966
+ # 
+ # data$partition <- 1-((data$f_prime*data$Vms^2)/(8*g*data$Rh*data$slope)) #Moog & Jirka 19999
+ # data$partition <- ifelse(data$partition < 0, 0, data$partition)
+ # 

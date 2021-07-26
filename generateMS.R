@@ -5,6 +5,7 @@
 setwd('C:\\Users\\craig\\Documents\\GitHub\\RSK600')
 
 #Move all results to global environment
+turbulence_stats <- read.csv('cache\\k600_theory\\turbulence_stats.csv')
 models_ulseth <- read.csv('cache\\k600_theory\\ulseth_models.csv')
 models_ustar <- read.csv('cache\\k600_theory\\ustar_models.csv')
 models_eD4 <- read.csv('cache\\k600_theory\\eD_models.csv')

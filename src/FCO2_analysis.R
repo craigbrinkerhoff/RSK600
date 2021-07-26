@@ -11,7 +11,7 @@ legend_labels <- c('BIKER',
                    'Model Using Observed \nshear velocity')
 
 ###################
-##FUNCTION TO GENERATE FCO2 FROM ALL DEPTH MODELS AND ALL SWOT RIVERS
+##FUNCTION TO GENERATE FCO2 FROM ALL DEPTH MODELS AND ALL SWOT RIVERS--------------------------------
 ####################
 fun_FCO2_analysis <- function(river) {
   #read in swot rivers
@@ -81,9 +81,6 @@ fun_FCO2_analysis <- function(river) {
   D_raymond2013 <- rowMeans(d)
   D_brinkerhoff2019 <- exp(-1.353)*Q_obs^(0.395) #Brinkerhoff etal 2019
 
-  #ustar
-  Ustar <- sqrt(g*S_obs*D_obs) #[m/s]
-
   #Generate k600 estimates [m/dy]---------------------------
   k600_obs <- k600_ustar_craig(D_obs, S_obs)
   k600_obs <- colMeans(k600_obs, na.rm=T)
@@ -118,15 +115,7 @@ fun_FCO2_analysis <- function(river) {
   kco2_raymond2013 <- (600/Sc_co2)^(1/2)*k600_raymond2013
   kco2_brinkerhoff2019 <- (600/Sc_co2)^(1/2)*k600_brinkerhoff2019
 
-  #Obtain actual CO2 fluxes--------------------------------------------
-#  FCO2_obs <- kco2_obs*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2
-#  FCO2_BIKER <- kco2_BIKER*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2
-#  FCO2_BIKER_low <- kco2_BIKER_low*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2
-#  FCO2_BIKER_high <- kco2_BIKER_high*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2
-#  FCO2_raymond2012 <- kco2_raymond2012*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2
-#  FCO2_raymond2013 <- kco2_raymond2013*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2
-#  FCO2_brinkerhoff2019 <- kco2_brinkerhoff2019*((co2-pCO2_a)*exp(henrys_law)*molarMass*1/1000000*1/0.001) #g/m2*dy includes conversion from uatm to mg/L of CO2
-
+  #Calculate actual CO2 fluxes--------------------------------------------
   FCO2_obs <- kco2_obs*(co2-pCO2_a)*(1/1e6)*exp(henrys_law)*998*molarMass #g-C/m2*dy
   FCO2_BIKER <- kco2_BIKER*(co2-pCO2_a)*(1/1e6)*exp(henrys_law)*998*molarMass #g-C/m2*dy
   FCO2_BIKER_low <- kco2_BIKER_low*(co2-pCO2_a)*(1/1e6)*exp(henrys_law)*998*molarMass #g-C/m2*dy
@@ -135,7 +124,7 @@ fun_FCO2_analysis <- function(river) {
   FCO2_raymond2013 <- kco2_raymond2013*(co2-pCO2_a)*(1/1e6)*exp(henrys_law)*998*molarMass #g-C/m2*dy
   FCO2_brinkerhoff2019 <- kco2_brinkerhoff2019*(co2-pCO2_a)*(1/1e6)*exp(henrys_law)*998*molarMass #g-C/m2*dy
 
-  #Surface area
+  #Calculate river surface areas per xs and timestep--------------------------------------------
   #first, get reach lengths from the cumulative reach lengths in river data
   r <- reaches
   for (i in 2:length(reaches)) {
@@ -143,10 +132,10 @@ fun_FCO2_analysis <- function(river) {
   }
   r <- r[-1]
 
-  #then calculate surface area
+  #then calculate total surface area (as time-averaged)
   sa <- sum(rowMeans(W_obs, na.rm = T) * r) #[m2]
 
-  #plot------------------------
+  #Gather results into single df--------------------------------------------
   for_plot <- data.frame('river' = name, 'timestep'=1:length(FCO2_BIKER), 'sa'=sa,
                         'FCO2_obs'=FCO2_obs,
                         'FCO2_BIKER'=FCO2_BIKER, 'FCO2_BIKER_low'=FCO2_BIKER_low, 'FCO2_BIKER_high'=FCO2_BIKER_high,
@@ -154,7 +143,7 @@ fun_FCO2_analysis <- function(river) {
                         'FCO2_raymond2013'=FCO2_raymond2013,
                         'FCO2_brinkerhoff2019'=FCO2_brinkerhoff2019)
 
-    #write results to file----------------
+    #save results to file--------------------------------------------
     write.csv(for_plot, paste0('cache/FCO2/by_river/results_', name, '.csv'))
 }
 
@@ -163,7 +152,7 @@ s <- data.frame('river'=NA, 'meanS'=NA)
 #################
 ##READ IN DATA--------------------------------
 #################
-#Beaulieu 2012 Co2 data-------------------------------------
+#Beaulieu 2012 Co2 data--------------------------------------------
 data <- read.csv('data/Beauliu2012.csv', header = TRUE)
 data <- data[5:30,] #only keep 26 biweekly sample so they reflect a single year (fall 2009-winter/spring/summer 2008). This amounts to
 Data <- select(data, c(Date, CO2, Temperature))
@@ -175,11 +164,11 @@ Data$Water_temp_C <- as.numeric(as.character(Data$Water_temp_C))
 Data$CO2_mol_L <- as.numeric(as.character(Data$CO2_umol_L))*0.000001
 Data$CO2_uatm <- (Data$CO2_mol_L*1e6) * 1/(exp(henrys_law_func(Data$Water_temp_C))*998*0.001)
 
-#BIKER results (only those with no measurement error)-----------------------------------------------
+#BIKER results for the SWOT rivers (only those with no measurement error)--------------------------------------------
 BIKER_results <- read.csv('cache/validation/BIKER_validation_results.csv')
 BIKER_results <- filter(BIKER_results, errFlag == 0)
 
-#SWOT rivers (Frasson etal 2021 + Durand etal 2016)----------------------------------------------------
+#SWOT rivers (Frasson etal 2021 + Durand etal 2016)--------------------------------------------
 files <- list.files('data/Frasson_etal_2021/IdealDataxxxxxx', pattern="*.nc", full.names = TRUE) #pepsi 2
 files2 <- list.files('data/Durand_etal_2016/xxxxxxxxxxxxxxxx', pattern="*.nc", full.names = TRUE) #pepsi 1
 files <- c(files, files2)
@@ -191,6 +180,7 @@ system.time(
   results <- mclapply(files, fun_FCO2_analysis, mc.cores=cores)
 )
 
+#debugging option
 #results <- fun_FCO2_analysis(files[14])
 
 #########################
@@ -202,7 +192,7 @@ df_fin <- list.files(path='cache/FCO2/by_river', full.names = TRUE) %>%
 write.csv(df_fin, 'cache/FCO2/CO2_results.csv')
 
 ##################
-##PLOT BEAULIEU 2012 TIMESERIES--------------------------------
+##PLOT BEAULIEU 2012 TIMESERIES FOR SUPPLEMENT--------------------------------
 ###################
 beaulieu <- ggplot(data=Data, aes(y=CO2_uatm, x=Date)) +
   geom_point(size=5, color='darkgreen') +
@@ -210,9 +200,9 @@ beaulieu <- ggplot(data=Data, aes(y=CO2_uatm, x=Date)) +
 ggsave('cache/FCO2/Beaulieu_timeseries.jpg', beaulieu, width=15, height=6)
 
 #################
-##GENERATE RESULTS AND FIGURES----------------
+##GENERATE RESULTS AND FIGURES--------------------------------------------
 ################
-#read in full results
+#read in full results--------------------------------------------
 output <- read.csv('cache/FCO2/CO2_results.csv')
 output$river <- as.character(output$river)
 
@@ -226,18 +216,19 @@ output <- drop_na(output)
 #Calculate total mass fluxes of CO2 from rivers------------------------------------------------
 massFluxes <- gather(output, key=key, value=value, c(FCO2_obs, FCO2_BIKER, FCO2_raymond2012, FCO2_raymond2013, FCO2_brinkerhoff2019)) %>%
   group_by(key) %>%
-  summarise(sumFCO2 = median(value * 1e-12 * 365, na.rm=T)*total_sa) #tG-C/yr from all rivers
-write.csv(massFluxes, 'cache/FCO2/medianFluxes.csv')
+  summarise(sumFCO2 = mean(value * 1e-12 * 365, na.rm=T)*total_sa,
+            medianFCO2 = median(value * 1e-12 * 365, na.rm=T)*total_sa) #tG-C/yr from all rivers
+write.csv(massFluxes, 'cache/FCO2/massFluxes.csv')
 
 ##########################
-##PLOT MEDIAN EFFLUX AND BY-RIVER METRICS PLOT----------------------------------------------------------------------
+##PLOT MEDIAN/MEAN EFFLUX AND BY-RIVER METRICS PLOT----------------------------------------------------------------------
 ###########################
 #bar plots of mass fluxes----------------------------------------
 massFluxes$key <- factor(massFluxes$key,levels = c("FCO2_BIKER", "FCO2_brinkerhoff2019", "FCO2_raymond2012", "FCO2_raymond2013", "FCO2_obs"))
-barPlots <- ggplot(massFluxes, aes(y=sumFCO2, x=key, fill=key)) +
+barPlot_mean <- ggplot(massFluxes, aes(y=sumFCO2, x=key, fill=key)) +
   geom_bar(stat='identity', color='black', size=1.2) +
   geom_hline(yintercept = massFluxes[massFluxes$key=='FCO2_obs', ]$sumFCO2, size=1.2, linetype='dashed', color='black') +
-  ylab('Median C Efflux [tG-C/yr]') +
+  ylab('Mean [tG-C/yr]') +
   xlab('Depth Model') +
   scale_fill_brewer(palette = 'Set1', name='', labels=c('BIKER \n ', 'Brinkerhoff \n2019', 'Raymond \n2012', 'Raymond \n2013', 'Observed \n ')) +
   theme(legend.position = "right",
@@ -249,13 +240,22 @@ barPlots <- ggplot(massFluxes, aes(y=sumFCO2, x=key, fill=key)) +
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
 
-#Calculate by-river error metrics-----------------------------------
-for_plot <- gather(output, key=key, value=value, c(FCO2_raymond2012, FCO2_raymond2013, FCO2_BIKER, FCO2_brinkerhoff2019))
-stats_by_reach <- group_by(for_plot, river, key) %>%
-  summarise(r2 = summary(lm(value~FCO2_obs))$r.squared,
-            nrmse = sqrt(mean((FCO2_obs - value)^2)) / mean(FCO2_obs, na.rm=T),
-            rBIAS =   mean(value - FCO2_obs) / mean(FCO2_obs, na.rm=T),
-            rrmse =   sqrt(mean((value - FCO2_obs)^2 / FCO2_obs^2, na.rm=T)))
+barPlot_median <- ggplot(massFluxes, aes(y=medianFCO2, x=key, fill=key)) +
+  geom_bar(stat='identity', color='black', size=1.2) +
+  geom_hline(yintercept = massFluxes[massFluxes$key=='FCO2_obs', ]$medianFCO2, size=1.2, linetype='dashed', color='black') +
+  ylab('Median [tG-C/yr]') +
+  xlab('Depth Model') +
+  scale_fill_brewer(palette = 'Set1', name='', labels=c('BIKER \n ', 'Brinkerhoff \n2019', 'Raymond \n2012', 'Raymond \n2013', 'Observed \n ')) +
+  theme(legend.position = "right",
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.text.y=element_text(size=20),
+        axis.title.y=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'))
+
+barPlots <- plot_grid(barPlot_mean, barPlot_median, ncol=1)
 
 #######################
 ##PLOT FCO2 VALIDATION ACROSS ALL RIVERS AND TIMESTEPS-------------------------
@@ -268,14 +268,13 @@ rmse <- round((Metrics::rmse((output$FCO2_obs), (output$FCO2_BIKER))), 2) #g/m2/
 predInts <- predict(lm, interval='prediction')
 output <- cbind(output, predInts)
 
-#plot validation-----------------------------------------
 flux_plot<- ggplot(output, aes(x=(FCO2_obs), y=(FCO2_BIKER), color=key)) +
   geom_pointrange(aes(ymin = FCO2_BIKER_low, ymax = FCO2_BIKER_high), fatten=10, fill='#1b9e77', pch=21, color='black') +
   geom_smooth(size=2, color='grey', method='lm', se=F)+
   geom_line(aes(y=10^(lwr)), color='grey', linetype='dashed', size=1.75) +
   geom_line(aes(y=10^(upr)), color='grey', linetype='dashed', size=1.75) +
   geom_abline(size=2, linetype='dashed', color='black') +
-  xlab('FCO2 via observed \nUstar [g-C/m2*dy]') +
+  xlab('FCO2 via observed \nshear velocity [g-C/m2*dy]') +
   ylab('FCO2 via BIKER [g-C/m2*dy]') +
   scale_y_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
@@ -288,16 +287,15 @@ flux_plot<- ggplot(output, aes(x=(FCO2_obs), y=(FCO2_BIKER), color=key)) +
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold')) +
-  annotate("text", label = paste0('RMSE: ', rmse, ' g-C/m2*dy'), x = 10^0, y = 10^1.5, size = 5, colour = "black")+
-  annotate("text", label = paste0('r2: ', lmr2), x = 10^0, y = 10^1.2, size = 5, colour = "black")
+  annotate("text", label = paste0('RMSE: ', rmse, ' g-C/m2*dy'), x = 10^0, y = 10^1.5, size = 7, colour = "black")+
+  annotate("text", label = paste0('r2: ', lmr2), x = 10^0, y = 10^1.2, size = 7, colour = "black")
 
-#Bring these alllllll together and save-----------------------------
+#Bring these plots together and save in pub-ready format-----------------------------
 FCO2_models <- plot_grid(flux_plot, barPlots, ncol=2, labels='auto')
-ggsave('cache/FCO2/FCO2_models.jpg', FCO2_models, width=17, height=8)
+ggsave('cache/FCO2/FCO2_models.jpg', FCO2_models, width=15, height=10)
 
 ##################
-##SAVE STATS TO FILES FOR MS--------------------------------------
+##SAVE STATS TO FILES FOR MS MARKDOWN FILE--------------------------------------
 #################
 results_all_rivs <- data.frame('rmse'=rmse, 'r2'=lmr2)
 write.csv(results_all_rivs, 'cache/FCO2/fco2_stats_all.csv')
-write.csv(stats_by_reach, 'cache/FCO2/fco2_stats_by_river.csv')

@@ -110,8 +110,8 @@ plotSWOTreaches <- ggplot(plot_stats, aes(x=key, y=value, fill=factor(errFlag)))
 ############
 ##NRMSE VS AMOUNT OF DATA-----------------------
 ############
-nrmse_vs_n <- ggplot(stats_by_reach, aes(y=nrmse, x=n_data, color=factor(errFlag))) +
-  geom_point(size=5, aes(pch=factor(errFlag)),show.legend=FALSE) +
+nrmse_vs_n <- ggplot(stats_by_reach[stats_by_reach$errFlag == 0,], aes(y=nrmse, x=n_data, color=factor(errFlag))) +
+  geom_point(size=5,show.legend=FALSE) +
   geom_hline(yintercept=1, linetype='dashed') +
   geom_hline(yintercept=0, linetype='dashed') +
   geom_hline(yintercept=0.50, linetype='dashed') +

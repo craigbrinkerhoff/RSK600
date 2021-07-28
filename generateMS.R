@@ -12,7 +12,6 @@ models_eD4 <- read.csv('cache\\k600_theory\\eD_models.csv')
 results_3_2_rivs <- read.csv('cache//validation//results_by_riv.csv')
 results_3_2_all <- read.csv('cache//validation//results_all_riv.csv')
 results_3_3_all <- read.csv('cache//FCO2//fco2_stats_all.csv')
-results_3_3_rivs <- read.csv('cache//FCO2//fco2_stats_by_river.csv')
 results_3_3_bulk <- read.csv('cache//FCO2//bulkFluxes.csv')
 results_3_3_bulk$key <- as.character(results_3_3_bulk$key)
 

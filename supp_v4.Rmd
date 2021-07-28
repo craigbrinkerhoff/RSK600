@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ##Contents
-This supplementary information contains 7 figures and 1 table. Please consult https://github.com/craigbrinkerhoff/RSK600 for all code to build and generate results, figures, and the manuscript.
+This supplementary information contains 4 texts, 5 figures and 2 tables. Please consult https://github.com/craigbrinkerhoff/RSK600 for all code to build and generate results, figures, and the manuscript.
 
 ## Text S1: Deriving two expressions for turbulent kinetic energy production
 Below we detail how we arrived at our two expressions for a cross-section-averaged turbulent kinetic energy production (*G*), or equation 3 in the main text. Please see Appendix A for variable descriptions and notation.
@@ -38,7 +38,7 @@ $$\mathbf{(S8)} G=\frac{UU_*^2}{H}$$
 ## Text S2: BIKER hyperparameterization
 We assign prior hyperparameters using SWOT data only. All priors are formalized within the model as truncated normal distributions of the log-transformed terms such that $log(X) \sim  \mathcal{N}(\mu, \sigma^2)$ for $\lambda < log(X) < \gamma$, using prior hyperparameters mean ($\mu$), standard deviation ($\sigma$), and upper ($\gamma$) and lower bounds ($\lambda$) for any parameter *X*.
 
-$A_0$ prior hyperparameters were assigned following an updated version of the method developed by @brinkerhoffConstrainingRemoteRiver2020a. They developed a set of river channel prior hyperparameters for McFLI algorithms that are entirely RS-able and reflect differential channel hydraulics as a function of river geomorphology. They used an extensive database of field measurements and machine learning to identify patterns that associate river width with the hydraulic priors needed to run McFLIs so that prior hyperparameters may be assigned to rivers using only the existing remotely sensed data. For this study, we extracted $\lambda_{A_0}$ and $\gamma_{A_0}$ as the **Xth** percentile values rather than the absolute maximum and minimum values to avoid physically impossible bounds on $A_0$.
+$A_0$ prior hyperparameters were assigned following an updated version of the method developed by @brinkerhoffConstrainingRemoteRiver2020a. They developed a set of river channel prior hyperparameters for McFLI algorithms that are entirely RS-able and reflect differential channel hydraulics as a function of river geomorphology. They used an extensive database of field measurements and machine learning to identify patterns that associate river width with the hydraulic priors needed to run McFLIs so that prior hyperparameters may be assigned to rivers using only the existing remotely sensed data. For this study, we extracted $\lambda_{A_0}$ and $\gamma_{A_0}$ as the 5th and 95th percentile values rather than the absolute maximum and minimum values to avoid physically impossible bounds on $A_0$.
 
 This leaves the $k_{600}$ hyperparameters to be defined. We assigned those by using a simple slope regression model to predict $U_*$ solely from a SWOT-observable value. It was trained on the @ulsethDistinctAirWater2019a dataset. Equation S9 assigns $\mu_{k_{600}}$ while $\sigma^2_{k_{600}}$ was set to equation S9's log-transformed standard error after propogation of errors for both equation S9 and equation 6 in the main text. This amounted to a value of 1.12. $\lambda_{k_{600}}$ and $\gamma_{k_600}}$ were set to log(0.001) m/day and log(500) m/day, respectively. Finally, we estimate $\sigma_{k_{600}}$ using the standard model error from equation 6 in the main text and as fit on the data shown in Figure 3a.
 
@@ -67,6 +67,8 @@ To calculate the bulk carbon efflux, we multiply the median $FCO_2$ value across
 ![Figure S3 Cummulative density functions (CDFs) of river width measurements, as binned by their dataset and and whether or not they meet the 'large river' condition (Rh=H). The dashed black line indicates the minimum river width that the SWOT satellite will observe (100m). This brief analysis indicates that the vast majority of SWOT-observable rivers should meet the 'large river' condition.](cache/k600_theory/swotPlot.jpg)
 
 ![Figure S4 Mean river properties (observed k600, width, and slope) for the 47 rivers versus their BIKER performance as defined by NRMSE (see Table S1 for this metric's definition). The dashed black line is the median NRMSE score. The poorly performing rivers are universally the narrowest and steepest of the set.](cache/validation/riverProperties_nrmse.jpg)
+
+![Figure S5 All timeseries of k per river](cache/validation/timeseries_noerr.jpg)
 
 ##Tables
 *Table S1: Validation metrics used in this study, where r is the correlation coefficient, Nt is number of observations and i is the specific observation. σ refers to the variance of the sample and μ refers to the mean of the sample. As is standard, a carrot accent indicates the predicted value.*

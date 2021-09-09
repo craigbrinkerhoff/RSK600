@@ -1,0 +1,16 @@
+-FCO2 plot should be the same as the k600 plot... Did i misexplain this?
+
+-Novel idea that's really cool, but the story and presentation requires some streamlining
+
+-get intuitive idea for what the terms in the budget mean
+-No need for all of the Td modeling, just say that G and eD are similar
+	Also, when channel is shallow/wide the oppiste of what I'm modeling is actually true: gradient length is so short that bed TKE is immediately 'usable' at the surface rather than a deep flow where it takes a while to reach the surface
+-Really, you should be integrating only at the surface not over the entire flow depth but that isn't going to be possible
+
+-It's probably sufficient to say look: shear via the bed ~ equals shear via form drag in very shallow systems (i.e. width >>> depth).
+	So, we can scale k using ethier bed shear or form shear and do away with all of the TKE budget stuff that's inviting critisicsm
+
+Generally, dissipation is preferred for modeling k because it encompasses all of the processes in the energy cascade and TKE budget. But if 
+
+
+Think about explaining this not as a TKE budget but rather bottom shear versus form shear. If they're mostly the same, then we don't need to predict k from 

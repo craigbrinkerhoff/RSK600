@@ -179,7 +179,6 @@ plots_2 <- plot_grid(wdPlot, tke_depthPlot, ncol=2, labels=c('b','c'), label_siz
 plot_1 <- plot_grid(boxes_TKE, plots_2, ncol=1, labels=c('a',NA), label_size = 20)
 ggsave('cache\\k600_theory\\turbulence.jpg', plot_1, width=14, height=15)
 
-
 #confirm that depth-scale and Kolmogorov-scale turbulence is ~similar when Rh=H (used later in the k600 plot but need in memory now)--------------
 ratio_stats <- group_by(data, figureFlag) %>% 
   summarise(meanratio = mean(((1e-6*eD)^0.25)/ustar),
@@ -187,7 +186,7 @@ ratio_stats <- group_by(data, figureFlag) %>%
             n=n())
 write.csv(ratio_stats, 'cache\\k600_theory\\V_ratio_stats.csv')
 
-velocityScalePlot <- ggplot(data, aes(x=flag_depth, y=(((1e-6*eD)^0.25)/ustar), fill=flag_depth)) + #kinematic viscosity is assumed 1e-6 m2/s because no water temperature data is available
+velocityScalePlot <- ggplot(data, aes(x=flag_depth, y=(((1e-6*eS)^0.25)/ustar), fill=flag_depth)) + #kinematic viscosity is assumed 1e-6 m2/s because no water temperature data is available
   geom_boxplot(size=1.2) +
   scale_fill_brewer(palette='Accent', name='')+
   geom_hline(yintercept = 1, linetype='dashed', size=2) +
@@ -206,24 +205,24 @@ velocityScalePlot <- ggplot(data, aes(x=flag_depth, y=(((1e-6*eD)^0.25)/ustar), 
         legend.title = element_text(size=17, face='bold'),
         legend.position = 'none')
 
-#frac(v*eD ^ {1/4}, U*)
-
 #Plot distributions of Rh/H ratios for SWOT-observable and non-SWOT observable rivers
-swotPlot <- ggplot(data, aes(x=width, linetype=flag_depth)) +
-  stat_ecdf(size=2, color='darkorange') +
-  scale_linetype_manual(values=c("dotted", "solid"), labels=c('Rh =/= H', 'Rh = H'), name='River Regime')+
-  geom_vline(xintercept = 50, linetype='dashed', size=2)+
-  geom_vline(xintercept = 100, linetype='dashed', size=2)+
-  annotate('text', label='Observable\nvia SWOT', x=3000, y=0.3, size=8, color='black')+
-  annotate('text', label='Not Observable\nvia SWOT', x=1, y=0.8, size=8, color='black')+
-  xlab('River width [m]')+
-  ylab('Percentile')+
-  scale_x_log10() +
-  theme(axis.text=element_text(size=20),
+swotPlot <- ggplot(data, aes(x=flag_depth, y=Qm3s, fill=flag_depth)) + #kinematic viscosity is assumed 1e-6 m2/s because no water temperature data is available
+  geom_boxplot(size=1.2) +
+  scale_fill_brewer(palette='Accent', name='')+
+ # geom_hline(yintercept = 50, linetype='dashed', size=2) +
+#  geom_hline(yintercept = 100, linetype='dashed', size=2) +
+  annotate('text', label='n = 475,142', x='Rh=H', y=10^-2, color='darkblue', size=10)+
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  ylab('River Width [m]') +
+  xlab('') +
+  theme(axis.text.y=element_text(size=19),
+        axis.text.x = element_text(size=24, face='bold'),
         axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'))
-ggsave('cache\\k600_theory\\swotPlot.jpg', swotPlot, width=11, height=8)
+        legend.position = 'none')
+ggsave('cache\\k600_theory\\swotPlot.jpg', swotPlot, width=8, height=8)
 
 ###################### K MODELS PLOTS-------------------------------
 data <- filter(data, study == 'Ulseth_etal_2019') #remove Brinkerhoff etal 2019 from dataset
@@ -386,24 +385,6 @@ lm <- lm(log_k600~log_eD, data=narrowRegime)
 lm.seg <- segmented(lm, npsi=1)
 
 summary(lm.seg)
-
-
-
-
-ggplot(data, aes(x=eD, y=k600, color=flag_swot)) +
-  geom_point(size=3) +
-  scale_color_brewer(palette = 'Dark2')+
-  xlab('eD [J/kg*s]') +
-  ylab('k600 [m/day') +
-  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
-                labels = scales::label_comma(drop0trailing = TRUE)) +
-  scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
-                labels = scales::label_comma(drop0trailing = TRUE))+
-  theme(axis.text=element_text(size=19),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'),
-        legend.position = 'bottom')
 
 
 ########

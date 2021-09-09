@@ -1,6 +1,6 @@
 ---
 title: "Gas exchange in large rivers controlled by largest turbulent eddies: implications for remotely sensing gas exchange via SWOT"
-author: 'CB Brinkerhoff, CJ Gleason, PA Raymond, MH Harlan'
+author: 'CB Brinkerhoff, CJ Gleason, CJ Zappa, PA Raymond, MH Harlan'
 date: "`r Sys.Date()`"
 bibliography: References.bib
 csl: agu_citation_style.csl

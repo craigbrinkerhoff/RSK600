@@ -104,7 +104,7 @@ data$eS <- (data$ustar^3)/(data$depth) #dissipation rate of surface turbulence o
 data$flag_swot <- ifelse(data$width >= 100, 'SWOT', 'Small')
 data$flag_depth <- ifelse(round(data$Rh/data$depth, 3) >= 0.95, 'Rh=H', 'Rh=/=H') #set to 95% just to get idea of number of SWOT measurements that generally meet this condition
 percs <- group_by(data, flag_swot, flag_depth) %>% summarise(n=n()) %>% group_by(flag_swot) %>% mutate(perc = 100 * n/sum(n))
-percs
+write.csv(percs, 'cache/k600_theory/Rh_H_percents.csv')
 
 #######LOG TRANSFORM SOME VARIABLES-----------------------------------------------------------
 data$log_eD <- log(data$eD)
@@ -185,7 +185,7 @@ ustar_k600_inefficient <- ggplot(inefficientRegime) +
 
 #Kolmogorov-scale turbulence fitted model
 eD4_k600_inefficient <- ggplot(inefficientRegime) +
-  geom_point(aes(x=eD4, y=k600), size=5, color='#beaed4') +
+  geom_point(aes(x=eD4, y=k600), size=5, color='darkgreen') +
   geom_line(aes(x=eD4, y=k600_pred_eD4), size=2, color='black') +
   annotate("text", label = paste0('r2: ', round(summary(lm_eD4)$r.squared,2)), x = 0.2, y = 17, size = 8, colour = "purple")+
   labs(x = expression(bold(paste(epsilon[D]^(1/4), ' [', W^(1/4),'/',kg^(1/4), ']'))),
@@ -198,7 +198,7 @@ eD4_k600_inefficient <- ggplot(inefficientRegime) +
 
 #generalized Kolmorogorv-style fitted model: can we statistically recover 1/4?
 generalized_k600_inefficient <- ggplot(inefficientRegime) +
-  geom_point(aes(x=eD, y=k600), size=5, color='#beaed4') +
+  geom_point(aes(x=eD, y=k600), size=5, color='darkblue') +
   geom_line(aes(x=eD, y=10^k600_pred_eD), size=2, color='black') +
   annotate("text", label = paste0('r2: ', round(summary(lm_eD)$r.squared,2)), x = 10^-4, y = 17, size = 8, colour = "darkred")+
   labs(x = expression(bold(paste(epsilon[D], ' [W/kg]'))),
@@ -213,7 +213,7 @@ generalized_k600_inefficient <- ggplot(inefficientRegime) +
         legend.title = element_text(size=17, face='bold'),
         legend.position = 'none')
 
-#efficient river condition: Rh =/= H--------------------
+#efficient river condition: Rh =/= H NOT CURRENTLY BEING PLOTTED--------------------
 efficientRegime <- data[data$flag_depth == 'Rh=/=H',]
 lm_ustar <- lm(k600~ustar+0, data=efficientRegime) #depth-scale turbulence
 lm_eD4 <- lm(k600~eD4+0, data=efficientRegime) #Kolmogorov-scale turbulence

@@ -1,4 +1,5 @@
 -FCO2 plot should be the same as the k600 plot... Did i misexplain this?
+	I don't think I mis-explained it but the question is why did it get better with inversions only every 12 days rather than every day
 
 -Novel idea that's really cool, but the story and presentation requires some streamlining
 

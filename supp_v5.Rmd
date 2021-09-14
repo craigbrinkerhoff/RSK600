@@ -1,12 +1,30 @@
 ---
 title: "Supplemental Information: Gas exchange in large rivers controlled by hydraulic geometry: implications for remotely sensing gas exchange via the SWOT satellite"
-author: "CB Brinkerhoff, CJ Gleason, CJ Zappa, PA Raymond, MH Harlan"
-date: "`r Sys.Date()`"
+author:
+  - Craig B Brinkerhoff:
+      email: cbrinkerhoff@umass.edu
+      institute: UMass
+      correspondence: true
+  - Colin J Gleason:
+      institute: UMass
+  - Christopher J Zappa:
+      institute: Lamont
+  - Peter A Raymond:
+      institute: Yale
+  - Merritt H Harlan:
+      institute: UMass
+institute:
+  - UMass: Department of Civil & Environmental Engineering, University of Massachusetts, Amherst, MA
+  - Lamont: Lamont-Doherty Earth Observatory, Columbia University, Palisades, NY
+  - Yale: School of the Environment, Yale University, New Haven, CT
+bibliography: References.bib
 csl: agu_citation_style.csl
 output:
-  word_document: 
+  word_document:
+      pandoc_args:
+        - '--lua-filter=scholarly-metadata.lua'
+        - '--lua-filter=author-info-blocks.lua'
       reference_docx: word-styles-reference.docx
-bibliography: References.bib
 
 ---
 
@@ -14,8 +32,8 @@ bibliography: References.bib
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-##Contents
-This supplementary information contains 4 texts, 4 figures and 2 tables. Please consult https://github.com/craigbrinkerhoff/RSK600 for all code to build and generate results, figures, and the manuscript.
+## Contents
+This supplementary information contains 4 texts, 3 figures and 2 tables. Please consult https://github.com/craigbrinkerhoff/RSK600 for all code to build and generate results, figures, and the manuscript.
 
 ## Test S1: Filtering procedure for hydraulics data
 To quantify how frequently SWOT-observable rivers are also inefficient river channels (section 2 of main text), we used the dataset of field-measured river hydraulics in @brinkerhoffReconcilingAtaStationAtManyStations2019. That dataset has over 500,000 discrete measurements of river width, velocity, area, and discharge that were made by the United States Geological Survey (USGS) to calibrate streamgauge rating curves. Here, we descirbe how this dataset was filtered down to 171,553 measurements to meet the assumptions in our conceptual model.
@@ -46,14 +64,16 @@ To calculate $CO_2$ fluxes and carbon efflux, we pair @beaulieuControlsGasTransf
 $$\mathbf{(S11)} k_{CO2, temp}=k_{600}*(Sc/600)^{-1/2}$$
 To calculate the bulk carbon efflux, we multiply the median $FCO_2$ value across all rivers and timesteps (in Tg-C/yr) by the total average surface area of all 47 rivers.
 
-##Figures
+## Figure S1
 ![Figure S1: Flowchart of the entire study's workflow](cache/flowchart.jpg)
 
+## Figure S2
 ![Figure S2 Timeseries of the biweekly CO2 data from @beaulieuControlsGasTransfer2012a. Sampling took place 2008-2009 in the Ohio River (upstream of Cincinnati, Ohio, United States). Each point here was joined to the 11-day SWOT observations used in this study (section 2.4).](cache/FCO2/Beaulieu_timeseries.jpg)
 
+## Figure S3
 ![Figure S3 All timeseries of k per river](cache/validation/timeseries_noerr.jpg)
 
-##Tables
+## Table S1
 *Table S1: Validation metrics used in this study, where r is the correlation coefficient, Nt is number of observations and i is the specific observation. σ refers to the variance of the sample and μ refers to the mean of the sample. As is standard, a carrot accent indicates the predicted value.*
 
 |**Description**|**Acronym**|**Definition**|**Ideal Score**|**Possible Range**|**Validation Scheme**|
@@ -64,6 +84,7 @@ To calculate the bulk carbon efflux, we multiply the median $FCO_2$ value across
 |Normalized root-mean-square error|NRMSE| $\sqrt{\frac{1}{N_t}\sum\limits_{i=1}^{N_t}(\frac{\hat{k_{600, i}}-k_{600, i}}{\bar{k_{600, i}}})^2}$ |0|0 to ∞|By river|
 |Relative bias|rBIAS| $\frac{1}{N_t}\sum\limits_{i=1}^{N_t}(\frac{\hat{k_{600, i}}-k_{600, i}}{\bar{k_{600, i}}})$ |0|-∞ to ∞|By river|
 
+## Table S2
 *Table S2: Details on the 3 depth hydraulic geometry models used to estimate FCO2 from the SWOT rivers (section 2.4).*
 
 |**Name**|**Equation**|**Description**|**Reference**|
@@ -72,4 +93,4 @@ To calculate the bulk carbon efflux, we multiply the median $FCO_2$ value across
 |Raymond 2012|$D=0.409Q^{0.294}$|1,026 measurements across the United States|@raymondScalingGasTransfer2012a|
 |Raymond 2013|$D=0.409Q^{0.294},  D=0.449Q^{0.37}$ |Average of the Raymond 2012 equation and one using 9,811 measurements at US streamgauges|@raymondGlobalCarbonDioxide2013a|
 
-##References
+## References

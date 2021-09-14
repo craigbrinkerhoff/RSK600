@@ -176,7 +176,7 @@ ustar_k600_inefficient <- ggplot(inefficientRegime) +
   geom_line(aes(x=ustar, y=k600_pred_ustar), size=2, color='black') +
   annotate("text", label = paste0('r2: ', round(summary(lm_ustar)$r.squared,2)), x = 0.05, y = 17, size = 8, colour = "purple")+
   labs(x = expression(bold(paste(U["*"], ' [m/s]'))),
-       y = expression(bold(paste(K[600], ' [m/dy]'))))+
+       y = '')+
   theme(axis.text=element_text(size=19),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
@@ -202,7 +202,7 @@ generalized_k600_inefficient <- ggplot(inefficientRegime) +
   geom_line(aes(x=eD, y=10^k600_pred_eD), size=2, color='black') +
   annotate("text", label = paste0('r2: ', round(summary(lm_eD)$r.squared,2)), x = 10^-4, y = 17, size = 8, colour = "darkred")+
   labs(x = expression(bold(paste(epsilon[D], ' [W/kg]'))),
-       y = '')+
+       y = expression(bold(paste(K[600], ' [m/dy]'))))+
   scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
                 labels = scales::label_comma(drop0trailing = TRUE)) +
   scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
@@ -276,7 +276,7 @@ arrow_img <- ggdraw() +
   draw_image('cache/k600_theory/arrow.jpg', scale=0.7)
 
 #bring plots together & write to file
-k600Plot <- plot_grid(efficientChannel_img, arrow_img, inefficientChannel_img, ustar_k600_inefficient, eD4_k600_inefficient, generalized_k600_inefficient, labels=c(NA, NA, NA, 'b', 'c', 'd'), ncol=3, label_size = 30)
+k600Plot <- plot_grid(efficientChannel_img, arrow_img, inefficientChannel_img, generalized_k600_inefficient, eD4_k600_inefficient, ustar_k600_inefficient, labels=c(NA, NA, NA, 'b', 'c', 'd'), ncol=3, label_size = 30)
 k600Plot <- plot_grid(calibrationPlot, k600Plot, ncol=1, labels=c('a', NA), label_size = 30)
 ggsave('cache\\k600_theory\\k600Plot.jpg', k600Plot, width=13, height=14)
 

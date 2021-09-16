@@ -1,5 +1,5 @@
 #################
-##Description: Turbulence controls on k~turbulence dissipation relationship
+##Description: Developing gas exchange model for SWOT-observable rivers
 ##Creator: Craig Brinkerhoff
 ##Date: Fall 2021
 #################

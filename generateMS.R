@@ -2,6 +2,8 @@
 #This will grab and store all results in your current RStudio environment so that you can knit the manuscript correctly. It then knits the manuscript too.
 #################
 
+library(tidyverse)
+
 setwd("C:/Users/craig/Documents/OneDrive - University of Massachusetts/Ongoing Projects/RSK600")
 
 #Move all results to global environment

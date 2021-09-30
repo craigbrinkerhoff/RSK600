@@ -11,15 +11,13 @@ library(cowplot)
 library(segmented)
 theme_set(theme_cowplot())
 
-setwd('C:\\Users\\craig\\Documents\\OneDrive - University of Massachusetts\\Ongoing Projects\\RSK600')
+setwd('C:\\Users\\cbrinkerhoff\\OneDrive - University of Massachusetts\\Ongoing Projects\\RSK600')
 
 #some constants
 g <- 9.8 #gravitational acceleration [m/s2]
 
 #######READ IN HYDRAULICS DATA FROM BRINKERHOFF ETAL 2019 TO GET SWOT VERSUS INEFFICIENT CHANNELS------------------------------
 data <- read.csv('data\\Brinkerhoff_etal_2019\\field_measurements.csv')
-#nhd_med <- read.csv('data\\Brinkerhoff_etal_2019\\NHD_join_table.csv')
-#data <- left_join(data, select(nhd_med, SLOPE, SOURCE_FEA), by = c("site_no" = "SOURCE_FEA"))
 
 #some necessary filtering
 data <- filter(data, is.finite(chan_width) ==1) %>%
@@ -30,8 +28,7 @@ data <- filter(data, is.finite(chan_width) ==1) %>%
   filter(chan_velocity > 0) %>%
   filter(chan_discharge > 0) %>%
   filter(chan_area > 0) %>%
-  filter(measured_rating_diff %in% c('Excellent', 'EXCL', 'GOOD', 'Good', 'Fair', 'FAIR'))# %>%
- # filter(is.finite(SLOPE)==1)
+  filter(measured_rating_diff %in% c('Excellent', 'EXCL', 'GOOD', 'Good', 'Fair', 'FAIR'))
 
 #imperial to metric
 data$area <- data$chan_area * 0.092903 #ft2 to m2
@@ -64,18 +61,6 @@ data <- left_join(data, bankfullD, 'site_no')
 data <- filter(data, width <= bankful_width)
 data <- filter(data, depth <= bankful_depth)
 
-#get Dingman r channel shape (f / b in AHG parlance) and only keep measurements made at sites with robust r estimates > 1 (Dingman 2007)
-# ahg <- group_by(data, site_no) %>%
-#   do(model_w = lm(log(width)~log(Qm3s), data=.),
-#      model_d = lm(log(depth)~log(Qm3s), data=.)) %>%
-#   mutate(b = model_w$coefficient[2],
-#          r2_w = summary(model_w)$r.squared,
-#          f = model_d$coefficient[2],
-#          r2_d = summary(model_d)$r.squared) %>%
-#   select(site_no, b, f, r2_w, r2_d) %>%
-#   mutate(r = f/b)
-# data <- left_join(data, ahg, 'site_no')
-
 #######READ IN FIELD DATA WITH K600-------------------
 #Ulseth etal 2019
 ulseth_data <- read.csv('data/Ulseth_etal_2019.csv', fileEncoding="UTF-8-BOM")
@@ -103,6 +88,8 @@ data$eS <- (data$ustar^3)/(data$depth) #dissipation rate of surface turbulence o
 #######SOME FLAGS FOR SWOT-OBSERVABLE RIVERS AND WHEN RH=H-------------------------------
 data$flag_swot <- ifelse(data$width >= 100, 'SWOT', 'Small')
 data$flag_depth <- ifelse(round(data$Rh/data$depth, 3) >= 0.95, 'Rh=H', 'Rh=/=H') #set to 95% just to get idea of number of SWOT measurements that generally meet this condition
+
+#########HOW MANY SWOT MEASUREMENTS MEET THE RH/H CONDITION?
 percs <- group_by(data, flag_swot, flag_depth) %>% summarise(n=n()) %>% group_by(flag_swot) %>% mutate(perc = 100 * n/sum(n))
 write.csv(percs, 'cache/k600_theory/Rh_H_percents.csv')
 
@@ -322,3 +309,67 @@ lm <- lm(log_k600~log_eD, data=efficientRegime)
 lm.seg <- segmented(lm, npsi=1)
 
 summary(lm.seg)
+
+
+
+# #####PARTIONING OF ED AND ES---------------------------------------------------------
+# data <- filter(data, study == 'Ulseth_etal_2019')
+# cf <- 0.100 #Henderson found empirically that Cf=0.113, if we use the empirical Strickler relation for n (1923- different rivers), we get Cf=0.09. So, we used Cf=0.100. See the notes!
+# Sg <- 2.65 #specific gravity
+# 
+# #Similar to Brinkerhoff etal 2019 function. Calibrating a Shield's grain size using Manning's equation, Shield's parameter, and Henderson relation f~(D/depth)^(1/3)
+# #See math notes for the two velocity derivations and the math solving for the Henderson coefficient multiple ways. We ultimately use Cf=0.100
+# 
+# #function to calibrate grain size
+# grainSizer <- function(v,s, d,cf, Sg){
+#   D <- 10^(seq(-5, 2, 0.005)) #virtual grain size [m] Tests 601 values
+#   
+#   #first method
+#   d_prime <- v^(3/2) * (sqrt((8*g*s)/(cf)))^(-3/2) * (1/D^(1/6))^(-3/2) #[m] #eq 15
+#   d_double_prime <- d - d_prime #[m]
+#   inverse_shields_prime <- ((Sg-1)*D)/(s*d_prime) #eq 16
+#   
+#   C_1 <- ifelse(inverse_shields_prime < 1.6, 41, 29)#eqs 20-22
+#   #ifelse(inverse_shields_prime < 17.8, 29, 23))
+#   C_2 <- ifelse(inverse_shields_prime < 1.6, 1.26,0.5)
+#   #ifelse(inverse_shields_prime < 17.8, 0.5, 0.415))
+#   v_m_double_prime_1 <- C_1/inverse_shields_prime^C_2 #eq 19, approximation of Einstein & Barbarossa sediment regimes
+#   
+#   #2nd method
+#   v_m_double_prime_2 <- v / sqrt(g*d_double_prime*s) #eq 14, closed form solution of v/m''
+#   
+#   #get calibrated value
+#   diff <- abs(v_m_double_prime_1-v_m_double_prime_2) #minimal difference b/w skin friction depth estimates
+#   D_fin <- D[which.min(diff)] #[m]
+#   
+#   #percent difference between estimates
+#   perc <- diff/v_m_double_prime_2
+#   perc <- min(perc, na.rm=T)*100
+#   
+#   return(c(D_fin, perc))
+# }
+# 
+# #run grain sizer function
+# grainResults <- mapply(grainSizer,data$Vms,data$slope, data$depth, cf, Sg)
+# 
+# data$D35 <- grainResults[1,]
+# data$grain_perc_diff <- grainResults[2,]
+# summary(data$D35)
+# summary(data$grain_perc_diff)
+# data$log_D35 <- log(data$D35)
+# 
+# 
+# #calculate resistance partition coefficient using calibrated D35 (and its associated d')
+# data$inverse_shields_prime <- data$Vms^(3/2) * (cf/(8*g*data$D35))^(3/4) * data$slope^(1/4) * (Sg-1)^(-1)
+# data$d_prime <- data$inverse_shields_prime * data$slope^(-1) * (Sg-1) * data$D35 #calculated via shield's parameter and so D35. Remeber error is less than 5% so we good
+# 
+# data$f_prime <- cf *(data$D35/data$d_prime)^(1/3) #Henderson 1966
+# 
+# data$partition <- 1-((data$f_prime*data$Vms^2)/(8*g*data$Rh*data$slope)) #Moog & Jirka 19999
+# data$partition <- ifelse(data$partition < 0, 0, data$partition)
+# 
+# #plot distriubtions of partitions
+# data$flag_depth2 <- ifelse(data$Rh / data$depth >= 0.95, 'inefficient', 'efficient')
+# ggplot(data, aes(x=partition, y=Rh/depth)) +
+#   geom_point()
+

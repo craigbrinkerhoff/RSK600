@@ -1,0 +1,205 @@
+#################
+##Description: Developing gas exchange model for 'hydraulically wide channels'
+              #It also estimates how many SWOT-observable rivers meet this hydraulically-wide condition
+##Creator: Craig Brinkerhoff
+##Date: Fall 2021
+
+##TO RUN:
+#  1) set the working directory below to the '~/RSK600' directory
+#  2) run script!
+#################
+
+#######SETUP-----------------------------
+library(tidyverse)
+library(colorspace)
+library(cowplot)
+library(segmented)
+theme_set(theme_cowplot())
+
+setwd('C:\\Users\\cbrinkerhoff\\OneDrive - University of Massachusetts\\Ongoing Projects\\RSK600')
+#setwd('C:\\Users\\craig\\Documents\\OneDrive - University of Massachusetts\\Ongoing Projects\\RSK600')
+
+#some constants
+g <- 9.8 #gravitational acceleration [m/s2]
+
+#######READ IN HYDRAULICS DATA FROM BRINKERHOFF ETAL 2019 TO GET SWOT VERSUS INEFFICIENT CHANNELS------------------------------
+data <- read.csv('data\\Brinkerhoff_etal_2019\\field_measurements.csv')
+
+#some necessary filtering
+data <- filter(data, is.finite(chan_width) ==1) %>%
+  filter(is.finite(chan_velocity)==1) %>%
+  filter(is.finite(chan_discharge)==1) %>%
+  filter(is.finite(chan_area)==1) %>%
+  filter(chan_width > 0) %>%
+  filter(chan_velocity > 0) %>%
+  filter(chan_discharge > 0) %>%
+  filter(chan_area > 0) %>%
+  filter(measured_rating_diff %in% c('Excellent', 'EXCL', 'GOOD', 'Good', 'Fair', 'FAIR'))
+
+#imperial to metric
+data$area <- data$chan_area * 0.092903 #ft2 to m2
+data$width <- data$chan_width*0.305 #m
+data$Vms <- data$chan_velocity*0.305 #m/s
+data$depth <- data$area / data$width
+data$slope <- NA #data$SLOPE
+data$Qm3s <- data$chan_discharge * 0.0283 #ft3/s to m3/s
+
+#calculate bankfull width so we can throw out out-of-bank events
+bankfullW = group_by(data, site_no) %>%
+  filter(n() >= 20) %>%
+  mutate(rank = rank(width, ties.method="first")) %>%
+  mutate(n = n()) %>%
+  mutate(desiredRank = round((n+1)/2, digits=0)) %>% #2 for a two year return period
+  mutate(temp = which(rank == desiredRank)) %>%
+  summarise(bankful_width = max(width[temp]))
+data <- left_join(data, bankfullW, 'site_no')
+
+#calculate bankfull depth so we can throw out out-of-bank events
+bankfullD = group_by(data, site_no) %>%
+  filter(n() >= 20) %>%
+  mutate(rank = rank(depth, ties.method="first")) %>%
+  mutate(n = n()) %>%
+  mutate(desiredRank = round((n+1)/2, digits=0)) %>% #2 for a two year return period
+  mutate(temp = which(rank == desiredRank)) %>%
+  summarise(bankful_depth = max(depth[temp]))
+data <- left_join(data, bankfullD, 'site_no')
+
+data <- filter(data, width <= bankful_width)
+data <- filter(data, depth <= bankful_depth)
+
+#######READ IN FIELD DATA COLLECTED FROM USGS REPORT-------------------
+usgs_data <- read.csv('data/additional_USGS_reaeration_data.csv')
+usgs_data$depth <- usgs_data$depth_ft * 0.3048 #ft to m
+usgs_data$width <- usgs_data$width_ft * 0.3048 #ft to m
+usgs_data$Vms <- usgs_data$velocity_fps * 0.3048 #ft to m
+usgs_data$slope <- usgs_data$slope_10_x_4 * 10^-4
+usgs_data$Qm3s <- usgs_data$depth * usgs_data$width * usgs_data$Vms #[m3/s]
+usgs_data$k600 <- usgs_data$k20_1_day * usgs_data$depth * (600/530)^(-1/2) #convert to k in m/dy and to a Sc of 600
+usgs_data_s <- select(usgs_data, 'width', 'Vms', 'depth', 'slope', 'k600', 'Qm3s', 'study')
+
+#######READ IN FIELD DATA WITH K600-------------------
+#Ulseth etal 2019
+ulseth_data <- read.csv('data/Ulseth_etal_2019.csv', fileEncoding="UTF-8-BOM")
+ulseth_data <- ulseth_data[,-8]
+ulseth_data$dataset <- ifelse(ulseth_data$data == 'This Study', 'Ulseth et al. 2019', as.character(ulseth_data$data)) #fix some labeling
+ulseth_data$data <- ifelse(ulseth_data$dataset == 'Raymond et al. 2012', 'Raymond et al. 2012 [5 studies]', as.character(ulseth_data$dataset)) #contains data from 5 studies
+ulseth_data <- filter(ulseth_data, is.na(width)==0) #filter out no width measurements
+ulseth_data_s <- select(ulseth_data, 'width', 'Vms', 'depth', 'slope', 'k600', 'Qm3s')
+ulseth_data_s$study <- 'Ulseth_etal_2019'
+
+#######JOIN DATASETS---------------------------------
+data <- select(data, 'width', 'Vms', 'depth', 'slope', 'Qm3s')
+data$k600 <- NA
+data$study <- 'Brinkerhoff_etal_2019'
+data <- rbind(data, ulseth_data_s, usgs_data_s)
+
+#######CALCULATE CHANNEL GEOMETRY---------------------------------------------------------
+data$Rh <- (data$depth*data$width)/(data$width + 2*data$depth) #hydraulic radius, assuming rectangular channel [m]
+data$ustar <- sqrt(g*data$Rh*data$slope) #friction/shear velocity [m/s]
+
+#######SOME FLAGS FOR SWOT-OBSERVABLE RIVERS AND WHEN RH=H-------------------------------
+data$flag_swot <- ifelse(data$width >= 100, 'SWOT', 'Small')
+data$flag_hydraulicWide <- ifelse(data$Rh/data$depth > 0.96, 'Rh=H', 'Rh=/=H') #set to 95% just to get idea of number of SWOT measurements that generally meet this condition
+
+#########HOW MANY SWOT MEASUREMENTS MEET THE RH/H CONDITION?
+percs <- group_by(data, flag_swot, flag_hydraulicWide) %>% summarise(n=n()) %>% group_by(flag_swot) %>% mutate(perc = 100 * n/sum(n))
+write.csv(percs, 'cache/k600_theory/Rh_H_percents.csv')
+
+##########PLOT CDF OF SWOT OBSERVATIONS
+swot_cdf <- ggplot(data[data$width > 100,], aes(x=Rh/depth*100)) +
+  stat_ecdf(size=3, color='#fc8d62') + 
+  xlim(0,100) +
+  xlab('Rh/H ratio [%]') +
+  ylab('Density')+
+  ggtitle('Swot-Observable Rivers')+
+  theme(axis.text=element_text(size=19),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        legend.position = 'none')
+
+#######LOG TRANSFORM SOME VARIABLES-----------------------------------------------------------
+data$log_slope <- log(data$slope)
+
+######## K600 MODEL--------------------
+#hydraulically-wide rivers
+data <- filter(data, study %in% c('Ulseth_etal_2019', 'Churchill_etal_1962', 'Owens_etal_1964'))
+data$flag_hydraulicWide <- ifelse(data$Rh/data$depth >= 0.99, 'Rh=H', 'Rh=/=H')
+
+hydraulicallyWide <- filter(data, flag_hydraulicWide == 'Rh=H')
+
+#fit classic small-eddy model
+hydraulicallyWide$hydraulicallyWideModel <- g^(3/8)*hydraulicallyWide$slope^(3/8)*hydraulicallyWide$depth^(1/8)
+lm_hydraulicallyWide_smallEddy <- lm(k600~hydraulicallyWideModel+0, data=hydraulicallyWide)
+hydraulicallyWide$k600_pred_wideHydraulics <- predict(lm_hydraulicallyWide_smallEddy, hydraulicallyWide)
+wideRiverModel_smallEddy <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
+  geom_point(size=5, color='#bebada') +
+  geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
+  geom_smooth(method='lm')+
+  annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_smallEddy)$r.squared,2)), x = 1, y = 100, size = 8, colour = "purple")+
+  labs(x = expression(bold(paste(alpha*(gS)^(3/8)*H^(1/8), ' [', m, '/', dy, ']'))),
+       y = expression(bold(paste(k[600], ' [', m, '/', dy, ']'))))+
+  scale_y_log10(
+                breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", scales::math_format(10^.x))) +
+  scale_x_log10(
+                breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", scales::math_format(10^.x)))+
+  annotation_logticks()+
+  ggtitle('Hydraulically-wide\nsmall-eddy model')+
+  theme(axis.text=element_text(size=19),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        legend.position = 'none')
+
+#fit chainsaw model
+hydraulicallyWide$hydraulicallyWideModel <- (g*hydraulicallyWide$slope)^(9/16)*hydraulicallyWide$depth^(11/16)
+lm_hydraulicallyWide_chainsaw <- lm(k600~hydraulicallyWideModel+0, data=hydraulicallyWide)
+hydraulicallyWide$k600_pred_wideHydraulics <- (predict(lm_hydraulicallyWide_chainsaw, hydraulicallyWide))
+wideRiverModel_chainsaw <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
+  geom_point(size=5, color='#bebada') +
+  geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
+  geom_smooth(method='lm')+
+  annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_chainsaw)$r.squared,2)), x = 1, y = 100, size = 8, colour = "purple")+
+  labs(x = expression(bold(paste(beta*(gS)^(9/16)*H^(11/16), ' [', m, '/', dy, ']'))),
+       y = expression(bold(paste(k[600], ' [', m, '/', dy, ']'))))+
+  scale_y_log10(
+                breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", scales::math_format(10^.x))) +
+  scale_x_log10(
+                breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", scales::math_format(10^.x)))+
+  annotation_logticks()+
+  ggtitle('Hydraulically-wide\nchainsaw model')+
+  theme(axis.text=element_text(size=19),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        legend.position = 'none')
+
+#bring it allllllllll together
+text1 <- ggdraw() + 
+  draw_label(paste0(round(percs[percs$flag_swot == 'SWOT' & percs$flag_hydraulicWide == 'Rh=H',]$perc, 0), "% of the SWOT observable\nmeasurements are\nhydraulically wide\n(n=", sum(percs$n), ')'),
+             fontface = 'bold', x = 0.5, y=0.5, size = 25, color='#fc8d62')
+
+k600_modelPlot <- plot_grid(wideRiverModel_smallEddy, wideRiverModel_chainsaw, swot_cdf, text1, ncol=2, label_size = 18, labels=c('a', 'b'))
+ggsave('cache\\k600_theory\\k600Plot.jpg', k600_modelPlot, height=9, width=10)
+
+#######WRITE CHAINSAW MODEL TO FILE-------------------------------
+models <- data.frame('name'=c('Chainsaw', 'Small-eddy'), 
+                     'r2'=c(summary(lm_hydraulicallyWide_chainsaw)$r.squared, summary(lm_hydraulicallyWide_smallEddy)$r.squared),
+                     'coef'=c(summary(lm_hydraulicallyWide_chainsaw)$coefficient[1], summary(lm_hydraulicallyWide_smallEddy)$coefficient[1]))
+write.csv(models, 'cache\\k600_theory\\hydraulicWide_models.csv')
+
+#######PRINT MODELS FOR PRIOR SPECIFICATIONS. THESE ARE MANUALLY IMPLEMENTED WITHIN BIKER BUT ARE CALCULATED USING THIS DATASET--------------------------
+#khat prior model for BIKER. Basically the k model without depth as it isn't SWOT observable
+hydraulicallyWide$term <- (g*hydraulicallyWide$slope)^(9/16)
+lmPrior <- lm((k600)~term+0, data=hydraulicallyWide)
+summary(lmPrior)
+
+#model coefficient
+summary(lmPrior)$coefficient[1]
+
+#log_khat prior uncertainty is the standard error of the lmPrior model
+summary(lmPrior)$sigma

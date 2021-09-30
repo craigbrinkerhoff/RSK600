@@ -14,17 +14,9 @@ Note that the actual algorithm is written as an R package and available at https
 - To run the algorithm validation, set working directory to '~/RSK600/'. Then, execute 'run.sh' as a bash script. Options for how this job is submitted are stored in that file as well and are up to the user.
 
 ## To generate manuscript
-The manuscript for this project is under development and written in RMarkdown. The most recent version is stored in the main directory, while old versions are stored in '~/docs/'. To generate the manuscript as a .docx file, just run 'generateMS.R'. This will pull all figures and results from the analysis outputs in order to have 100% reproducibility. Note that it can only be generated on an HPC if pandoc is installed.
+The manuscript for this project is under development and written in RMarkdown. The most recent version is stored in the main directory, while old versions are stored in '~/docs/'. To generate the manuscript as a .docx file (pre-formatted correctly for submission to an AGU journal), just run 'generateMS.R'. This will pull all figures and results from the analysis outputs in order to have 100% reproducibility. Note that this code was written to be run locally and not on an HPC.
 
-The 'word-styles-reference.docx' file, as well as the '.lua' files are required to generate a correctly-formatted manuscript in docx format from an RMarkdown file. The .lua files are borrowed from the 'lua-filters' package (https://github.com/pandoc/lua-filters) which facilitate formatting multiple authors with different affiliations between pandoc parsing and writing to docx/pdf (https://pandoc.org/lua-filters.html). This all requires the most recent version of pandoc to be installed (of which your RStudio install may have an outdated version). Note that pandoc is a command-line tool and completely seperate from R. However, one can easily install pandoc from the R console using the following code:
-
-```
-  # installing/loading the installr package:
-  if(!require(installr)) { install.packages("installr"); require(installr)} #load / install+load installr
-  
-  # Installing pandoc
-  install.pandoc()
-```
+If you are curious about the workflow behind producing a 'ready-to-submit' manuscript in Word format, I have a set of notes that details the process. Just ask!
 
 ## Questions
 Feel free to reach out at cbrinkerhoff[at]umass[dot]edu!

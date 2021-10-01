@@ -1,7 +1,8 @@
 #!/bin/bash
-#SBATCH -c 8  # Number of Cores per Task
+#SBATCH --job-name='BIKER'
+#SBATCH -c 48  # Number of Cores per Task
 #SBATCH -p cee_water_cjgleason
-#SBATCH --mem=25000  # Requested Memory
+#SBATCH --mem=125000  # Requested Memory
 #SBATCH -t 500:00:00  # Job time limit
 #SBATCH -o out.txt  # %j = job ID
 #SBATCH -e err.txt

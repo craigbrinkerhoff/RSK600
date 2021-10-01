@@ -1,14 +1,14 @@
 version: 0.10.1
 data_loading: TRUE
 data_loading_header: TRUE
-data_ignore:
+data_ignore: reaeration_data_notes.csv
 cache_loading: TRUE
 recursive_loading: FALSE
 munging: TRUE
 logging: FALSE
 logging_level: INFO
 load_libraries: TRUE
-libraries: reshape2, plyr, stringr, lubridate, dplyr, ggplot2, tidyr, readr, parallel, ncdf4, lubridate, segmented, Metrics, cowplot, grid, RColorBrewer, colorspace, ggfortify, devtools, BIKER, hydroGOF
+libraries: reshape2, plyr, stringr, lubridate, dplyr, ggplot2, tidyr, readr, parallel, ncdf4, lubridate, Metrics, cowplot, grid, gridExtra, RColorBrewer, colorspace, ggfortify, devtools, BIKER
 as_factors: FALSE
 tables_type: tibble
 attach_internal_libraries: FALSE

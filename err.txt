@@ -1,7 +1,4 @@
-
-The following have been reloaded with a version change:
-  1) gcc/10.2.0 => gcc/9.3.0
-
+/var/spool/slurm/slurmd/job1582808/slurm_script: line 10: /home/cbrinkerhoff_umass_edu/.bashrc: No such file or directory
 Project name: RSK600
 Loading project configuration
 Autoloading packages
@@ -56,8 +53,6 @@ Loading required package: parallel
  Loading package: ncdf4
 Loading required package: ncdf4
  Loading package: lubridate
- Loading package: segmented
-Loading required package: segmented
  Loading package: Metrics
 Loading required package: Metrics
  Loading package: cowplot
@@ -71,6 +66,15 @@ The following object is masked from 'package:lubridate':
 
  Loading package: grid
 Loading required package: grid
+ Loading package: gridExtra
+Loading required package: gridExtra
+
+Attaching package: 'gridExtra'
+
+The following object is masked from 'package:dplyr':
+
+    combine
+
  Loading package: RColorBrewer
 Loading required package: RColorBrewer
  Loading package: colorspace
@@ -82,29 +86,13 @@ Loading required package: devtools
 Loading required package: usethis
  Loading package: BIKER
 Loading required package: BIKER
- Loading package: hydroGOF
-Loading required package: hydroGOF
-Loading required package: zoo
-
-Attaching package: 'zoo'
-
-The following objects are masked from 'package:base':
-
-    as.Date, as.Date.numeric
-
-
-Attaching package: 'hydroGOF'
-
-The following objects are masked from 'package:Metrics':
-
-    mae, mse, rmse
-
 Autoloading helper functions
  Running helper script: functions.R
  Running helper script: inputs.R
 Autoloading data
  Loading cached data set: Beauliu2012
  Loading cached data set: Ulseth_etal_2019
+ Loading cached data set: additional_USGS_reaeration_data
  Loading cached data set: dataLocations
 Munging data
 
@@ -112,17 +100,1073 @@ Munging data
 cols(
   X1 = col_double(),
   river = col_character(),
-  timestep = col_double(),
-  sa = col_double(),
-  FCO2_obs = col_double(),
-  FCO2_BIKER = col_double(),
-  FCO2_BIKER_low = col_double(),
-  FCO2_BIKER_high = col_double(),
-  FCO2_raymond2012 = col_double(),
-  FCO2_raymond2013 = col_double(),
-  FCO2_brinkerhoff2019 = col_double()
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
 )
 
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  time = col_double(),
+  kobs = col_double(),
+  kest_mean = col_double(),
+  kest_low = col_double(),
+  kest_high = col_double(),
+  kest_sd = col_double(),
+  errFlag = col_double(),
+  Wobs = col_double(),
+  Sobs = col_double(),
+  Dobs = col_double()
+)
+
+There were 50 or more warnings (use warnings() to see the first 50)
 
 -- Column specification --------------------------------------------------------
 cols(
@@ -859,5 +1903,28 @@ cols(
   FCO2_brinkerhoff2019 = col_double()
 )
 
-`geom_smooth()` using formula 'y ~ x'
+
+-- Column specification --------------------------------------------------------
+cols(
+  X1 = col_double(),
+  river = col_character(),
+  timestep = col_double(),
+  sa = col_double(),
+  FCO2_obs = col_double(),
+  FCO2_BIKER = col_double(),
+  FCO2_BIKER_low = col_double(),
+  FCO2_BIKER_high = col_double(),
+  FCO2_raymond2012 = col_double(),
+  FCO2_raymond2013 = col_double(),
+  FCO2_brinkerhoff2019 = col_double()
+)
+
 There were 48 warnings (use warnings() to see them)
+`summarise()` has grouped output by 'river'. You can override using the `.groups` argument.
+`geom_smooth()` using formula 'y ~ x'
+There were 50 or more warnings (use warnings() to see the first 50)
+`geom_smooth()` using formula 'y ~ x'
+Warning message:
+In predict.lm(lm, interval = "prediction") :
+  predictions on current data refer to _future_ responses
+

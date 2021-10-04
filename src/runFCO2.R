@@ -38,10 +38,10 @@ fun_FCO2_analysis <- function(river) {
   Q_obs[Q_obs<0]=NA
 
   #Sample every 14 days because CO2 data is biweekly (convienantly, average SWOT overpass frequency is 11 days, so close)
-  W_obs = W_obs[,seq(river_start_date, ncol(W_obs), 14)]
-  S_obs = S_obs[,seq(river_start_date, ncol(S_obs), 14)]
-  Q_obs = Q_obs[,seq(river_start_date, ncol(Q_obs), 14)]
-  area = area[,seq(river_start_date, ncol(area), 14)]
+  W_obs = W_obs[,seq(river_start_date, ncol(W_obs), samplingRate)]
+  S_obs = S_obs[,seq(river_start_date, ncol(S_obs), samplingRate)]
+  Q_obs = Q_obs[,seq(river_start_date, ncol(Q_obs), samplingRate)]
+  area = area[,seq(river_start_date, ncol(area), samplingRate)]
 
   #Some NA handling in slopes (borrowed from Frassion etal 2021 BAM runs)-----------------------------------------------------------
   if (any(apply(S_obs,2,sum,na.rm=TRUE) ==0)){ #removes timesteps with all NA slopes
@@ -78,16 +78,16 @@ fun_FCO2_analysis <- function(river) {
   k600_obs <- k600_model(D_obs, S_obs)
   k600_obs <- colMeans(k600_obs, na.rm=T)
   k600_BIKER <- filter(BIKER_results, river == name)$kest_mean
-  k600_BIKER <- k600_BIKER[seq(1, length(k600_BIKER), 14)]
+  k600_BIKER <- k600_BIKER[seq(1, length(k600_BIKER), samplingRate)]
   k600_BIKER_low <- filter(BIKER_results, river == name)$kest_low
-  k600_BIKER_low <- k600_BIKER_low[seq(1, length(k600_BIKER_low), 14)]
+  k600_BIKER_low <- k600_BIKER_low[seq(1, length(k600_BIKER_low), samplingRate)]
   k600_BIKER_high <- filter(BIKER_results, river == name)$kest_high
-  k600_BIKER_high <- k600_BIKER_high[seq(1, length(k600_BIKER_high), 14)]
-  k600_raymond2012 <- k600_ustar_craig(D_raymond2012, S_obs)
+  k600_BIKER_high <- k600_BIKER_high[seq(1, length(k600_BIKER_high), samplingRate)]
+  k600_raymond2012 <- k600_model(D_raymond2012, S_obs)
   k600_raymond2012 <- colMeans(k600_raymond2012, na.rm=T)
-  k600_raymond2013 <- k600_ustar_craig(D_raymond2013, S_obs)
+  k600_raymond2013 <- k600_model(D_raymond2013, S_obs)
   k600_raymond2013 <- colMeans(k600_raymond2013, na.rm=T)
-  k600_brinkerhoff2019 <- k600_ustar_craig(D_brinkerhoff2019, S_obs)
+  k600_brinkerhoff2019 <- k600_model(D_brinkerhoff2019, S_obs)
   k600_brinkerhoff2019 <- colMeans(k600_brinkerhoff2019, na.rm=T)
 
   #Calculate FCO2 and Sc using Beauliu data-------------------------------------------
@@ -140,6 +140,19 @@ fun_FCO2_analysis <- function(river) {
     write.csv(for_plot, paste0('cache/FCO2/by_river/results_', name, '.csv'))
 }
 
+#...................................................................................................................................
+
+###########
+##MAKE SURE BY RIVER RESULTS ARE FOR THIS SESSION--------------
+###########
+fold <- 'cache/FCO2/by_river'
+
+# get all files in the directories, recursively
+f <- list.files(fold, include.dirs = F, full.names = T, recursive = T)
+# remove the files
+file.remove(f)
+
+#create dummy slope df (used in function above)
 s <- data.frame('river'=NA, 'meanS'=NA)
 
 #################

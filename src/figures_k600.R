@@ -14,6 +14,9 @@ print('validating BIKER...')
 results <- read.csv('cache/validation/BIKER_validation_results.csv')
 full_output <- filter(results, errFlag == 0) #remove results with SWOT measurement error
 
+#full_output <- group_by(full_output, river) %>%
+#  slice(seq(1, n(), samplingRate))
+
 #Calculate r2 and rmse metrics
 lm_kfit <- lm(log10(full_output$kest_mean)~log10(full_output$kobs))
 r2 <- round(summary(lm_kfit)$r.squared, 2)
@@ -28,17 +31,19 @@ full_output <- cbind(full_output, predInts)
 ##MODEL VALIDATION ACROSS ALL RIVERS AND TIMESTEPS--------------------------------------------------------
 ####################
 valPlot <- ggplot(full_output, aes(x=(kobs), y=(kest_mean))) +
-  geom_abline(size=2, linetype='dashed', color='black') +
   geom_pointrange(aes(ymin = kest_low, ymax = kest_high), fatten=10, fill='#1b9e77', pch=21, color='black') +
   geom_smooth(size=2, color='darkgrey', method='lm', se=F)+
   geom_line(aes(y=10^(lwr)), color='darkgrey', linetype='dashed', size=1.75) +
   geom_line(aes(y=10^(upr)), color='darkgrey', linetype='dashed', size=1.75) +
+  geom_abline(size=2, linetype='dashed', color='black') +
   xlab('k600 via observed \ndepth [m/dy]') +
   ylab('BIKER k600 [m/dy]') +
   scale_y_log10(
+      limits = c(10^-1, 10^2),
       breaks = scales::trans_breaks("log10", function(x) 10^x),
       labels = scales::trans_format("log10", scales::math_format(10^.x)))+
   scale_x_log10(
+      limits = c(10^-1, 10^2),
       breaks = scales::trans_breaks("log10", function(x) 10^x),
       labels = scales::trans_format("log10", scales::math_format(10^.x)))+
   scale_color_discrete_qualitative(palette = 'Harmonic') +
@@ -47,8 +52,8 @@ valPlot <- ggplot(full_output, aes(x=(kobs), y=(kest_mean))) +
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold')) +
-  annotate("text", label = paste0('RMSE: ', rmse, ' m/dy'), x = 10^0, y = 10^1, size = 7, colour = "black")+
-  annotate("text", label = paste0('r2: ', r2), x = 10^0, y = 10^0.8, size = 7, colour = "black")
+  annotate("text", label = paste0('RMSE: ', rmse, ' m/dy'), x = 10^-0.4, y = 10^1.5, size = 7, colour = "black")+
+  annotate("text", label = paste0('r2: ', r2), x = 10^-0.5, y = 10^1.3, size = 7, colour = "black")
 
 ########################
 ##CALCULATE BY-RIVER ERROR METRICS---------------------------------------------
@@ -87,12 +92,11 @@ plotSWOTreaches <- ggplot(plot_stats, aes(x=key, y=value, fill=factor(errFlag)))
 ############
 ##NRMSE VS AMOUNT OF DATA-----------------------
 ############
-nrmse_vs_n <- ggplot(stats_by_river[stats_by_river$errFlag == 0,], aes(y=nrmse, x=n_data, color=factor(errFlag))) +
-  geom_point(size=6,show.legend=FALSE, alpha=0.75) +
-  geom_hline(yintercept = median(stats_by_river[stats_by_river$errFlag==0,]$nrmse), linetype='dashed')+
+nrmse_vs_n <- ggplot(stats_by_river[stats_by_river$errFlag == 0,]) +
+  geom_point(aes(y=nrmse, x=n_data), color='#7fc97f',size=6) +
+  geom_hline(aes(yintercept = median(stats_by_river[stats_by_river$errFlag==0,]$nrmse)), linetype='dashed', color='darkblue', size=1.5)+
   ylab('NRMSE') +
   xlab('Num. SWOT Observations') +
-  scale_color_brewer(palette = 'Accent', name='', labels=c('No Error', 'SWOT Measurement Error')) +
   theme(legend.position = "bottom",
         axis.text=element_text(size=20),
         axis.title=element_text(size=24,face="bold"),
@@ -102,12 +106,11 @@ nrmse_vs_n <- ggplot(stats_by_river[stats_by_river$errFlag == 0,], aes(y=nrmse, 
 ############
 ##NRMSE VS AMOUNT OF DATA-----------------------
 ############
-nrmse_vs_w <- ggplot(stats_by_river[stats_by_river$errFlag==0,], aes(y=nrmse, x=meanWobs, color=factor(errFlag))) +
-  geom_point(size=6, show.legend=FALSE, alpha=0.75) +
-  geom_hline(yintercept = median(stats_by_river[stats_by_river$errFlag==0,]$nrmse), linetype='dashed')+
+nrmse_vs_w <- ggplot(stats_by_river[stats_by_river$errFlag==0,]) +
+  geom_point(aes(y=nrmse, x=meanWobs),color='#7fc97f', size=6) +
+  geom_hline(aes(yintercept = median(stats_by_river[stats_by_river$errFlag==0,]$nrmse)), linetype='dashed', color='darkblue', size=1.5)+
   xlab('Mean observed width [m]') +
   ylab('NRMSE') +
-  scale_color_brewer(palette = 'Accent', name='', labels=c('No Error', 'SWOT Measurement Error')) +
   scale_x_log10(
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x)))+

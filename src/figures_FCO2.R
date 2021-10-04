@@ -8,7 +8,6 @@ print('validating BIKER + CO2 data...')
 
 `%notin%` <- Negate(`%in%`)
 
-
 ###########
 ##READ IN RESULTS----------------------------------
 ###########
@@ -50,7 +49,8 @@ massFluxes$key <- factor(massFluxes$key,levels = c("FCO2_BIKER", "FCO2_brinkerho
 barPlot_mean <- ggplot(massFluxes, aes(y=sumFCO2, x=key, fill=key)) +
   geom_bar(stat='identity', color='black', size=1.2) +
   geom_errorbar(aes(x=key, ymin=lowCI_sum, ymax=highCI_sum), width=0.4, colour="black", size=1.3)+
-  geom_hline(yintercept = massFluxes[massFluxes$key=='FCO2_obs', ]$sumFCO2, size=1.2, linetype='dashed', color='black') +
+  geom_hline(yintercept = massFluxes[massFluxes$key=='FCO2_obs', ]$sumFCO2, size=1.2, linetype='dashed', color='#ff7f00') +
+  ylim(0,5.5)+
   ylab('Mean [tG-C/yr]') +
   xlab('Depth Model') +
   scale_fill_brewer(palette = 'Set1', name='', labels=c('BIKER \n ', 'Brinkerhoff \n2019', 'Raymond \n2012', 'Raymond \n2013', 'Observed \n ')) +
@@ -66,7 +66,8 @@ barPlot_mean <- ggplot(massFluxes, aes(y=sumFCO2, x=key, fill=key)) +
 barPlot_median <- ggplot(massFluxes, aes(y=medianFCO2, x=key, fill=key)) +
   geom_bar(stat='identity', color='black', size=1.2) +
   geom_errorbar(aes(x=key, ymin=lowCI_med, ymax=highCI_med), width=0.4, colour="black", size=1.3)+
-  geom_hline(yintercept = massFluxes[massFluxes$key=='FCO2_obs', ]$medianFCO2, size=1.2, linetype='dashed', color='black') +
+  geom_hline(yintercept = massFluxes[massFluxes$key=='FCO2_obs', ]$medianFCO2, size=1.2, linetype='dashed', color='#ff7f00') +
+  ylim(0,5.5)+
   ylab('Median [tG-C/yr]') +
   xlab('Depth Model') +
   scale_fill_brewer(palette = 'Set1', name='', labels=c('BIKER \n ', 'Brinkerhoff \n2019', 'Raymond \n2012', 'Raymond \n2013', 'Observed \n ')) +
@@ -95,17 +96,19 @@ output <- cbind(output, predInts)
 
 #overall FCO2 validation plot
 flux_plot<- ggplot(output, aes(x=(FCO2_obs), y=(FCO2_BIKER), color=key)) +
-  geom_pointrange(aes(ymin = FCO2_BIKER_low, ymax = FCO2_BIKER_high), fatten=10, fill='#1b9e77', pch=21, color='black') +
+  geom_pointrange(aes(ymin = FCO2_BIKER_low, ymax = FCO2_BIKER_high), fatten=10, fill='#e41a1c', pch=21, color='black') +
   geom_smooth(size=2, color='grey', method='lm', se=F)+
   geom_line(aes(y=10^(lwr)), color='grey', linetype='dashed', size=1.75) +
   geom_line(aes(y=10^(upr)), color='grey', linetype='dashed', size=1.75) +
   geom_abline(size=2, linetype='dashed', color='black') +
-  xlab('FCO2 via observed \nshear velocity [g-C/m2*dy]') +
+  xlab('FCO2 via observed \ndepth [g-C/m2*dy]') +
   ylab('FCO2 via BIKER [g-C/m2*dy]') +
   scale_y_log10(
+    limits = c(10^-2, 10^2),
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x)))+
   scale_x_log10(
+    limits = c(10^-2, 10^2),
     breaks = scales::trans_breaks("log10", function(x) 10^x),
     labels = scales::trans_format("log10", scales::math_format(10^.x)))+
   theme(legend.position = "none",
@@ -113,14 +116,14 @@ flux_plot<- ggplot(output, aes(x=(FCO2_obs), y=(FCO2_BIKER), color=key)) +
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold')) +
-  annotate("text", label = paste0('RMSE: ', rmse, ' g-C/m2*dy'), x = 10^0, y = 10^1.5, size = 7, colour = "black")+
-  annotate("text", label = paste0('r2: ', lmr2), x = 10^0, y = 10^1.2, size = 7, colour = "black")
+  annotate("text", label = paste0('RMSE: ', rmse, ' g-C/m2*dy'), x = 10^-1, y = 10^1.5, size = 7, colour = "black")+
+  annotate("text", label = paste0('r2: ', lmr2), x = 10^-1, y = 10^1.3, size = 7, colour = "black")
 
 #######################
 #BRING VARIOUS FCO2 FIGURES TOGETHER INTO SINGLE FILE AND WRITE TO DISK-----------------------------
 #######################
-FCO2_models <- plot_grid(flux_plot, barPlots, ncol=2, labels='auto')
-ggsave('cache/FCO2/FCO2_models.jpg', FCO2_models, width=15, height=10)
+FCO2_models <- plot_grid(flux_plot, barPlots, ncol=2, labels='auto', label_size=18)
+ggsave('cache/FCO2/FCO2_models.jpg', FCO2_models, width=14, height=8)
 
 ##################
 ##SAVE STATS TO FILES FOR MS MARKDOWN FILE--------------------------------------

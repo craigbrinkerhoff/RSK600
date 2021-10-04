@@ -138,13 +138,13 @@ files <- list.files('data/Frasson_etal_2021/IdealDataxxxxxx', pattern="*.nc", fu
 files2 <- list.files('data/Durand_etal_2016/xxxxxxxxxxxxxxxx', pattern="*.nc", full.names = TRUE) #pepsi 1
 files <- c(files, files2)
 
-sink("stan_text_dump.txt") #send all stan outputs to a dump file so they don't muck up the console
+sink("stan_text_dump.txt") #send all stan outputs to a dump file so they don't muck up the console output
+
 results <- mclapply(files, run_BIKER, 0, mc.cores=cores)
 
-#run with SWOT measurement errors----------------
-files <- list.files('data/Frasson_etal_2021/FullUncertainty', pattern="*.nc", full.names = TRUE)
-
+files <- list.files('data/Frasson_etal_2021/FullUncertainty', pattern="*.nc", full.names = TRUE) #run with SWOT measurement errors
 results <- mclapply(files, run_BIKER, 1, mc.cores=cores)
+
 sink()
 
 #################

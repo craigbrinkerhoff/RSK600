@@ -1,7 +1,7 @@
 version: 0.10.1
 data_loading: TRUE
 data_loading_header: TRUE
-data_ignore: reaeration_data_notes.csv
+data_ignore: reaeration_data_notes.csv, BIKER_priors.csv
 cache_loading: TRUE
 recursive_loading: FALSE
 munging: TRUE

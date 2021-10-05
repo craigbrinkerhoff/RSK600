@@ -132,21 +132,20 @@ hydraulicallyWide <- filter(data, flag_hydraulicWide == 'Rh=H')
 hydraulicallyWide$hydraulicallyWideModel <- g^(3/8)*hydraulicallyWide$slope^(3/8)*hydraulicallyWide$depth^(1/8)
 lm_hydraulicallyWide_smallEddy <- lm(k600~hydraulicallyWideModel+0, data=hydraulicallyWide)
 hydraulicallyWide$k600_pred_wideHydraulics <- predict(lm_hydraulicallyWide_smallEddy, hydraulicallyWide)
-wideRiverModel_smallEddy <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
+plot_smallEddy_eS <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
   geom_point(size=5, color='#bebada') +
   geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
-  geom_smooth(method='lm')+
   annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_smallEddy)$r.squared,2)), x = 1, y = 100, size = 8, colour = "purple")+
   labs(x = expression(bold(paste(alpha*(gS)^(3/8)*H^(1/8), ' [', m, '/', dy, ']'))),
        y = expression(bold(paste(k[600], ' [', m, '/', dy, ']'))))+
-  scale_y_log10(
+  scale_y_log10(limits=c(10^-1,10^2),
                 breaks = scales::trans_breaks("log10", function(x) 10^x),
                 labels = scales::trans_format("log10", scales::math_format(10^.x))) +
-  scale_x_log10(
+  scale_x_log10(limits=c(10^-1,10^2),
                 breaks = scales::trans_breaks("log10", function(x) 10^x),
                 labels = scales::trans_format("log10", scales::math_format(10^.x)))+
   annotation_logticks()+
-  ggtitle('Hydraulically-wide\nsmall-eddy model')+
+  ggtitle('Small-eddy, bed dissipation')+
   theme(axis.text=element_text(size=19),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
@@ -157,21 +156,70 @@ wideRiverModel_smallEddy <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydrau
 hydraulicallyWide$hydraulicallyWideModel <- (g*hydraulicallyWide$slope)^(9/16)*hydraulicallyWide$depth^(11/16)
 lm_hydraulicallyWide_chainsaw <- lm(k600~hydraulicallyWideModel+0, data=hydraulicallyWide)
 hydraulicallyWide$k600_pred_wideHydraulics <- (predict(lm_hydraulicallyWide_chainsaw, hydraulicallyWide))
-wideRiverModel_chainsaw <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
+plot_chainsaw_eS <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
   geom_point(size=5, color='#bebada') +
   geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
-  geom_smooth(method='lm')+
   annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_chainsaw)$r.squared,2)), x = 1, y = 100, size = 8, colour = "purple")+
   labs(x = expression(bold(paste(beta*(gS)^(9/16)*H^(11/16), ' [', m, '/', dy, ']'))),
        y = expression(bold(paste(k[600], ' [', m, '/', dy, ']'))))+
-  scale_y_log10(
+  scale_y_log10(limits=c(10^-1,10^2),
                 breaks = scales::trans_breaks("log10", function(x) 10^x),
                 labels = scales::trans_format("log10", scales::math_format(10^.x))) +
-  scale_x_log10(
+  scale_x_log10(limits=c(10^-1,10^2),
                 breaks = scales::trans_breaks("log10", function(x) 10^x),
                 labels = scales::trans_format("log10", scales::math_format(10^.x)))+
   annotation_logticks()+
-  ggtitle('Hydraulically-wide\nchainsaw model')+
+  ggtitle('Chainsaw, bed dissipation')+
+  theme(axis.text=element_text(size=19),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        legend.position = 'none')
+
+#############
+#form-drag dissipation
+##############
+hydraulicallyWide$hydraulicallyWideModel <- (g*hydraulicallyWide$slope*hydraulicallyWide$Vms)^(1/4)
+lm_hydraulicallyWide_smallEddy <- lm(k600~hydraulicallyWideModel+0, data=hydraulicallyWide)
+hydraulicallyWide$k600_pred_wideHydraulics <- predict(lm_hydraulicallyWide_smallEddy, hydraulicallyWide)
+plot_smallEddy_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
+  geom_point(size=5, color='#bebada') +
+  geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
+  annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_smallEddy)$r.squared,2)), x = 1, y = 100, size = 8, colour = "purple")+
+  labs(x = expression(bold(paste(alpha[1]*(gSU)^(1/4), ' [', m, '/', dy, ']'))),
+       y = expression(bold(paste(k[600], ' [', m, '/', dy, ']'))))+
+  scale_y_log10(limits=c(10^-1,10^2),
+                breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", scales::math_format(10^.x))) +
+  scale_x_log10(limits=c(10^-1,10^2),
+                breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", scales::math_format(10^.x)))+
+  annotation_logticks()+
+  ggtitle('Small-eddy, stream \npower dissipation')+
+  theme(axis.text=element_text(size=19),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        legend.position = 'none')
+
+#fit chainsaw model
+hydraulicallyWide$hydraulicallyWideModel <- (g*hydraulicallyWide$slope)^(7/16)*hydraulicallyWide$Vms^(1/4)*hydraulicallyWide$depth^(9/16)
+lm_hydraulicallyWide_chainsaw <- lm(k600~hydraulicallyWideModel+0, data=hydraulicallyWide)
+hydraulicallyWide$k600_pred_wideHydraulics <- (predict(lm_hydraulicallyWide_chainsaw, hydraulicallyWide))
+plot_chainsaw_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
+  geom_point(size=5, color='#bebada') +
+  geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
+  annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_chainsaw)$r.squared,2)), x = 1, y = 100, size = 8, colour = "purple")+
+  labs(x = expression(bold(paste(beta[1]*(gS)^(7/16)*U^(1/4)*H^(9/16), ' [', m, '/', dy, ']'))),
+       y = expression(bold(paste(k[600], ' [', m, '/', dy, ']'))))+
+  scale_y_log10(limits=c(10^-1,10^2),
+                breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", scales::math_format(10^.x))) +
+  scale_x_log10(limits=c(10^-1,10^2),
+                breaks = scales::trans_breaks("log10", function(x) 10^x),
+                labels = scales::trans_format("log10", scales::math_format(10^.x)))+
+  annotation_logticks()+
+  ggtitle('Chainsaw, stream \npower dissipation')+
   theme(axis.text=element_text(size=19),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
@@ -179,11 +227,13 @@ wideRiverModel_chainsaw <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraul
         legend.position = 'none')
 
 #bring it allllllllll together
-text1 <- ggdraw() + 
-  draw_label(paste0(round(percs[percs$flag_swot == 'SWOT' & percs$flag_hydraulicWide == 'Rh=H',]$perc, 0), "% of the SWOT observable\nmeasurements are\nhydraulically wide\n(n=", sum(percs$n), ')'),
-             fontface = 'bold', x = 0.5, y=0.5, size = 25, color='#fc8d62')
+#text1 <- ggdraw() + 
+#  draw_label(paste0(round(percs[percs$flag_swot == 'SWOT' & percs$flag_hydraulicWide == 'Rh=H',]$perc, 0), "% of the SWOT observable\nmeasurements are\nhydraulically wide\n(n=", sum(percs$n), ')'),
+#             fontface = 'bold', x = 0.5, y=0.5, size = 25, color='#fc8d62')
 
-k600_modelPlot <- plot_grid(wideRiverModel_smallEddy, wideRiverModel_chainsaw, swot_cdf, text1, ncol=2, label_size = 18, labels=c('a', 'b'))
+k600_modelPlot <- plot_grid(plot_smallEddy_eS, plot_chainsaw_eS, plot_smallEddy_eD, plot_chainsaw_eD, ncol=2, label_size = 18, labels=c('a', 'b'))
+
+break
 ggsave('cache\\k600_theory\\k600Plot.jpg', k600_modelPlot, height=9, width=10)
 
 #######WRITE CHAINSAW MODEL TO FILE-------------------------------
@@ -194,7 +244,7 @@ write.csv(models, 'cache\\k600_theory\\hydraulicWide_models.csv')
 
 #######PRINT MODELS FOR PRIOR SPECIFICATIONS. THESE ARE MANUALLY IMPLEMENTED WITHIN BIKER BUT ARE CALCULATED USING THIS DATASET--------------------------
 #khat prior model for BIKER. Basically the k model without depth as it isn't SWOT observable
-hydraulicallyWide$term <- (g*hydraulicallyWide$slope)^(9/16)
+hydraulicallyWide$term <- g^(7/16)*hydraulicallyWide$slope^(9/16)
 lmPrior <- lm((k600)~term+0, data=hydraulicallyWide)
 summary(lmPrior)
 

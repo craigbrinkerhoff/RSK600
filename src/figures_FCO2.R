@@ -4,6 +4,12 @@
 #Date: Fall 2021
 ######################
 
+#for local runs
+library(tidyverse)
+library(cowplot)
+theme_set(theme_cowplot())
+setwd('C:\\Users\\craig\\Documents\\OneDrive - University of Massachusetts\\Ongoing Projects\\RSK600')
+
 print('validating BIKER + CO2 data...')
 
 `%notin%` <- Negate(`%in%`)
@@ -130,3 +136,42 @@ ggsave('cache/FCO2/FCO2_models.jpg', FCO2_models, width=14, height=8)
 #################
 results_all_rivs <- data.frame('rmse'=rmse, 'r2'=lmr2)
 write.csv(results_all_rivs, 'cache/FCO2/fco2_stats_all.csv')
+
+
+
+
+
+#testing--------------------------
+massFluxes_byRiver <- group_by(output, river) %>%
+  filter(n() >= 3) %>% #only keep rivers with at least 3 measurements to get by-river medians
+  gather(key=key, value=value, c(FCO2_BIKER, FCO2_raymond2012, FCO2_raymond2013, FCO2_brinkerhoff2019)) %>%
+  group_by(river, key) %>%
+  summarise(sumFCO2 = mean(value * 1e-12 * 365, na.rm=T)*total_sa, #tG-C/yr from all rivers
+            medianFCO2 = median(value * 1e-12 * 365, na.rm=T)*total_sa,  #tG-C/yr from all rivers
+            obsFCO2 = mean(FCO2_obs * 1e-12 * 365, na.rm=T)*total_sa)
+
+stats <- group_by(massFluxes_byRiver, key) %>%
+  summarise(rmse = Metrics::rmse(obsFCO2, medianFCO2),
+            r2 = summary(lm(medianFCO2~obsFCO2))$r.squared,
+            bias =   Metrics::bias(obsFCO2, medianFCO2))
+
+massFluxes_models <- group_by(massFluxes_byRiver, key) %>%
+  do(model = lm((medianFCO2)~(obsFCO2), data=.)) %>%
+  mutate(r2 = summary(model)$r.squared,
+         slope = model$coefficients[2],
+         int = (model$coefficients[1]))
+
+ggplot(massFluxes_byRiver[massFluxes_byRiver$key == 'FCO2_brinkerhoff2019',], aes(x= obsFCO2, y=medianFCO2, color=key)) +
+  geom_point(size=5, alpha=0.50)+
+  geom_smooth(method='lm', se=F, size=5) +
+  geom_abline(size=2, linetype='dashed') +
+  scale_color_brewer(palette = 'Set1', name='', labels=c('BIKER \n ', 'Brinkerhoff \n2019', 'Raymond \n2012', 'Raymond \n2013')) +
+  xlim(0,15)+
+  ylim(0,15)+
+  xlab('Mean River Efflux \nvia observed depth [tG-C/yr]') +
+  ylab('Mean Predicted River Efflux [tG-C/yr]')+
+  theme(legend.position = "right",
+        axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'))

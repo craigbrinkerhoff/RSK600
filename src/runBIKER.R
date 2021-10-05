@@ -21,12 +21,14 @@ run_BIKER <- function(currPepsi, errFlag) {
   H_obs=ncvar_get(data_in,'Reach_Timeseries/H')
   S_obs = ncvar_get(data_in, 'Reach_Timeseries/S')
   area = ncvar_get(data_in, 'Reach_Timeseries/A')
+  Q_obs=ncvar_get(data_in,'Reach_Timeseries/Q')
 
   #prep river hydraulics-----------------------------------------------------------
   S_obs[S_obs<=0]=NA
   S_obs[is.na(S_obs)] = 0.000017 #min obs SWOT slope Biancarma etal 2016
   W_obs[W_obs<0]=NA
   H_obs[H_obs<0]=NA
+  Q_obs[Q_obs<0]=NA
   area[area<0]=NA
 
   #Some NA handling in slopes (borrowed from Frassion etal 2021 BAM runs)-----------------------------------------------------------
@@ -36,6 +38,7 @@ run_BIKER <- function(currPepsi, errFlag) {
     W_obs=W_obs[,-remove_index]
     H_obs=H_obs[,-remove_index]
     S_obs=S_obs[,-remove_index]
+    Q_obs=Q_obs[,-remove_index]
     area=area[,-remove_index]
   }
 
@@ -45,6 +48,7 @@ run_BIKER <- function(currPepsi, errFlag) {
     W_obs=W_obs[-remove_index,]
     H_obs=H_obs[-remove_index,]
     S_obs=S_obs[-remove_index,]
+    Q_obs=Q_obs[,-remove_index]
     area=area[,-remove_index]
   }
 
@@ -74,16 +78,18 @@ run_BIKER <- function(currPepsi, errFlag) {
 
     #calculate observed k600 with no measurement error
     Dtrue <- area/Wtrue
+    V_obs <- Q_obs/area
     #Rhtrue <- area / (Wtrue + 2*Dtrue)
-    k_obs <- k600_model(Dtrue, Strue) #k600 equation
+    k_obs <- k600_model(Dtrue, Strue, V_obs) #k600 equation
     k_obs <- colMeans(k_obs, na.rm=T)
   }
 
   #Calculate observed k600 with no measurement error
   else {
-    D_obs <- area/W_obs
+    D_obs <- area/W_obs #[m]
+    V_obs <- Q_obs/area #[m/s]
     #Rh_obs <- area / (W_obs + 2*D_obs)
-    k_obs <- k600_model(D_obs, S_obs) #k600 equation
+    k_obs <- k600_model(D_obs, S_obs, V_obs) #k600 equation
     k_obs <- colMeans(k_obs, na.rm=T)
   }
 

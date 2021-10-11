@@ -1,4 +1,4 @@
-/var/spool/slurm/slurmd/job1583299/slurm_script: line 10: /home/cbrinkerhoff_umass_edu/.bashrc: No such file or directory
+/var/spool/slurm/slurmd/job1584512/slurm_script: line 10: /home/cbrinkerhoff_umass_edu/.bashrc: No such file or directory
 Project name: RSK600
 Loading project configuration
 Autoloading packages
@@ -86,6 +86,24 @@ Loading required package: devtools
 Loading required package: usethis
  Loading package: BIKER
 Loading required package: BIKER
+ Loading package: hydroGOF
+Loading required package: hydroGOF
+Loading required package: zoo
+
+Attaching package: 'zoo'
+
+The following objects are masked from 'package:base':
+
+    as.Date, as.Date.numeric
+
+
+Attaching package: 'hydroGOF'
+
+The following objects are masked from 'package:Metrics':
+
+    mae, mse, rmse
+
+ Loading package: zoo
 Autoloading helper functions
  Running helper script: functions.R
  Running helper script: inputs.R
@@ -848,11 +866,28 @@ cols(
 )
 
 There were 47 warnings (use warnings() to see them)
+-- Attaching packages --------------------------------------- tidyverse 1.3.1 --
+v tibble  3.1.1     v forcats 0.5.1
+v purrr   0.3.4     
+-- Conflicts ------------------------------------------ tidyverse_conflicts() --
+x dplyr::arrange()         masks plyr::arrange()
+x lubridate::as.difftime() masks base::as.difftime()
+x gridExtra::combine()     masks dplyr::combine()
+x purrr::compact()         masks plyr::compact()
+x dplyr::count()           masks plyr::count()
+x lubridate::date()        masks base::date()
+x dplyr::failwith()        masks plyr::failwith()
+x dplyr::filter()          masks stats::filter()
+x dplyr::id()              masks plyr::id()
+x lubridate::intersect()   masks base::intersect()
+x dplyr::lag()             masks stats::lag()
+x dplyr::mutate()          masks plyr::mutate()
+x dplyr::rename()          masks plyr::rename()
+x lubridate::setdiff()     masks base::setdiff()
+x cowplot::stamp()         masks lubridate::stamp()
+x dplyr::summarise()       masks plyr::summarise()
+x dplyr::summarize()       masks plyr::summarize()
+x lubridate::union()       masks base::union()
 `summarise()` has grouped output by 'river'. You can override using the `.groups` argument.
-`geom_smooth()` using formula 'y ~ x'
-There were 50 or more warnings (use warnings() to see the first 50)
-`geom_smooth()` using formula 'y ~ x'
 Warning message:
-In predict.lm(lm, interval = "prediction") :
-  predictions on current data refer to _future_ responses
-
+Removed 1 rows containing missing values (geom_text). 

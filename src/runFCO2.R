@@ -64,18 +64,26 @@ fun_FCO2_analysis <- function(river) {
 
   s <- rbind(s, data.frame('river'=river, meanS=mean(S_obs, na.rm=T)))
 
-  #calculate observed average flow depth
+  #calculate observed average flow depth and veocity
+  V_obs <- Q_obs / area #[m/s]
   D_obs <- area / W_obs #[m]
 
-  #Calculate rating curves following suite of rating curve models [m/s]
+  #Calculate depth rating curves following suite of rating curve models [m/s]
   D_raymond2012 <- exp(-0.895)*Q_obs^0.294
   D_raymond2013 <- exp(1/(1.86*-1.06))*Q_obs^(1-0.51-0.12)
   d <- data.frame(D_raymond2012, D_raymond2013)
   D_raymond2013 <- rowMeans(d)
   D_brinkerhoff2019 <- 0.265191*Q_obs^(0.39496) #Brinkerhoff etal 2019, estimated in CONUS_CO2 code
 
+  #Calculate velocity rating curves following suite of rating curve models [m/s]
+  V_raymond2012 <- exp(-1.64)*Q_obs^0.285
+  V_raymond2013 <- exp(-1.06)*V_obs^(0.12)
+  v <- data.frame(V_raymond2012, V_raymond2013)
+  V_raymond2013 <- rowMeans(v)
+  V_brinkerhoff2019 <- (1/(0.265191*13.28524))*Q_obs^(1-0.39496-0.413728) #Brinkerhoff etal 2019, estimated in CONUS_CO2 code
+
   #Generate k600 estimates [m/dy]---------------------------
-  k600_obs <- k600_model(D_obs, S_obs)
+  k600_obs <- k600_model(D_obs, S_obs, V_obs)
   k600_obs <- colMeans(k600_obs, na.rm=T)
   k600_BIKER <- filter(BIKER_results, river == name)$kest_mean
   k600_BIKER <- k600_BIKER[seq(1, length(k600_BIKER), samplingRate)]
@@ -83,11 +91,11 @@ fun_FCO2_analysis <- function(river) {
   k600_BIKER_low <- k600_BIKER_low[seq(1, length(k600_BIKER_low), samplingRate)]
   k600_BIKER_high <- filter(BIKER_results, river == name)$kest_high
   k600_BIKER_high <- k600_BIKER_high[seq(1, length(k600_BIKER_high), samplingRate)]
-  k600_raymond2012 <- k600_model(D_raymond2012, S_obs)
+  k600_raymond2012 <- k600_model(D_raymond2012, S_obs, V_raymond2012)
   k600_raymond2012 <- colMeans(k600_raymond2012, na.rm=T)
-  k600_raymond2013 <- k600_model(D_raymond2013, S_obs)
+  k600_raymond2013 <- k600_model(D_raymond2013, S_obs, V_raymond2013)
   k600_raymond2013 <- colMeans(k600_raymond2013, na.rm=T)
-  k600_brinkerhoff2019 <- k600_model(D_brinkerhoff2019, S_obs)
+  k600_brinkerhoff2019 <- k600_model(D_brinkerhoff2019, S_obs, V_brinkerhoff2019)
   k600_brinkerhoff2019 <- colMeans(k600_brinkerhoff2019, na.rm=T)
 
   #Calculate FCO2 and Sc using Beauliu data-------------------------------------------
@@ -158,7 +166,7 @@ s <- data.frame('river'=NA, 'meanS'=NA)
 #################
 ##READ IN DATA--------------------------------
 #################
-#Beaulieu timeseries
+#Beaulieu timeseries wrangling
 data <- read.csv('data/Beauliu2012.csv', header = TRUE)
 data <- data[5:30,] #only keep 26 biweekly sample so they reflect a single year (fall 2009-winter/spring/summer 2008). This amounts to
 Data <- select(data, c(Date, CO2, Temperature))
@@ -167,8 +175,10 @@ Data$Date <- format(Data$Date, format="%m-%d")
 Data <- Data[order(Data$Date),]
 colnames(Data) <- c('Date', 'CO2_umol_L', 'Water_temp_C')
 Data$Water_temp_C <- as.numeric(as.character(Data$Water_temp_C))
-Data$CO2_mol_L <- as.numeric(as.character(Data$CO2_umol_L))*0.000001
-Data$CO2_uatm <- (Data$CO2_mol_L*1e6) * 1/(exp(henrys_law_func(Data$Water_temp_C))*998*0.001)
+
+#Beaulieu timeseries unit conversions
+Data$CO2_mol_L <- as.numeric(as.character(Data$CO2_umol_L))*0.000001 #mol/L to mol/m3
+Data$CO2_uatm <- (Data$CO2_mol_L*1e6) * 1/(exp(henrys_law_func(Data$Water_temp_C))*998*0.001) #mol/m3 to uatm
 
 #(((((quick detour to make beaulieu timeseries plot for supplement)))))))))
 beaulieu <- ggplot(data=Data, aes(y=CO2_uatm, x=Date)) +
@@ -184,7 +194,7 @@ ggsave('cache/FCO2/Beaulieu_timeseries.jpg', beaulieu, width=15, height=6)
 BIKER_results <- read.csv('cache/validation/BIKER_validation_results.csv')
 BIKER_results <- filter(BIKER_results, errFlag == 0)
 
-#SWOT rivers (Frasson etal 2021 + Durand etal 2016)--------------------------------------------
+#read in SWOT rivers (Frasson etal 2021 + Durand etal 2016), no measurement error--------------------------------------------
 files <- list.files('data/Frasson_etal_2021/IdealDataxxxxxx', pattern="*.nc", full.names = TRUE) #pepsi 2
 files2 <- list.files('data/Durand_etal_2016/xxxxxxxxxxxxxxxx', pattern="*.nc", full.names = TRUE) #pepsi 1
 files <- c(files, files2)

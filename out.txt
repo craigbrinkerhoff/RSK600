@@ -1,4 +1,2 @@
 [1] "starting FCO2..."
-[1] "validating BIKER..."
 [1] "validating BIKER + CO2 data..."
-[1] 4698297004

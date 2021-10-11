@@ -22,6 +22,7 @@ run_BIKER <- function(currPepsi, errFlag) {
   S_obs = ncvar_get(data_in, 'Reach_Timeseries/S')
   area = ncvar_get(data_in, 'Reach_Timeseries/A')
   Q_obs=ncvar_get(data_in,'Reach_Timeseries/Q')
+  priorQ <- ncvar_get(data_in, 'River_Info/QWBM')
 
   #prep river hydraulics-----------------------------------------------------------
   S_obs[S_obs<=0]=NA
@@ -57,15 +58,19 @@ run_BIKER <- function(currPepsi, errFlag) {
   if (errFlag == 1){
     Wtrue=ncvar_get(data_in,'Reach_Timeseries/Wtrue') #observed W and S with no measurement error
     Strue = ncvar_get(data_in, 'Reach_Timeseries/Strue')
+    Htrue = ncvar_get(data_in, 'Reach_Timeseries/Htrue')
+
     Strue[Strue<=0]=NA
     Strue[is.na(Strue)] = 0.000017 #min obs SWOT slope Biancarma etal 2016
     Wtrue[Wtrue<0]=NA
+    Htrue[Htrue<0]=NA
 
     #Some NA handling in slopes (borrowed from Frassion etal 2021 BAM runs)-----------------------------------------------------------
     if (any(apply(Strue,2,sum,na.rm=TRUE) ==0)){ #removes timesteps with all NA slopes
       remove_index =  which((apply(Strue,2,sum,na.rm=TRUE) ==0) ==TRUE)
 
       Wtrue=Wtrue[,-remove_index]
+      Htrue=Htrue[,-remove_index]
       Strue=Strue[,-remove_index]
     }
 
@@ -73,13 +78,16 @@ run_BIKER <- function(currPepsi, errFlag) {
       remove_index =  which((apply(Strue,1,sum,na.rm=TRUE) ==0) ==TRUE)
 
       Wtrue=Wtrue[-remove_index,]
+      Htrue=Htrue[,-remove_index]
       Strue=Strue[-remove_index,]
     }
 
     #calculate observed k600 with no measurement error
     Dtrue <- area/Wtrue
     V_obs <- Q_obs/area
+    dA_obs <- calcdA_mat(Wtrue,Htrue) #[m2]
     #Rhtrue <- area / (Wtrue + 2*Dtrue)
+
     k_obs <- k600_model(Dtrue, Strue, V_obs) #k600 equation
     k_obs <- colMeans(k_obs, na.rm=T)
   }
@@ -88,18 +96,17 @@ run_BIKER <- function(currPepsi, errFlag) {
   else {
     D_obs <- area/W_obs #[m]
     V_obs <- Q_obs/area #[m/s]
+    dA_obs <- calcdA_mat(W_obs,H_obs) #[m2]
     #Rh_obs <- area / (W_obs + 2*D_obs)
+
     k_obs <- k600_model(D_obs, S_obs, V_obs) #k600 equation
     k_obs <- colMeans(k_obs, na.rm=T)
   }
 
-
-  #Calculate dA matrix from RS W and H-----------------------------------------------------------
-  dA_obs <- calcdA_mat(W_obs,H_obs) #[m2]
-
   #run BIKER------------------------------------------
-  data <- biker_data(w=W_obs, s=S_obs, dA=dA_obs)
+  data <- biker_data(w=W_obs, s=S_obs, dA=dA_obs, priorQ=as.matrix(priorQ))
   priors <- biker_priors(data)
+  priors$river_type_priors$logk_sd <- rep(0.30, ncol(W_obs)) #0.748
   priors$sigma_model$sigma_post = matrix(uncertainity, nrow=nrow(W_obs), ncol=ncol(W_obs)) #For this validation, we only want Rh uncertainty. Real implementation would use full model uncertainty (calculate in '~src\swot_k_model.R')
   kest <- biker_estimate(bikerdata = data, bikerpriors = priors, meas_err=F,iter = 3000L) #meas err needs to be removed
 
@@ -112,6 +119,7 @@ run_BIKER <- function(currPepsi, errFlag) {
                        'kest_low'=kest$conf.low,
                        'kest_high'=kest$conf.high,
                        'kest_sd'=kest$sigma,
+                       'kprior' = exp(priors$river_type_priors$logk_hat),
                        'errFlag'=1,
                        'Wobs'=colMeans(Wtrue, na.rm=T),
                        'Sobs'=colMeans(Strue, na.rm=T),
@@ -126,6 +134,7 @@ run_BIKER <- function(currPepsi, errFlag) {
                        'kest_low'=kest$conf.low,
                        'kest_high'=kest$conf.high,
                        'kest_sd'=kest$sigma,
+                       'kprior' = exp(priors$river_type_priors$logk_hat),
                        'errFlag'=0,
                        'Wobs'=colMeans(W_obs, na.rm=T),
                        'Sobs'=colMeans(S_obs, na.rm=T),
@@ -137,7 +146,6 @@ run_BIKER <- function(currPepsi, errFlag) {
 #############
 #RUN BIKER IN PARALLEL------------------------------
 ############
-start_time <- Sys.time()
 
 #run with no measurement error (x's are placeholders so that I can grab river names from file paths easily- these means total num of characters is equaivlant to the measurement error filepath below)-----------------
 files <- list.files('data/Frasson_etal_2021/IdealDataxxxxxx', pattern="*.nc", full.names = TRUE) #pepsi 2
@@ -146,6 +154,8 @@ files <- c(files, files2)
 
 sink("stan_text_dump.txt") #send all stan outputs to a dump file so they don't muck up the console output
 
+#results <- run_BIKER(files[2], 0)
+#break
 results <- mclapply(files, run_BIKER, 0, mc.cores=cores)
 
 files <- list.files('data/Frasson_etal_2021/FullUncertainty', pattern="*.nc", full.names = TRUE) #run with SWOT measurement errors
@@ -160,6 +170,3 @@ df_fin <- list.files(path='cache/validation/by_river', full.names = TRUE) %>%
   lapply(read_csv) %>%
   bind_rows()
 write.csv(df_fin, 'cache/validation/BIKER_validation_results.csv')
-
-end_time <- Sys.time()
-end_time - start_time

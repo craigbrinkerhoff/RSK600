@@ -5,10 +5,13 @@
 ######################
 
 #for local runs
-library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
 library(cowplot)
+library(hydroGOF)
 theme_set(theme_cowplot())
-#setwd('C:\\Users\\craig\\Documents\\OneDrive - University of Massachusetts\\Ongoing Projects\\RSK600')
+setwd('C:\\Users\\cbrinkerhoff\\OneDrive - University of Massachusetts\\Ongoing Projects\\RSK600')
 
 print('validating BIKER + CO2 data...')
 
@@ -115,14 +118,14 @@ stats <- gather(output, key=key, value=value, c(FCO2_BIKER, FCO2_raymond2012, FC
   group_by(river) %>%
   filter(n() >= 3) %>%
   group_by(river, key) %>%
-  summarise(r2 = summary(lm(value~FCO2_obs))$r.squared,
+  summarise(r = sqrt(summary(lm(value~FCO2_obs))$r.squared),
             NRMSE = sqrt(mean((FCO2_obs - value)^2, na.rm=T)) / mean(FCO2_obs, na.rm=T),
             rBIAS =   mean(value- FCO2_obs, na.rm=T) / mean(FCO2_obs, na.rm=T),
             KGE =   KGE(value, FCO2_obs), #sqrt(mean((kobs- kest_mean)^2 / kobs^2, na.rm=T)),
             n_data=n())
 
-plot_stats <- gather(stats, key=key2, value=value2, c('NRMSE', 'rBIAS', 'KGE', 'r2'))
-plot_stats <- filter(plot_stats, key2 %in% c('NRMSE', 'KGE', 'rBIAS', 'r2'))
+plot_stats <- gather(stats, key=key2, value=value2, c('NRMSE', 'rBIAS', 'KGE', 'r'))
+plot_stats <- filter(plot_stats, key2 %in% c('NRMSE', 'KGE', 'rBIAS', 'r'))
 lowKGE <- nrow(plot_stats[plot_stats$key2 == 'KGE' & plot_stats$value2 < -2,])
 
 boxPlots <- ggplot(plot_stats, aes(x=key2, y=value2, fill=key))+

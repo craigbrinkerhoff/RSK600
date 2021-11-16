@@ -8,7 +8,7 @@
 g <- 9.8 #gravitational acceleration [m/s2]
 molarMass <- 12.01 #[g/mol] for C
 pCO2_a <- 390 #[uatm]
-uncertainity <- 0.30 #see regression model for actual uncertainity
+uncertainity <- 0.30 #see regression model for actual uncertainty
 
 ###############
 #Implementation settings

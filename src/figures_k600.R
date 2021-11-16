@@ -40,14 +40,12 @@ valPlot <- ggplot(full_output, aes(x=(kobs), y=(kest_mean))) +
   geom_abline(size=3, linetype='dashed', color='darkgrey') +
   xlab('k600 via observed \nhydraulics [m/dy]') +
   ylab('BIKER k600 [m/dy]') +
-  scale_y_log10(
-      limits = c(10^-1, 10^2),
-      breaks = scales::trans_breaks("log10", function(x) 10^x),
-      labels = scales::trans_format("log10", scales::math_format(10^.x)))+
-  scale_x_log10(
-      limits = c(10^-1, 10^2),
-      breaks = scales::trans_breaks("log10", function(x) 10^x),
-      labels = scales::trans_format("log10", scales::math_format(10^.x)))+
+  scale_y_log10(limits=c(10^-1,10^2),
+                breaks=c(0.1, 1, 10, 100),
+                labels=c('0.1', '1', '10', '100'))+
+  scale_x_log10(limits=c(10^-1,10^2),
+                breaks=c(0.1, 1, 10, 100),
+                labels=c('0.1', '1', '10', '100'))+
   scale_fill_discrete_qualitative(palette = 'Dark3') +
   annotate("text", x = 10^-0.4, y = 10^1.5, label = '(Colors correspond \nto rivers)', size=6)+
   theme(legend.position = "none",
@@ -55,28 +53,31 @@ valPlot <- ggplot(full_output, aes(x=(kobs), y=(kest_mean))) +
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
+ggsave('cache/validation/validation.jpg', valPlot, width=8, height=8)
 
 ########################
 ##CALCULATE BY-RIVER ERROR METRICS---------------------------------------------
 ########################
 stats_by_river <- group_by(results, river, errFlag) %>%
-  summarise(r2 = summary(lm(kest_mean~kobs))$r.squared,
+  summarise(r = sqrt(summary(lm(kest_mean~kobs))$r.squared),
             NRMSE = sqrt(mean((kobs - kest_mean)^2, na.rm=T)) / mean(kobs, na.rm=T),
             rBIAS =   mean(kest_mean- kobs, na.rm=T) / mean(kobs, na.rm=T),
-            KGE =   KGE(kest_mean, kobs), #sqrt(mean((kobs- kest_mean)^2 / kobs^2, na.rm=T)),
+            KGE = KGE(kest_mean, kobs),
+            CV = sd(kobs)/mean(kobs),
             meanKobs = mean(kobs, na.rm=T),
             meanWobs = mean(Wobs, na.rm=T),
             meanSobs = mean(Sobs, na.rm=T),
             meanDobs = mean(Dobs, na.rm=T),
             n_data=n())
 
-plot_stats <- gather(stats_by_river, key=key, value=value, c('NRMSE', 'rBIAS', 'KGE', 'r2'))
-plot_stats <- filter(plot_stats, key %in% c('NRMSE', 'KGE', 'rBIAS', 'r2'))
+plot_stats <- gather(stats_by_river, key=key, value=value, c('NRMSE', 'rBIAS', 'KGE', 'r'))
+plot_stats <- filter(plot_stats, key %in% c('NRMSE', 'KGE', 'rBIAS', 'r'))
 
 ########################
 ##PLOT BY-RIVER ERROR METRICS---------------------------------------
 ########################
-lowKGE <- nrow(plot_stats[plot_stats$key == 'KGE' & plot_stats$value < -2,])
+lowKGE_0 <- nrow(plot_stats[plot_stats$key == 'KGE' & plot_stats$value < -2 & plot_stats$errFlag==0,])
+lowKGE_1 <- nrow(plot_stats[plot_stats$key == 'KGE' & plot_stats$value < -2 & plot_stats$errFlag==1,])
 plotSWOTreaches <- ggplot(plot_stats, aes(x=key, y=value, fill=factor(errFlag))) +
   geom_boxplot(size=1, alpha=0.75) +
   geom_hline(yintercept=1, linetype='dashed') +
@@ -85,7 +86,8 @@ plotSWOTreaches <- ggplot(plot_stats, aes(x=key, y=value, fill=factor(errFlag)))
   xlab('Metric') +
   ylab('Value') +
   coord_cartesian(ylim=c(-2,2))+
-  annotate("text", x = 'KGE', y = -1.8, label = paste0('# rivers \n< -2: ', lowKGE), size=5)+
+  annotate("text", x = 'KGE', y = -2, label = paste0('# rivers \n< -2: ', lowKGE_0), size=5, color='#7fc97f')+
+  annotate("text", x = 'KGE', y = -1.6, label = paste0('# rivers \n< -2: ', lowKGE_1), size=5, color='#beaed4')+
   scale_fill_brewer(palette = 'Accent', name='', labels=c('No Error', 'SWOT Measurement Error')) +
   theme(legend.position = "bottom",
         axis.text=element_text(size=20),
@@ -94,14 +96,13 @@ plotSWOTreaches <- ggplot(plot_stats, aes(x=key, y=value, fill=factor(errFlag)))
         legend.title = element_text(size=17, face='bold'))
 
 ############
-##NRMSE VS AMOUNT OF DATA-----------------------
+##r VS AMOUNT OF DATA-----------------------
 ############
-r2_vs_n <- ggplot(stats_by_river[stats_by_river$errFlag == 0,]) +
-  geom_point(aes(y=r2, x=n_data), color='#7fc97f',size=6) +
-  geom_hline(aes(yintercept = median(stats_by_river[stats_by_river$errFlag==0,]$r2)), linetype='dashed', color='darkblue', size=1.5)+
-  ylab('r2') +
+r_vs_n <- ggplot(stats_by_river[stats_by_river$errFlag == 0,]) +
+  geom_point(aes(y=r, x=n_data), color='#7fc97f',size=6) +
+  geom_hline(aes(yintercept = median(stats_by_river[stats_by_river$errFlag==0,]$r)), linetype='dashed', color='darkblue', size=1.5)+
+  ylab('r') +
   xlab('Num. SWOT Observations') +
-  ylim(0,1)+
   theme(legend.position = "bottom",
         axis.text=element_text(size=20),
         axis.title=element_text(size=24,face="bold"),
@@ -109,24 +110,21 @@ r2_vs_n <- ggplot(stats_by_river[stats_by_river$errFlag == 0,]) +
         legend.title = element_text(size=17, face='bold'))
 
 ############
-##NRMSE VS AMOUNT OF DATA-----------------------
+##r VS AMOUNT OF DATA-----------------------
 ############
-r2_vs_w <- ggplot(stats_by_river[stats_by_river$errFlag==0,]) +
-  geom_point(aes(y=r2, x=meanWobs),color='#7fc97f', size=6) +
-  geom_hline(aes(yintercept = median(stats_by_river[stats_by_river$errFlag==0,]$r2)), linetype='dashed', color='darkblue', size=1.5)+
+r_vs_w <- ggplot(stats_by_river[stats_by_river$errFlag==0,]) +
+  geom_point(aes(y=r, x=meanWobs),color='#7fc97f', size=6) +
+  geom_hline(aes(yintercept = median(stats_by_river[stats_by_river$errFlag==0,]$r)), linetype='dashed', color='darkblue', size=1.5)+
   xlab('Mean observed width [m]') +
-  ylab('r2') +
-  ylim(0,1)+
-  scale_x_log10(
-    breaks = scales::trans_breaks("log10", function(x) 10^x),
-    labels = scales::trans_format("log10", scales::math_format(10^.x)))+
+  ylab('r') +
+  scale_x_log10()+
   theme(legend.position = "none",
         axis.text=element_text(size=20),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
 
-temp <- plot_grid(r2_vs_n, r2_vs_w, ncol=1, labels=c('b', 'c'), label_size=18)
+temp <- plot_grid(r_vs_n, r_vs_w, ncol=1, labels=c('b', 'c'), label_size=18)
 valPlot_byRiver <- plot_grid(plotSWOTreaches, temp, ncol=2, labels=c('a', NA), label_size=18)
 ggsave('cache/validation/validation_by_river.jpg', valPlot_byRiver, width=12, height=8)
 
@@ -135,63 +133,63 @@ ggsave('cache/validation/validation_by_river.jpg', valPlot_byRiver, width=12, he
 #################
 set.seed(113)
 
-#Randomly select 3 rivers representative of good, eh, and bad KGE scores
-kge_bins <- quantile(stats_by_river[stats_by_river$errFlag ==0,]$KGE, c(0.33, 0.66), na.rm = T)
-kge_bad <- filter(stats_by_river[stats_by_river$errFlag ==0,], KGE <= kge_bins[1]) %>% select(river)
-kge_good <- filter(stats_by_river[stats_by_river$errFlag ==0,], KGE >= kge_bins[2]) %>% select(river)
-kge_eh <- filter(stats_by_river[stats_by_river$errFlag ==0,], KGE >= kge_bins[1] & KGE <= kge_bins[2]) %>% select(river)
-
-#bad river plot
-badRiver <- filter(full_output, river == sample(kge_bad$river, 1)) %>%
-  gather(key=key, value=value, c(kobs, kest_mean))
-badRiver$kest_low <- ifelse(badRiver$key == 'kobs', NA, badRiver$kest_low)
-badRiver$kest_high <- ifelse(badRiver$key == 'kobs', NA, badRiver$kest_high)
-riv <- as.character(badRiver[1,]$river)
-badRiverPlot <- ggplot(badRiver, aes(x=time, y=value, color=key)) + #model
-  geom_ribbon(aes(ymin = kest_low, ymax = kest_high), alpha=0.75, fill='grey')+
-  geom_line(size=1.5) +
-  ylab('k600 [m/dy]') +
-  xlab('Timestep') +
-  scale_color_brewer(palette='Set2') +
-  theme(legend.position = "none") +
-  ggtitle(paste0('Bad River: ', riv))
-
-#eh river plot
-ehRiver <- filter(full_output, river == sample(kge_eh$river, 1)) %>%
-  gather(key=key, value=value, c(kobs, kest_mean))
-ehRiver$kest_low <- ifelse(ehRiver$key == 'kobs', NA, ehRiver$kest_low)
-ehRiver$kest_high <- ifelse(ehRiver$key == 'kobs', NA, ehRiver$kest_high)
-riv <- as.character(ehRiver[1,]$river)
-ehRiverPlot <- ggplot(ehRiver, aes(x=time, y=value, color=key)) + #model
-  geom_ribbon(aes(ymin = kest_low, ymax = kest_high), alpha=0.75, fill='grey')+
-  geom_line(size=1.5) +
-  ylab('k600 [m/dy]') +
-  xlab('Timestep') +
-  scale_color_brewer(palette='Set2') +
-  theme(legend.position = "none") +
-  ggtitle(paste0('OK River: ', riv))
-
-#good river plot
-goodRiver <- filter(full_output, river == sample(kge_good$river, 1)) %>%
-  gather(key=key, value=value, c(kobs, kest_mean))
-goodRiver$kest_low <- ifelse(goodRiver$key == 'kobs', NA, goodRiver$kest_low)
-goodRiver$kest_high <- ifelse(goodRiver$key == 'kobs', NA, goodRiver$kest_high)
-riv <- as.character(goodRiver[1,]$river)
-goodRiverPlot <- ggplot(goodRiver, aes(x=time, y=value, color=key)) + #model
-  geom_ribbon(aes(ymin = kest_low, ymax = kest_high), alpha=0.75, fill='grey')+
-  geom_line(size=1.5) +
-  ylab('k600 [m/dy]') +
-  xlab('Timestep') +
-  scale_color_brewer(palette='Set2', name='k600 [m/dy]', labels=c('BIKER', 'Model using \nobserved hydraulics')) +
-  ggtitle(paste0('Good River: \n', riv))
-
-# extract the legend from one of the plots
-legend <- get_legend(goodRiverPlot + theme(legend.box.margin = margin(0, 0, 0, 100)))
-
-#bring it alllllll together via cowplot package
-timeseriesPlot <- plot_grid(goodRiverPlot + theme(legend.position = 'none'), ehRiverPlot, badRiverPlot, legend, ncol=2, labels=c('b','c','d',NA), label_size = 18)
-plot2 <- plot_grid(valPlot, timeseriesPlot, ncol=2, labels=c('a', NA), label_size = 18)
-ggsave('cache/validation/validation.jpg', plot2, width=14, height=8)
+# #Randomly select 3 rivers representative of good, eh, and bad KGE scores
+# kge_bins <- quantile(stats_by_river[stats_by_river$errFlag ==0,]$KGE, c(0.33, 0.66), na.rm = T)
+# kge_bad <- filter(stats_by_river[stats_by_river$errFlag ==0,], KGE <= kge_bins[1]) %>% select(river)
+# kge_good <- filter(stats_by_river[stats_by_river$errFlag ==0,], KGE >= kge_bins[2]) %>% select(river)
+# kge_eh <- filter(stats_by_river[stats_by_river$errFlag ==0,], KGE >= kge_bins[1] & KGE <= kge_bins[2]) %>% select(river)
+# 
+# #bad river plot
+# badRiver <- filter(full_output, river == sample(kge_bad$river, 1)) %>%
+#   gather(key=key, value=value, c(kobs, kest_mean))
+# badRiver$kest_low <- ifelse(badRiver$key == 'kobs', NA, badRiver$kest_low)
+# badRiver$kest_high <- ifelse(badRiver$key == 'kobs', NA, badRiver$kest_high)
+# riv <- as.character(badRiver[1,]$river)
+# badRiverPlot <- ggplot(badRiver, aes(x=time, y=value, color=key)) + #model
+#   geom_ribbon(aes(ymin = kest_low, ymax = kest_high), alpha=0.75, fill='grey')+
+#   geom_line(size=1.5) +
+#   ylab('k600 [m/dy]') +
+#   xlab('Timestep') +
+#   scale_color_brewer(palette='Set2') +
+#   theme(legend.position = "none") +
+#   ggtitle(paste0('Bad River: ', riv))
+# 
+# #eh river plot
+# ehRiver <- filter(full_output, river == sample(kge_eh$river, 1)) %>%
+#   gather(key=key, value=value, c(kobs, kest_mean))
+# ehRiver$kest_low <- ifelse(ehRiver$key == 'kobs', NA, ehRiver$kest_low)
+# ehRiver$kest_high <- ifelse(ehRiver$key == 'kobs', NA, ehRiver$kest_high)
+# riv <- as.character(ehRiver[1,]$river)
+# ehRiverPlot <- ggplot(ehRiver, aes(x=time, y=value, color=key)) + #model
+#   geom_ribbon(aes(ymin = kest_low, ymax = kest_high), alpha=0.75, fill='grey')+
+#   geom_line(size=1.5) +
+#   ylab('k600 [m/dy]') +
+#   xlab('Timestep') +
+#   scale_color_brewer(palette='Set2') +
+#   theme(legend.position = "none") +
+#   ggtitle(paste0('OK River: ', riv))
+# 
+# #good river plot
+# goodRiver <- filter(full_output, river == sample(kge_good$river, 1)) %>%
+#   gather(key=key, value=value, c(kobs, kest_mean))
+# goodRiver$kest_low <- ifelse(goodRiver$key == 'kobs', NA, goodRiver$kest_low)
+# goodRiver$kest_high <- ifelse(goodRiver$key == 'kobs', NA, goodRiver$kest_high)
+# riv <- as.character(goodRiver[1,]$river)
+# goodRiverPlot <- ggplot(goodRiver, aes(x=time, y=value, color=key)) + #model
+#   geom_ribbon(aes(ymin = kest_low, ymax = kest_high), alpha=0.75, fill='grey')+
+#   geom_line(size=1.5) +
+#   ylab('k600 [m/dy]') +
+#   xlab('Timestep') +
+#   scale_color_brewer(palette='Set2', name='k600 [m/dy]', labels=c('BIKER', 'Model using \nobserved hydraulics')) +
+#   ggtitle(paste0('Good River: \n', riv))
+# 
+# # extract the legend from one of the plots
+# legend <- get_legend(goodRiverPlot + theme(legend.box.margin = margin(0, 0, 0, 100)))
+# 
+# #bring it alllllll together via cowplot package
+# timeseriesPlot <- plot_grid(goodRiverPlot + theme(legend.position = 'none'), ehRiverPlot, badRiverPlot, legend, ncol=2, labels=c('b','c','d',NA), label_size = 18)
+#plot2 <- plot_grid(valPlot, timeseriesPlot, ncol=2, labels=c('a', NA), label_size = 18)
+#ggsave('cache/validation/validation.jpg', valPlot, width=8, height=8)
 
 ####################
 ##SAVE ALL OTHER TIMESERIES FOR THE SUPPLEMENT
@@ -215,13 +213,13 @@ for (i in 1:63){ #47 rivers with no measurement error, 16 with errors modeled vi
   results$kest_high <- ifelse(results$key == 'kobs', NA, results$kest_high/max(results$value))
   riv <- as.character(results[1,]$river)
 
-  pltList[[ river ]]  <- ggplot(results, aes(x=time/max(time), y=value/max(value), color=key)) + #model
+  pltList[[ river ]]  <- ggplot(results, aes(x=time, y=value/max(value), color=key)) + #model
     geom_ribbon(aes(ymin = kest_low, ymax = kest_high), alpha=0.75, fill='grey')+
     geom_line(size=1.5) +
     ylab('') +
     xlab('') +
     ylim(0,1.5)+
-    scale_color_brewer(palette='Set2', name='k600 [m/dy]', labels=c('BIKER', 'Model using \nobserved hydraulics')) +
+    scale_color_brewer(palette='Set2', name='', labels=c('BIKER', 'Model using \nobserved hydraulics')) +
     ggtitle(river)
   }
 
@@ -285,8 +283,8 @@ legend <- get_legend(
 plotTimeseries <- plotgrid + draw_grob(legend, 0.8, -0.49, 1.1, 1.1)
 
 #create x and y axis labels for entire figure
-yTitleCombo <- textGrob(expression(k600~(m/dy)), gp=gpar(fontface="bold", col="black", fontsize=22), rot=90)
-xTitleCombo <- textGrob(expression(Timestep), gp=gpar(fontface="bold", col="black", fontsize=22))
+yTitleCombo <- textGrob(expression(k[600]/Max~k[600]~(m/dy)), gp=gpar(fontface="bold", col="black", fontsize=30), rot=90)
+xTitleCombo <- textGrob(expression(Timestep), gp=gpar(fontface="bold", col="black", fontsize=30))
 plotTimeseries <- gridExtra::grid.arrange(gridExtra::arrangeGrob(plotTimeseries, left = yTitleCombo, bottom = xTitleCombo))
 
 #write to file

@@ -9,6 +9,6 @@ theme_set(theme_cowplot())
 
 #Run analysis-------------------------------
 #source(here::here('src' , 'runBIKER.R'))
-source(here::here('src' , 'runFCO2.R'))
-#source(here::here('src' , 'figures_k600.R'))
-source(here::here('src' , 'figures_FCO2.R'))
+#source(here::here('src' , 'runFCO2.R'))
+source(here::here('src' , 'figures_k600.R'))
+#source(here::here('src' , 'figures_FCO2.R'))

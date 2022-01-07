@@ -14,19 +14,15 @@ percs_overall <- group_by(percs, flag_hydraulicWide) %>%
   summarise(total = sum(n)) %>%
   mutate(perc = 100 * total/sum(total))
 
+results_dynamics <- read.csv('cache/validation/results_dynamics.csv')
 results_k600_rivs <- read.csv('cache//validation//results_by_riv.csv')
 results_fco2_rivs <- read.csv('cache//FCO2//CO2_results.csv')
 results_fco2_bulk <- read.csv('cache//FCO2//massFluxes.csv')
 results_fco2_bulk$key <- as.character(results_fco2_bulk$key)
 
 #knit manuscript
-rmarkdown::render("manuscript_v6.Rmd")
+rmarkdown::render("manuscript_v7.Rmd")
 print('Manuscript generated.')
 
-rmarkdown::render("supp_v6.Rmd")
-print('Supplemental Information generated.')
-
-
-#scraps
-#results_k600_all <- read.csv('cache//validation//results_all_riv.csv')
-#results_fco2_all <- read.csv('cache//FCO2//fco2_stats_all.csv')
+#rmarkdown::render("supp_v7.Rmd")
+#print('Supplemental Information generated.')

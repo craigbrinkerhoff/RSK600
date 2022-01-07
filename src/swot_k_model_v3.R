@@ -15,7 +15,7 @@ library(tidyr)
 library(ggplot2)
 library(colorspace)
 library(cowplot)
-theme_set(theme_cowplot())
+theme_set(theme_classic())
 
 #setwd('C:\\Users\\cbrinkerhoff\\OneDrive - University of Massachusetts\\Ongoing Projects\\RSK600')
 setwd('C:\\Users\\craig\\Documents\\OneDrive - University of Massachusetts\\Ongoing Projects\\RSK600')
@@ -237,6 +237,8 @@ models <- data.frame('name'=c('Chainsaw-eS', 'Small-eddy-eS', 'Chainsaw-eD', 'Sm
                      )
 write.csv(models, 'cache\\k600_theory\\hydraulicWide_models.csv')
 
+
+
 #######MONTE CARLO PROPOGATION OF UNCERTANTIES-------------------------
 beta_sigma <- summary(lm_hydraulicallyWide_chainsaw_eD)$sigma
 u_sigma <- 0.3
@@ -247,7 +249,7 @@ n <- 10000 #MC sample size
 output <- 1:nrow(hydraulicallyWide)
 for (i in output) {
   log_knowns <- (7/16)*log(g) + (7/16)*log(hydraulicallyWide[i,]$slope) + (9/16)*log(hydraulicallyWide[i,]$depth)
-  log_k600_pred <- rnorm(n, log(summary(lm_hydraulicallyWide_chainsaw_eD)$coefficient[1]), log(beta_sigma)) + knowns + (1/4)*rnorm(n, log(hydraulicallyWide[i,]$Vms), u_sigma)
+  log_k600_pred <- rnorm(n, log(summary(lm_hydraulicallyWide_chainsaw_eD)$coefficient[1]), log(beta_sigma)) + log_knowns + (1/4)*rnorm(n, log(hydraulicallyWide[i,]$Vms), u_sigma)
   output[i] <- sd(log_k600_pred)
 }
 

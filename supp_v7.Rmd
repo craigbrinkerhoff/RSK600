@@ -1,0 +1,138 @@
+---
+title: "Supplemental Information: Using hydraulic geometry and the SWOT satellite to remotely sense river gas exchange velocity"
+author:
+  - Craig B Brinkerhoff:
+      email: cbrinkerhoff@umass.edu
+      institute: UMass
+      correspondence: true
+  - Colin J Gleason:
+      institute: UMass
+  - Christopher J Zappa:
+      institute: Lamont
+  - Peter A Raymond:
+      institute: Yale
+  - Merritt H Harlan:
+      institute: UMass
+institute:
+  - UMass: Department of Civil & Environmental Engineering, University of Massachusetts, Amherst, MA
+  - Lamont: Lamont-Doherty Earth Observatory, Columbia University, Palisades, NY
+  - Yale: School of the Environment, Yale University, New Haven, CT
+bibliography: References.bib
+csl: agu_citation_style.csl
+output:
+  word_document:
+      pandoc_args:
+        - '--lua-filter=scholarly-metadata.lua'
+        - '--lua-filter=author-info-blocks.lua'
+      reference_docx: word-styles-reference.docx
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Contents
+This supplementary information contains 4 texts, 1 figure and 3 tables. Please consult https://github.com/craigbrinkerhoff/RSK600 for all code to build and generate results, figures, and the manuscript.
+
+## Test S1: Estimating how many SWOT rivers are hydraulically wide
+To quantify how frequently SWOT-observable rivers are also hydraulically wide river channels (section 3 of main text), we used the dataset of field-measured river hydraulics in @brinkerhoffReconcilingAtaStationAtManyStations2019. That dataset has over 500,000 discrete measurements of river width, velocity, area, and discharge that were made by the United States Geological Survey (USGS) to calibrate streamgauge rating curves. Here, we describe how this dataset was filtered down to 171,553 measurements and how we quantified what was 'hydraulically wide'.
+
+First, we removed all measurements tagged by the USGS as 'poor', measurements with impossible values, or measurements of 0. While this would indicate a dry channel, our hydraulic geometry model necessitates within-bank flow. Likewise, because hydraulic geometry only applies to within-bank flows and not flood events, we remove all overbank flows. This was done by first filtering for sites with at least 20 measurements (to build robust estimates of bankfull hydraulics) and then calculating bankfull width and depth as the width or depth with a return period of two years. While the only true way to calculate bankfull hydraulics is manually in the field, this is obviously impractical here. A two year return period is a standard approximation for determining out-of-bank flow in single-channel meandering rivers and was the method used by @brinkerhoffReconcilingAtaStationAtManyStations2019. We then removed all measurements with a width or depth beyond their respective at-a-station 2 year values.
+
+Finally, we filtered this dataset to only measurements at least 100m wide ('SWOT-observable'). This left us with `r HG_swot$n` total river hydraulics measurements.
+
+## Text S2: Gas exchange model derivations
+In this text we provide the full algebra to arrive at the four physically-based gas exchange models in the main text (equations 3-6). Equation 3 is derived via equations S1-S5. Equation 4 is derived via equations S6-S7. Equation 5 is derived via equations S8-S13. Equation 6 is derived via equations S14-S18. Consult Appendix A for all variable definitions. Note that $\alpha$ and $\beta$ are statistical parameters obtained via least squares regression for the small-eddy and Reynolds models, respectively. Subscripts denote variants of the same parameter, depending on which $\epsilon$ model is employed.
+
+**Small-eddy models**
+
+*log-law-of-the-wall dissipation*
+$$k_{600}=\alpha(\epsilon_S)^{1/4} \mathbf{(S1)}$$
+$$k_{600}=\alpha(\frac{U_*^3}{H})^{1/4} \mathbf{(S2)}$$
+$$k_{600}=\alpha(\frac{\sqrt{gR_hS}^3}{H})^{1/4} \mathbf{(S3)}$$
+$$k_{600}=\alpha(\frac{(gHS)^{3/2}}{H})^{1/4} \mathbf{(S4)}$$
+$$k_{600}=\alpha(gS)^{3/8}H^{1/8} \mathbf{(S5)}$$
+
+*form-drag dissipation*
+$$k_{600}=\alpha_1(\epsilon_D)^{1/4} \mathbf{(S6)}$$
+$$k_{600}=\alpha_1(gS\bar{U})^{1/4} \mathbf{(S7)}$$
+
+**Reynolds extension models**
+
+*log-law-of-the-wall dissipation*
+$$k_{600}=\beta_0(\epsilon_S)^{1/4}A_p^{3/4} \mathbf{(S8)}$$
+$$k_{600}=\beta (\frac{U_*^3}{H})^{1/4}((U_*H)^{1/2})^{3/4} \mathbf{(S9)}$$
+$$k_{600}=\beta U_*^{9/8}H^{1/8} \mathbf{(S10)}$$
+$$k_{600}=\beta (gR_hS)^{9/16}H^{1/8} \mathbf{(S11)}$$
+$$k_{600}=\beta (gHS)^{9/16}H^{1/8} \mathbf{(S12)}$$
+$$k_{600}=\beta (gS)^{9/16}H^{11/16} \mathbf{(S13)}$$
+
+*form-drag dissipation*
+$$k_{600}=\beta_0(\epsilon_D)^{1/4}A_p^{3/4} \mathbf{(S14)}$$
+$$k_{600}=\beta_1(gS\bar{U})^{1/4}((U_*H)^{1/2})^{3/4} \mathbf{(S15)}$$
+$$k_{600}=\beta_1(gS\bar{U})^{1/4}(gR_hS)^{3/16}H^{3/8} \mathbf{(S16)}$$
+$$k_{600}=\beta_1(gS\bar{U})^{1/4}(gHS)^{3/16}H^{3/8} \mathbf{(S17)}$$
+$$k_{600}=\beta_1(gS)^{7/16}\bar{U}^{1/4}H^{9/16} \mathbf{(S18)}$$
+
+## Text S3: BIKER hyperparameterization
+In this text we explain in detail how BIKER's hyperparameter values were set for each river.
+
+We assign prior hyperparameters using SWOT data only. All priors are formalized within the model as truncated normal distributions of the log-transformed terms such that $log(X) \sim  \mathcal{N}(\mu, \sigma^2)$ for $\lambda < log(X) < \gamma$, using prior hyperparameters mean ($\mu$), standard deviation ($\sigma$), and upper ($\gamma$) and lower bounds ($\lambda$) for any parameter *X*.
+
+$A_0_i$ and $n_i$ prior hyperparameters were assigned following an updated version of the method developed by @brinkerhoffConstrainingRemoteRiver2020. They developed a set of river channel prior hyperparameters for McFLI algorithms that are entirely RS-able and reflect differential channel hydraulics as a function of river geomorphology. They used an extensive database of field measurements and machine learning to identify patterns that associate river width with the hydraulic priors needed to run McFLIs so that prior hyperparameters are assigned to rivers using only the remotely sensed measurements. For this study, we extracted $A_0_{\lambda}$ and $A_0_{\gamma}$ as the 5th and 95th percentile values rather than the absolute maximum and minimum values to avoid physically impossible bounds on $A_0$.
+
+This leaves the $k_{600_t}$ hyperparameters to be defined. $k_{600_{\mu}}$ is set by invoking the hydraulic geometry (HG) relationships developed in section 3.2.3 of the main text using the data from @brinkerhoffReconcilingAtaStationAtManyStations2019. We replaced both depth and velocity terms from our gas exchange model (equation 6 in the main text) with these HG models, resulting in equation S19 where Q is the mass-conserved streamflow for the river reach.
+
+$$k_{600_{\mu}} = 62.82(gS_{i,t})^{7/16}(0.265Q_{t}^{0.395})^{9/16}*(0.284Q_{t}^{0.191})^{1/4} \mathbf{(S19)}$$
+
+Obviously, we have no a priori information about Q. So, we use the Q prior that will be globally available when SWOT launches: a mean annual estimate from a water balance model. This is provided with the simulated SWOT data by both @durandIntercomparisonRemoteSensing2016 and @frassonExploringFactorsControlling2021. Using a temporally-invariant estimate of streamflow is the worst case scenario and BIKER's performance will improve with a more informed prior on streamflow (and therefore $k_{600}$). This was recently shown on many of these rivers for SWOT discharge algorithms [@frassonExploringFactorsControlling2021]. However as noted in the main text, our primary goal with this initial validation is to benchmark BIKER's worst case scenario for performance and so we do that here.
+
+Finally, $k_{600_{\sigma}}$ is set to 0.30 (log-space). This corresponds to a coefficient of variation of approximately 0.30, which we took to reflect a reasonably strong agreement between the prior and the observed values. $k_{600_{\lambda}}$ was set to log(0.001) m/day. $k_{600_{\gamma}}$ was set to log(500) m/day.
+
+## Text S4: Specifiying the $\sigma_{k_{600}}$ parameter
+Here, we detail how the $\sigma_{k_{600}}$ parameter is specified in this study, as well as how it should be specified once SWOT launches.
+
+Recall that $\sigma_{k_{600}}$ refers to the total uncertainty inherent in equation 8, i.e. stemming from both the Reynolds/form-drag dissipation model and the Manning's model for $\bar{U}$. For the purposes of this study, we are validating BIKER against equation 10 in the main text and so all uncertainties associated with the $\beta_1$ parameter are ignored and we only need to reflect the Manning's uncertainty in our specification of $\sigma_{k_{600}}^2$. Therefore, we take @hagemannBAMBayesianAMHGManning2017's estimated uncertainty from Manning's equation to infer streamflow from SWOT observations (0.25) and inflate it slightly to also account for the hydraulically-wide channel assumption and arrive at 0.30. This is the $\sigma_{k_{600}}$ used in this study.
+
+In the scenario that BIKER is run on real SWOT data, $\sigma_k_{600}$ must reflect the full uncertainty implicit in equation 8 in the main text. This means we must also account for uncertainty from the $\beta_1$ parameter. Assuming perfect, no-error measurements are made by the SWOT satellite, the $k_{600}$ relative uncertainty is expressed for some set of hydraulic observations as equation S20. We use the 166 hydraulically-wide measurements in our field-measured $k_{600}$ dataset and run 166 different Monte Carlo simulations (each 10,000 runs) to obtain 166 different $\sigma_k_{600}$ terms. We then take the average of those to be a reasonable estimate of $\sigma_k_{600}$. This ultimately provided a value of 1.1 for the log-transformed $\sigma_k_{600}$ that should be used once SWOT launches.
+
+$$log_{k_{600}} \sim normal \left[ log(\beta_1), log(\sigma_{\beta_1}) \right] + \frac{1}{4}normal\left[log(\bar{U}), log(\sigma_{mannings})\right] \frac{7}{16}log(gS) + \frac{9}{16}log(H)  \mathbf{(S20)}$$
+
+## Figure S1
+![Figure S1 Timeseries of the biweekly CO2 data from @beaulieuControlsGasTransfer2012. Sampling took place 2008-2009 in the Ohio River (upstream of Cincinnati, Ohio, United States). Each point here was joined to the 11-day SWOT observations used in this study (section 2.4).](cache/FCO2/Beaulieu_timeseries.jpg)
+
+## Table S1
+*Table S1: Studies that gas exchange velocity measurements come from. 'Study' refers to the paper from which these measurements were taken. Any data wrangling was done by those authors. 'Field Workers' refers to who actually made the measurements. The Raymond et al. (2012) dataset is itself a meta-analysis. Please see that paper for how those measurements were collected. We used the set of measurements ultimately published by Ulseth et al. 2019.*
+
+|**Study**|**Workers**|**Number of measurements**|
+|---------|-------------|--------------------------|
+|@ulsethDistinctAirWater2019|@ulsethDistinctAirWater2019|
+|@ulsethDistinctAirWater2019|@hallUseArgonMeasure2018|
+|@ulsethDistinctAirWater2019|@schelkerCO2EvasionSteep2016|
+|@ulsethDistinctAirWater2019|@mauriceInfluenceFlowBed2017|
+|@ulsethDistinctAirWater2019|@raymondScalingGasTransfer2012|
+|@churchillPredictionStreamReaeration1964|@churchillPredictionStreamReaeration1964|
+|@owensReaerationStudiesStreams1964|@owensReaerationStudiesStreams1964|
+
+## Table S2
+*Table S2: Validation metrics used in this study, where Nt is number of observations and i is the specific observation. σ refers to the variance of the sample and μ refers to the mean of the sample. As is standard, a carrot accent indicates the predicted value.*
+
+|**Description**|**Acronym**|**Definition**|**Ideal Score**|**Possible Range**|**Validation Scheme**|
+|-----------|-------|----------|-----------|--------------|-----------------|
+|Correlation Coefficient|$r$| $\sqrt{1-(\frac{\sum\limits_{i=1}^{N_t}{(k_{600, i}-\hat{k_{600}})^2}}{\sum{(k_{600, i}-\bar{k_{600}})^2}})}$ |1|-1 to 1|	All rivers and all timesteps|
+|Root-mean-square-error|RMSE| $\sqrt{\frac{1}{N_t}\sum\limits_{i=1}^{N_t}(\hat{k_{600, i}}-k_{600, i})^2}$ |0|0 to ∞|All rivers and all timesteps|
+|Relative root-mean-square error|RRMSE| $\sqrt{\frac{1}{N_t}\sum\limits_{i=1}^{N_t}(\frac{\hat{k_{600, i}}-k_{600, i}}{k_{600, i}})^2}$ |0|0 to ∞|By river|
+|Normalized root-mean-square error|NRMSE| $\sqrt{\frac{1}{N_t}\sum\limits_{i=1}^{N_t}(\frac{\hat{k_{600, i}}-k_{600, i}}{\bar{k_{600, i}}})^2}$ |0|0 to ∞|By river|
+|Relative bias|rBIAS| $\frac{1}{N_t}\sum\limits_{i=1}^{N_t}(\frac{\hat{k_{600, i}}-k_{600, i}}{\bar{k_{600, i}}})$ |0|-∞ to ∞|By river|
+
+## Table S3
+*Table S3: Details on the 3 depth hydraulic geometry models used to estimate FCO2 from the SWOT rivers (section 2.4).*
+
+|**Name**|**Depth equation**|**Velocity equation**|**Description**|**Reference**|
+|--------|------------------|---------------------|---------------|-------------|
+|Brinkerhoff 2019|$D=0.265Q^{0.395}$|$\bar{U}=0.284Q^{0.191}$|530,945 measurements made across the United States at streamgauges|this study; @brinkerhoffReconcilingAtaStationAtManyStations2019|
+|Raymond 2012|$D=0.409Q^{0.294}$|$\bar{U}=0.194Q^{0.285}$||1,026 measurements across the United States|@raymondScalingGasTransfer2012|
+|Raymond 2013|$D=0.409Q^{0.294},  D=0.449Q^{0.37}$|$\bar{U}=0.194Q^{0.285}, \bar{U}=0.346Q^{0.120}$|Average of the Raymond 2012 equation and one using 9,811 measurements at US streamgauges|@raymondGlobalCarbonDioxide2013|
+
+## References

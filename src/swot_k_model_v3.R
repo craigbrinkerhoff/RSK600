@@ -35,14 +35,14 @@ data <- filter(data, is.finite(chan_width) ==1) %>%
   filter(chan_velocity > 0) %>%
   filter(chan_discharge > 0) %>%
   filter(chan_area > 0) %>%
-  filter(measured_rating_diff %in% c('Excellent', 'EXCL', 'GOOD', 'Good', 'Fair', 'FAIR'))
+  filter(measured_rating_diff %in% c('Excellent', 'EXCL', 'GOOD', 'Good'))#, 'Fair', 'FAIR'))
 
 #imperial to metric
 data$area <- data$chan_area * 0.092903 #ft2 to m2
 data$width <- data$chan_width*0.305 #m
 data$Vms <- data$chan_velocity*0.305 #m/s
 data$depth <- data$area / data$width
-data$slope <- NA #data$SLOPE
+data$slope <- NA 
 data$Qm3s <- data$chan_discharge * 0.0283 #ft3/s to m3/s
 
 #calculate bankfull width so we can throw out out-of-bank events
@@ -65,10 +65,12 @@ bankfullD = group_by(data, site_no) %>%
   summarise(bankful_depth = max(depth[temp]))
 data <- left_join(data, bankfullD, 'site_no')
 
-data <- filter(data, width <= bankful_width)
-data <- filter(data, depth <= bankful_depth)
+data <- filter(data, width < bankful_width)
+data <- filter(data, depth < bankful_depth)
 
 #######READ IN FIELD DATA COLLECTED FROM USGS REPORT-------------------
+  #Chuchill et al 1964
+  #Owens et al 1964
 usgs_data <- read.csv('data/additional_USGS_reaeration_data.csv')
 usgs_data$depth <- usgs_data$depth_ft * 0.3048 #ft to m
 usgs_data$width <- usgs_data$width_ft * 0.3048 #ft to m
@@ -100,11 +102,12 @@ data$ustar <- sqrt(g*data$Rh*data$slope) #friction/shear velocity [m/s]
 
 #######SOME FLAGS FOR SWOT-OBSERVABLE RIVERS AND WHEN RH=H-------------------------------
 data$flag_swot <- ifelse(data$width >= 100, 'SWOT', 'Small')
-data$flag_hydraulicWide <- ifelse(data$Rh/data$depth > 0.96, 'Rh=H', 'Rh=/=H') #set to 95% just to get idea of number of SWOT measurements that generally meet this condition
 
-#########HOW MANY SWOT MEASUREMENTS MEET THE RH/H CONDITION?
-percs <- group_by(data, flag_swot, flag_hydraulicWide) %>% summarise(n=n()) %>% group_by(flag_swot) %>% mutate(perc = 100 * n/sum(n))
-write.csv(percs, 'cache/k600_theory/Rh_H_percents.csv')
+#########HYDRAULIC GEOMETRY OF SWOT-OBSERVABLE FLOWS
+HG_swot <- round(mean((data[data$flag_swot == 'SWOT',]$Rh/data[data$flag_swot == 'SWOT',]$depth)),2)
+n <- nrow(data[data$flag_swot == 'SWOT',])
+df <- data.frame('mean'=HG_swot, 'n'=n)
+write.csv(df, 'cache/k600_theory/HG_swot.csv')
 
 #######LOG TRANSFORM SOME VARIABLES-----------------------------------------------------------
 data$log_slope <- log(data$slope)
@@ -142,16 +145,16 @@ plot_smallEddy_eS <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y
         legend.title = element_text(size=17, face='bold'),
         legend.position = 'none')
 
-#fit chainsaw model with surface manifest of bed dissipation
+#fit reynolds model with surface manifest of bed dissipation
 hydraulicallyWide$hydraulicallyWideModel <- (g*hydraulicallyWide$slope)^(9/16)*hydraulicallyWide$depth^(11/16)
-lm_hydraulicallyWide_chainsaw_eS <- lm(k600~hydraulicallyWideModel+0, data=hydraulicallyWide)
-hydraulicallyWide$k600_pred_wideHydraulics <- (predict(lm_hydraulicallyWide_chainsaw_eS, hydraulicallyWide))
+lm_hydraulicallyWide_reynolds_eS <- lm(k600~hydraulicallyWideModel+0, data=hydraulicallyWide)
+hydraulicallyWide$k600_pred_wideHydraulics <- (predict(lm_hydraulicallyWide_reynolds_eS, hydraulicallyWide))
 
 #plot model
-plot_chainsaw_eS <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
+plot_reynolds_eS <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
   geom_point(size=5, color='#bebada') +
   geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
-  annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_chainsaw_eS)$r.squared,2)), x = 1, y = 100, size = 8, colour = "purple")+
+  annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_reynolds_eS)$r.squared,2)), x = 1, y = 100, size = 8, colour = "purple")+
   labs(x = expression(bold(paste(beta*(gS)^{9/16}*H^{11/16}, ' [', m, '/', dy, ']'))),
        y = '')+
   scale_y_log10(limits=c(10^-1,10^2),
@@ -161,7 +164,7 @@ plot_chainsaw_eS <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=
                 breaks=c(0.1, 1, 10, 100),
                 labels=c('0.1', '1', '10', '100'))+
   annotation_logticks()+
-  ggtitle(expression(bold(paste('Chainsaw, ', epsilon==epsilon[S]))))+
+  ggtitle(expression(bold(paste('Reynolds extension, ', epsilon==epsilon[S]))))+
   theme(axis.text=element_text(size=19),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
@@ -194,16 +197,16 @@ plot_smallEddy_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y
         legend.title = element_text(size=17, face='bold'),
         legend.position = 'none')
 
-#fit chainsaw model with form-drag dissipation
+#fit reynolds model with form-drag dissipation
 hydraulicallyWide$hydraulicallyWideModel <- (g*hydraulicallyWide$slope)^(7/16)*hydraulicallyWide$Vms^(1/4)*hydraulicallyWide$depth^(9/16)
-lm_hydraulicallyWide_chainsaw_eD <- lm(k600~hydraulicallyWideModel+0, data=hydraulicallyWide)
-hydraulicallyWide$k600_pred_wideHydraulics <- (predict(lm_hydraulicallyWide_chainsaw_eD, hydraulicallyWide))
+lm_hydraulicallyWide_reynolds_eD <- lm(k600~hydraulicallyWideModel+0, data=hydraulicallyWide)
+hydraulicallyWide$k600_pred_wideHydraulics <- (predict(lm_hydraulicallyWide_reynolds_eD, hydraulicallyWide))
 
 #plot model
-plot_chainsaw_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
+plot_reynolds_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
   geom_point(size=5, color='#bebada') +
   geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
-  annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_chainsaw_eD)$r.squared,2)), x = 1, y = 100, size = 8, colour = "purple")+
+  annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_reynolds_eD)$r.squared,2)), x = 1, y = 100, size = 8, colour = "purple")+
   labs(x = expression(bold(paste(beta[1]*(gS)^{7/16}*U^{1/4}*H^{9/16}, ' [', m, '/', dy, ']'))),
        y = '')+
   scale_y_log10(limits=c(10^-1,10^2),
@@ -213,34 +216,33 @@ plot_chainsaw_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=
                 breaks=c(0.1, 1, 10, 100),
                 labels=c('0.1', '1', '10', '100'))+
   annotation_logticks()+
-  ggtitle(expression(bold(paste('Chainsaw, ', epsilon==epsilon[D]))))+
+  ggtitle(expression(bold(paste('Reynolds extension, ', epsilon==epsilon[D]))))+
   theme(axis.text=element_text(size=19),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'),
         legend.position = 'none')
 
-k600_modelPlot <- plot_grid(plot_smallEddy_eS, plot_chainsaw_eS, plot_smallEddy_eD, plot_chainsaw_eD, ncol=2, label_size = 18, labels=c('a', 'b', 'c', 'd'))
+k600_modelPlot <- plot_grid(plot_smallEddy_eS, plot_reynolds_eS, plot_smallEddy_eD, plot_reynolds_eD, ncol=2, label_size = 18, labels=c('a', 'b', 'c', 'd'))
 
 ggsave('cache\\k600_theory\\k600Plot.jpg', k600_modelPlot, height=9, width=10)
 
-#######WRITE CHAINSAW MODEL TO FILE-------------------------------
-models <- data.frame('name'=c('Chainsaw-eS', 'Small-eddy-eS', 'Chainsaw-eD', 'Small-eddy-eD'),
-                     'r2'=c(summary(lm_hydraulicallyWide_chainsaw_eS)$r.squared,
+#######WRITE reynolds MODEL TO FILE-------------------------------
+models <- data.frame('name'=c('reynolds-eS', 'Small-eddy-eS', 'reynolds-eD', 'Small-eddy-eD'),
+                     'r2'=c(summary(lm_hydraulicallyWide_reynolds_eS)$r.squared,
                             summary(lm_hydraulicallyWide_smallEddy_eS)$r.squared,
-                            summary(lm_hydraulicallyWide_chainsaw_eD)$r.squared,
+                            summary(lm_hydraulicallyWide_reynolds_eD)$r.squared,
                             summary(lm_hydraulicallyWide_smallEddy_eD)$r.squared),
-                     'coef'=c(summary(lm_hydraulicallyWide_chainsaw_eS)$coefficient[1],
+                     'coef'=c(summary(lm_hydraulicallyWide_reynolds_eS)$coefficient[1],
                               summary(lm_hydraulicallyWide_smallEddy_eS)$coefficient[1],
-                              summary(lm_hydraulicallyWide_chainsaw_eD)$coefficient[1],
+                              summary(lm_hydraulicallyWide_reynolds_eD)$coefficient[1],
                               summary(lm_hydraulicallyWide_smallEddy_eD)$coefficient[1])
                      )
 write.csv(models, 'cache\\k600_theory\\hydraulicWide_models.csv')
 
 
-
 #######MONTE CARLO PROPOGATION OF UNCERTANTIES-------------------------
-beta_sigma <- summary(lm_hydraulicallyWide_chainsaw_eD)$sigma
+beta_sigma <- summary(lm_hydraulicallyWide_reynolds_eD)$sigma
 u_sigma <- 0.3
 
 set.seed(13)
@@ -249,7 +251,7 @@ n <- 10000 #MC sample size
 output <- 1:nrow(hydraulicallyWide)
 for (i in output) {
   log_knowns <- (7/16)*log(g) + (7/16)*log(hydraulicallyWide[i,]$slope) + (9/16)*log(hydraulicallyWide[i,]$depth)
-  log_k600_pred <- rnorm(n, log(summary(lm_hydraulicallyWide_chainsaw_eD)$coefficient[1]), log(beta_sigma)) + log_knowns + (1/4)*rnorm(n, log(hydraulicallyWide[i,]$Vms), u_sigma)
+  log_k600_pred <- rnorm(n, log(summary(lm_hydraulicallyWide_reynolds_eD)$coefficient[1]), log(beta_sigma)) + log_knowns + (1/4)*rnorm(n, log(hydraulicallyWide[i,]$Vms), u_sigma)
   output[i] <- sd(log_k600_pred)
 }
 

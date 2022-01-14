@@ -97,7 +97,6 @@ run_BIKER <- function(currPepsi, errFlag) {
     D_obs <- area/W_obs #[m]
     V_obs <- Q_obs/area #[m/s]
     dA_obs <- calcdA_mat(W_obs,H_obs) #[m2]
-    #Rh_obs <- area / (W_obs + 2*D_obs)
 
     k_obs <- k600_model(D_obs, S_obs, V_obs) #k600 equation
     k_obs <- colMeans(k_obs, na.rm=T)

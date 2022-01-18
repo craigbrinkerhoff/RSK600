@@ -1,2 +1,3 @@
-[1] "starting FCO2..."
+[1] "validating BIKER..."
 [1] "validating BIKER + CO2 data..."
+Time difference of 13.51674 secs

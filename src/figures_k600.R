@@ -1,7 +1,7 @@
 ########################
 #Description: Produce figures for BIKER runs on SWOT-simulated rivers
 #Creator: Craig Brinkerhoff
-#Date: Fall 2021
+#Date: Winter 2022
 ######################
 
 print('validating BIKER...')
@@ -16,49 +16,6 @@ theme_set(theme_classic())
 results <- read.csv('cache/validation/BIKER_validation_results.csv')
 full_output <- filter(results, errFlag == 0) #remove results with SWOT measurement error
 
-####################
-##MODEL VALIDATION ACROSS ALL RIVERS AND TIMESTEPS--------------------------------------------------------
-####################
-dynamicsPlot_regress <- ggplot(full_output, aes(x=(kobs), y=(kest_mean), color=river)) +
-  geom_smooth(size=2, method='lm', se=F)+
-  geom_abline(size=3, linetype='dotted', color='darkblue') +
-  xlab('k600 via observed hydraulics [m/dy]') +
-  ylab('BIKER k600 [m/dy]') +
-  scale_y_log10(limits=c(10^-1,10^2),
-                breaks=c(0.1, 1, 10, 100),
-                labels=c('0.1', '1', '10', '100'))+
-  scale_x_log10(limits=c(10^-1,10^2),
-                breaks=c(0.1, 1, 10, 100),
-                labels=c('0.1', '1', '10', '100'))+
-  scale_fill_discrete_qualitative(palette = 'Cold') +
-  annotate("text", x = 10^-0.2, y = 10^1.5, label = '(Colors correspond \nto rivers)', size=6)+
-  annotation_logticks()+
-  theme(legend.position = "none",
-        axis.text=element_text(size=20),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'))
-
-forPlot <- group_by(full_output, river) %>%
-  do(model=lm(log(kest_mean)~log(kobs), data=.)) %>%
-  mutate(Slope = model$coefficients[2]) %>%
-  select('river', 'Slope')
-write.csv(forPlot, 'cache/validation/results_dynamics.csv')
-dynamicsPlot_stats <- ggplot(forPlot, aes(x=Slope)) +
-  geom_histogram(color='black', size=1) +
-  geom_vline(xintercept=1, size=3, color='darkblue', linetype='dotted') +
-  ylab("Count")+
-  xlab("Regression Slope") +
-  annotate("text", x = 6, y = 12, label = 'Slope of 1 indicates\nperfectly captured dynamics', size=6, color='darkblue')+
-  theme(legend.position = "none",
-        axis.text=element_text(size=20),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'))
-
-dynamicsPlot <- plot_grid(dynamicsPlot_regress, dynamicsPlot_stats, ncol=2, labels=c('a', 'b'), label_size = 18)
-ggsave('cache/validation/dynamics.jpg', dynamicsPlot, width=13.5, height=7)
-
 ########################
 ##CALCULATE BY-RIVER ERROR METRICS---------------------------------------------
 ########################
@@ -72,7 +29,9 @@ stats_by_river <- group_by(results, river, errFlag) %>%
             meanWobs = mean(Wobs, na.rm=T),
             meanSobs = mean(Sobs, na.rm=T),
             meanDobs = mean(Dobs, na.rm=T),
-            n_data=n())
+            n_data=n(),
+            priorKbias = (mean(kprior, na.rm=T)-mean(kobs, na.rm=T))/mean(kobs, na.rm=T),
+            BIKERbias = (sum(kest_mean - kobs, na.rm=T)/n())/(mean(kobs, na.rm=T)))
 
 plot_stats <- gather(stats_by_river, key=key, value=value, c('NRMSE', 'rBIAS', 'KGE', 'r'))
 plot_stats <- filter(plot_stats, key %in% c('NRMSE', 'KGE', 'rBIAS', 'r'))
@@ -99,6 +58,30 @@ plotSWOTreaches <- ggplot(plot_stats, aes(x=key, y=value, fill=factor(errFlag)))
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
 
+###########################
+## PLOT SCALING DYNAMICS-------------------------------
+###########################
+forPlot <- group_by(full_output, river) %>%
+  do(model=lm(log(kest_mean)~log(kobs), data=.)) %>%
+  mutate(Slope = model$coefficients[2]) %>%
+  select('river', 'Slope')
+write.csv(forPlot, 'cache/validation/results_dynamics.csv')
+
+dynamicsPlot_stats <- ggplot(forPlot, aes(x=Slope)) +
+  geom_histogram(color='black', size=1) +
+  geom_vline(xintercept=1, size=3, color='darkblue', linetype='dotted') +
+  ylab("Count")+
+  xlab("Regression Slope") +
+  annotate("text", x = 3, y = 12, label = 'Slope of 1 indicates\nperfectly captured dynamics', size=6, color='darkblue')+
+  theme(legend.position = "none",
+        axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'))
+
+byRiverPlot <- plot_grid(plotSWOTreaches, dynamicsPlot_stats, ncol=2, labels=c('a', 'b'), label_size = 18)
+ggsave('cache/validation/validation_by_river.jpg', byRiverPlot, width=13.5, height=7)
+
 ############
 ##r VS AMOUNT OF DATA-----------------------
 ############
@@ -106,31 +89,27 @@ r_vs_n <- ggplot(stats_by_river[stats_by_river$errFlag == 0,]) +
   geom_point(aes(y=r, x=n_data), color='#7fc97f',size=6) +
   geom_hline(aes(yintercept = median(stats_by_river[stats_by_river$errFlag==0,]$r)), linetype='dashed', color='darkblue', size=1.5)+
   ylab('r') +
-  xlab('Num. SWOT Observations') +
+  xlab('') +
   theme(legend.position = "bottom",
         axis.text=element_text(size=20),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
 
-############
-##r VS AMOUNT OF DATA-----------------------
-############
-r_vs_w <- ggplot(stats_by_river[stats_by_river$errFlag==0,]) +
-  geom_point(aes(y=r, x=meanWobs),color='#7fc97f', size=6) +
-  geom_hline(aes(yintercept = median(stats_by_river[stats_by_river$errFlag==0,]$r)), linetype='dashed', color='darkblue', size=1.5)+
-  xlab('Mean observed width [m]') +
-  ylab('r') +
-  scale_x_log10()+
+nBiasPlot <- ggplot(stats_by_river[stats_by_river$errFlag==0,], aes(y=BIKERbias, x=priorKbias)) +
+  geom_point(,color='#7fc97f', size=6) +
+  geom_abline(size=2, linetype='dashed', color='darkgrey')+
+  geom_smooth(method='lm', se=F, color='#7fc97f')+
+  xlab('Prior bias') +
+  ylab('BIKER bias') +
   theme(legend.position = "none",
         axis.text=element_text(size=20),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
 
-temp <- plot_grid(r_vs_n, r_vs_w, ncol=1, labels=c('b', 'c'), label_size=18)
-valPlot_byRiver <- plot_grid(plotSWOTreaches, temp, ncol=2, labels=c('a', NA), label_size=18)
-ggsave('cache/validation/validation_by_river.jpg', valPlot_byRiver, width=12, height=8)
+hydraulicsPlot <- plot_grid(r_vs_n, nBiasPlot, ncol=1, labels=c('auto'), label_size=18)
+ggsave('cache/validation/validation_hydraulics.jpg', hydraulicsPlot, width=12, height=12)
 
 ####################
 ##SAVE ALL OTHER TIMESERIES FOR THE SUPPLEMENT
@@ -159,7 +138,7 @@ for (i in 1:63){ #47 rivers with no measurement error, 16 with errors modeled vi
     geom_line(size=1.5) +
     ylab('') +
     xlab('') +
-    ylim(0,1.5)+
+    ylim(0,1.7)+
     scale_color_brewer(palette='Set2', name='', labels=c('BIKER', 'Model using \nobserved hydraulics')) +
     ggtitle(river)
   }

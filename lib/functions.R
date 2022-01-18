@@ -38,14 +38,8 @@ calcdA_vec <- function(w, h) {
   dA
 }
 
-#k600 function using craig's model
-#k600_ustar_craig <- function(Rh, slope) {
-#  Ustar <- sqrt(g*Rh*slope)
-#  return(56.0294*Ustar)
-#}
-
 #Calculate 'observed' k600 via the hydraulically-wide chainsaw model (see '~src\swot_k_model.R' for its validation)
 k600_model <- function(depth, slope, vel) {
   #return(76.4*(g*slope)^(9/16)*(depth)^(11/16)) #CHAINSAW MODEL FOR ES
-  return(62.82*(g*slope)^(7/16)*vel^(1/4)*depth^(9/16)) #CHAINSAW MODEL FOR ED
+  return(62.82*(g*colMeans(slope, na.rm=T))^(7/16)*colMeans(vel,na.rm=T)^(1/4)*colMeans(depth,na.rm=T)^(9/16)) #CHAINSAW MODEL FOR ED
 }

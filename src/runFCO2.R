@@ -1,7 +1,7 @@
 ###########################
 #Description: Uses BIKER and rating curves to calculate FCO2 and median C fluxes from the SWOT simulated rivers
 #Craig Brinkerhoff
-#Fall 2021
+#Winter 2022
 ##########################
 
 print('starting FCO2...')
@@ -71,20 +71,30 @@ fun_FCO2_analysis <- function(river) {
   #Calculate depth rating curves following suite of rating curve models [m/s]
   D_raymond2012 <- exp(-0.895)*Q_obs^0.294
   D_raymond2013 <- exp(1/(1.86*-1.06))*Q_obs^(1-0.51-0.12)
-  d <- data.frame(D_raymond2012, D_raymond2013)
-  D_raymond2013 <- rowMeans(d)
+  d <- matrix(NA, ncol=ncol(D_obs), nrow=nrow(D_obs))
+  for(i in 1:nrow(D_obs)) {
+    for(k in 1:ncol(D_obs)){
+      d[i,k] <- mean(c(D_raymond2012[i,k], D_raymond2013[i,k]))
+    }
+  }
+  D_raymond2013 <- d
   D_brinkerhoff2019 <- 0.265191*Q_obs^(0.39496) #Brinkerhoff etal 2019, estimated in CONUS_CO2 code
 
   #Calculate velocity rating curves following suite of rating curve models [m/s]
   V_raymond2012 <- exp(-1.64)*Q_obs^0.285
   V_raymond2013 <- exp(-1.06)*V_obs^(0.12)
-  v <- data.frame(V_raymond2012, V_raymond2013)
-  V_raymond2013 <- rowMeans(v)
+  v <- matrix(NA, ncol=ncol(V_obs), nrow=nrow(V_obs))
+  for(i in 1:nrow(V_obs)) {
+    for(k in 1:ncol(V_obs)){
+      v[i,k] <- mean(c(V_raymond2012[i,k], V_raymond2013[i,k]))
+    }
+  }
+
+  V_raymond2013 <- v
   V_brinkerhoff2019 <- (1/(0.265191*13.28524))*Q_obs^(1-0.39496-0.413728) #Brinkerhoff etal 2019, estimated in CONUS_CO2 code
 
   #Generate k600 estimates [m/dy]---------------------------
   k600_obs <- k600_model(D_obs, S_obs, V_obs)
-  k600_obs <- colMeans(k600_obs, na.rm=T)
   k600_BIKER <- filter(BIKER_results, river == name)$kest_mean
   k600_BIKER <- k600_BIKER[seq(1, length(k600_BIKER), samplingRate)]
   k600_BIKER_low <- filter(BIKER_results, river == name)$kest_low
@@ -92,11 +102,8 @@ fun_FCO2_analysis <- function(river) {
   k600_BIKER_high <- filter(BIKER_results, river == name)$kest_high
   k600_BIKER_high <- k600_BIKER_high[seq(1, length(k600_BIKER_high), samplingRate)]
   k600_raymond2012 <- k600_model(D_raymond2012, S_obs, V_raymond2012)
-  k600_raymond2012 <- colMeans(k600_raymond2012, na.rm=T)
   k600_raymond2013 <- k600_model(D_raymond2013, S_obs, V_raymond2013)
-  k600_raymond2013 <- colMeans(k600_raymond2013, na.rm=T)
   k600_brinkerhoff2019 <- k600_model(D_brinkerhoff2019, S_obs, V_brinkerhoff2019)
-  k600_brinkerhoff2019 <- colMeans(k600_brinkerhoff2019, na.rm=T)
 
   #Calculate FCO2 and Sc using Beauliu data-------------------------------------------
   #sort by starting month here
@@ -202,6 +209,7 @@ files <- c(files, files2)
 #########################
 ##RUN FCO2 ANALYSIS IN PARALLEL------------------------------
 ##########################
+sink("cache/fco2_text_dump.txt") #send all stan outputs to a dump file so they don't muck up the console output
 results <- mclapply(files, fun_FCO2_analysis, mc.cores=cores)
 
 #debugging option
@@ -214,3 +222,4 @@ df_fin <- list.files(path='cache/FCO2/by_river', full.names = TRUE) %>%
   lapply(read_csv) %>%
   bind_rows()
 write.csv(df_fin, 'cache/FCO2/CO2_results.csv')
+sink()

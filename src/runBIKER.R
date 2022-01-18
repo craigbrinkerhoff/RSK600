@@ -1,7 +1,7 @@
 ######################
 #Description: Runs the BIKER algorithm on SWOT-simulated rivers (each river run in parallel)
 #Creator: Craig Brinkerhoff
-#Date: Fall 2021
+#Date: Winter 2022
 #####################
 
 print('running BIKER...')
@@ -89,7 +89,7 @@ run_BIKER <- function(currPepsi, errFlag) {
     #Rhtrue <- area / (Wtrue + 2*Dtrue)
 
     k_obs <- k600_model(Dtrue, Strue, V_obs) #k600 equation
-    k_obs <- colMeans(k_obs, na.rm=T)
+    #k_obs <- colMeans(k_obs, na.rm=T)
   }
 
   #Calculate observed k600 with no measurement error
@@ -99,7 +99,7 @@ run_BIKER <- function(currPepsi, errFlag) {
     dA_obs <- calcdA_mat(W_obs,H_obs) #[m2]
 
     k_obs <- k600_model(D_obs, S_obs, V_obs) #k600 equation
-    k_obs <- colMeans(k_obs, na.rm=T)
+    #k_obs <- colMeans(k_obs, na.rm=T)
   }
 
   #run BIKER------------------------------------------
@@ -107,7 +107,9 @@ run_BIKER <- function(currPepsi, errFlag) {
   priors <- biker_priors(data)
   priors$river_type_priors$logk_sd <- rep(0.30, ncol(W_obs)) #0.748
   priors$sigma_model$sigma_post = matrix(uncertainity, nrow=nrow(W_obs), ncol=ncol(W_obs)) #For this validation, we only want Rh uncertainty. Real implementation would use full model uncertainty (calculate in '~src\swot_k_model.R')
-  kest <- biker_estimate(bikerdata = data, bikerpriors = priors, meas_err=F,iter = 3000L) #meas err needs to be removed
+  posterior <- biker_estimate(bikerdata = data, bikerpriors = priors, meas_err=F,iter = 3000L) #meas err needs to be removed
+  out <- biker_extract(posterior)
+  kest <- out$k600
 
   #write results to file-----------------------------------------------------------
   if(errFlag == 1){
@@ -122,7 +124,8 @@ run_BIKER <- function(currPepsi, errFlag) {
                        'errFlag'=1,
                        'Wobs'=colMeans(Wtrue, na.rm=T),
                        'Sobs'=colMeans(Strue, na.rm=T),
-                       'Dobs'=colMeans(area, na.rm=T)/colMeans(Wtrue, na.rm=T))
+                       'Dobs'=colMeans(area, na.rm=T)/colMeans(Wtrue, na.rm=T),
+                       'dAobs'=colMeans(dA_obs, na.rm=T))
     write.csv(temp, paste0('cache/validation/by_river/results_', name, '_err.csv'))
   }
   else{
@@ -137,7 +140,8 @@ run_BIKER <- function(currPepsi, errFlag) {
                        'errFlag'=0,
                        'Wobs'=colMeans(W_obs, na.rm=T),
                        'Sobs'=colMeans(S_obs, na.rm=T),
-                       'Dobs'=colMeans(area, na.rm=T)/colMeans(W_obs, na.rm=T))
+                       'Dobs'=colMeans(area, na.rm=T)/colMeans(W_obs, na.rm=T),
+                       'dAobs'=colMeans(dA_obs, na.rm=T))
     write.csv(temp, paste0('cache/validation/by_river/results_', name, '.csv'))
   }
 }
@@ -151,16 +155,15 @@ files <- list.files('data/Frasson_etal_2021/IdealDataxxxxxx', pattern="*.nc", fu
 files2 <- list.files('data/Durand_etal_2016/xxxxxxxxxxxxxxxx', pattern="*.nc", full.names = TRUE) #pepsi 1
 files <- c(files, files2)
 
-sink("stan_text_dump.txt") #send all stan outputs to a dump file so they don't muck up the console output
-
-#results <- run_BIKER(files[2], 0)
+sink("cache/biker_text_dump.txt") #send all stan outputs to a dump file so they don't muck up the console output
+#results <- run_BIKER(files[32], 0)
 #break
 results <- mclapply(files, run_BIKER, 0, mc.cores=cores)
 
 files <- list.files('data/Frasson_etal_2021/FullUncertainty', pattern="*.nc", full.names = TRUE) #run with SWOT measurement errors
 results <- mclapply(files, run_BIKER, 1, mc.cores=cores)
-
-sink()
+#results <- run_BIKER(files[1], 1)
+#break
 
 #################
 #CONCATENATE ALL BY-RIVER RESULTS INTO A SINGLE FILE----------------------------
@@ -169,3 +172,4 @@ df_fin <- list.files(path='cache/validation/by_river', full.names = TRUE) %>%
   lapply(read_csv) %>%
   bind_rows()
 write.csv(df_fin, 'cache/validation/BIKER_validation_results.csv')
+sink()

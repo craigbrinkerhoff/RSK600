@@ -96,6 +96,13 @@ data$k600 <- NA
 data$study <- 'Brinkerhoff_etal_2019'
 data <- rbind(data, ulseth_data_s, usgs_data_s)
 
+#########QUICK DETOUR TO CALCULATE HG MODELS FOR FCO2 CALCULATIONS------------------------------
+num <- nrow(data)
+wid <- lm(log(width)~log(Qm3s), data=data)
+dep <- lm(log(depth)~log(Qm3s), data=data)
+models <- data.frame('model' = c('width', 'depth'), 'r2'=c(summary(wid)$r.squared, summary(dep)$r.squared), 'coef'=c(exp(wid$coefficient[1]), exp(dep$coefficient[1])), 'slope'=c(wid$coefficient[2], dep$coefficient[2]))
+write.csv(models, 'cache\\AHG.csv')
+
 #######CALCULATE CHANNEL GEOMETRY---------------------------------------------------------
 data$Rh <- (data$depth*data$width)/(data$width + 2*data$depth) #hydraulic radius, assuming rectangular channel [m]
 data$ustar <- sqrt(g*data$Rh*data$slope) #friction/shear velocity [m/s]

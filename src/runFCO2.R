@@ -10,6 +10,9 @@ print('starting FCO2...')
 legend_labels <- c('BIKER',
                    'Model using observed \ndepth')
 
+#This model specifically predicts w and d from HG and then obtains velocity by continuity. The model fit for velocity was notably worse.
+Brinkerhoff2019_AHG <- read.csv('cache/AHG.csv')
+
 ###################
 ##FUNCTION TO GENERATE FCO2 FROM ALL DEPTH MODELS AND ALL SWOT RIVERS--------------------------------
 ####################
@@ -37,11 +40,15 @@ fun_FCO2_analysis <- function(river) {
   area[area<0]=NA
   Q_obs[Q_obs<0]=NA
 
-  #Sample every 14 days because CO2 data is biweekly (convienantly, average SWOT overpass frequency is 11 days, so close)
+  #Sample every 14 days because CO2 data is biweekly (conveniently, average SWOT overpass frequency is 11 days, so close)
   W_obs = W_obs[,seq(river_start_date, ncol(W_obs), samplingRate)]
   S_obs = S_obs[,seq(river_start_date, ncol(S_obs), samplingRate)]
   Q_obs = Q_obs[,seq(river_start_date, ncol(Q_obs), samplingRate)]
   area = area[,seq(river_start_date, ncol(area), samplingRate)]
+  
+  if(is.null(dim(W_obs))==1) {
+    return(NA)
+  }
 
   #Some NA handling in slopes (borrowed from Frassion etal 2021 BAM runs)-----------------------------------------------------------
   if (any(apply(S_obs,2,sum,na.rm=TRUE) ==0)){ #removes timesteps with all NA slopes
@@ -78,7 +85,7 @@ fun_FCO2_analysis <- function(river) {
     }
   }
   D_raymond2013 <- d
-  D_brinkerhoff2019 <- 0.265191*Q_obs^(0.39496) #Brinkerhoff etal 2019, estimated in CONUS_CO2 code
+  D_brinkerhoff2019 <- Brinkerhoff2019_AHG[2,]$coef*Q_obs^(Brinkerhoff2019_AHG[2,]$slope) #Brinkerhoff etal 2019, estimated in CONUS_CO2 code
 
   #Calculate velocity rating curves following suite of rating curve models [m/s]
   V_raymond2012 <- exp(-1.64)*Q_obs^0.285
@@ -91,7 +98,7 @@ fun_FCO2_analysis <- function(river) {
   }
 
   V_raymond2013 <- v
-  V_brinkerhoff2019 <- (1/(0.265191*13.28524))*Q_obs^(1-0.39496-0.413728) #Brinkerhoff etal 2019, estimated in CONUS_CO2 code
+  V_brinkerhoff2019 <- (1/(Brinkerhoff2019_AHG[2,]$coef*Brinkerhoff2019_AHG[1,]$coef))*Q_obs^(1-Brinkerhoff2019_AHG[2,]$slope-Brinkerhoff2019_AHG[1,]$slope) #Brinkerhoff etal 2019, estimated in CONUS_CO2 code
 
   #Generate k600 estimates [m/dy]---------------------------
   k600_obs <- k600_model(D_obs, S_obs, V_obs)
@@ -111,7 +118,7 @@ fun_FCO2_analysis <- function(river) {
   co2 <- Data_sort$CO2_uatm[1:length(k600_BIKER)] #measured co2
   Sc_co2 <- Sc_co2_func(Data_sort$Water_temp_C) #Sc from measured water temperature
   Sc_co2 <- Sc_co2[1:length(k600_BIKER)]
-  henrys_law <- henrys_law_func(Data_sort$Water_temp_C) #Henry's solubility coefficient from measured water temperature
+  henrys_law <- henry_func(Data_sort$Water_temp_C) #Henry's solubility coefficient from measured water temperature
   henrys_law <- henrys_law[1:length(k600_BIKER)]
 
   #Convert to kco2 [m/dy]--------------------------
@@ -124,27 +131,23 @@ fun_FCO2_analysis <- function(river) {
   kco2_brinkerhoff2019 <- (600/Sc_co2)^(1/2)*k600_brinkerhoff2019
 
   #Calculate actual CO2 fluxes--------------------------------------------
-  FCO2_obs <- kco2_obs*(co2-pCO2_a)*(1/1e6)*exp(henrys_law)*998*molarMass #g-C/m2*dy
-  FCO2_BIKER <- kco2_BIKER*(co2-pCO2_a)*(1/1e6)*exp(henrys_law)*998*molarMass #g-C/m2*dy
-  FCO2_BIKER_low <- kco2_BIKER_low*(co2-pCO2_a)*(1/1e6)*exp(henrys_law)*998*molarMass #g-C/m2*dy
-  FCO2_BIKER_high <- kco2_BIKER_high*(co2-pCO2_a)*(1/1e6)*exp(henrys_law)*998*molarMass #g-C/m2*dy
-  FCO2_raymond2012 <- kco2_raymond2012*(co2-pCO2_a)*(1/1e6)*exp(henrys_law)*998*molarMass #g-C/m2*dy
-  FCO2_raymond2013 <- kco2_raymond2013*(co2-pCO2_a)*(1/1e6)*exp(henrys_law)*998*molarMass #g-C/m2*dy
-  FCO2_brinkerhoff2019 <- kco2_brinkerhoff2019*(co2-pCO2_a)*(1/1e6)*exp(henrys_law)*998*molarMass #g-C/m2*dy
+  FCO2_obs <- kco2_obs*((co2-pCO2_a)*(1/1e6)*henrys_law)*(1/0.001)*molarMass*(365)  #[g-C/m2*yr]
+  FCO2_BIKER <- kco2_BIKER*((co2-pCO2_a)*(1/1e6)*henrys_law)*(1/0.001)*molarMass*(365) #[g-C/m2*yr]
+  FCO2_BIKER_low <- kco2_BIKER_low*((co2-pCO2_a)*(1/1e6)*henrys_law)*(1/0.001)*molarMass*(365) #[g-C/m2*yr]
+  FCO2_BIKER_high <- kco2_BIKER_high*((co2-pCO2_a)*(1/1e6)*henrys_law)*(1/0.001)*molarMass*(365) #[g-C/m2*yr]
+  FCO2_raymond2012 <- kco2_raymond2012*((co2-pCO2_a)*(1/1e6)*henrys_law)*(1/0.001)*molarMass*(365) #[g-C/m2*yr]
+  FCO2_raymond2013 <- kco2_raymond2013*((co2-pCO2_a)*(1/1e6)*henrys_law)*(1/0.001)*molarMass*(365) #[g-C/m2*yr]
+  FCO2_brinkerhoff2019 <- kco2_brinkerhoff2019*((co2-pCO2_a)*(1/1e6)*henrys_law)*(1/0.001)*molarMass*(365) #[g-C/m2*yr]
 
-  #Calculate river surface areas per xs and timestep--------------------------------------------
+  #Calculate river surface areas per subreach and timestep--------------------------------------------
   #first, get reach lengths from the cumulative reach lengths in river data
-  r <- reaches
-  for (i in 2:length(reaches)) {
-    r[i] <- reaches[i] - reaches[i-1]
-  }
-  r <- r[-1]
+  r <- reaches[length(reaches)]
 
-  #then calculate total surface area (as time-averaged)
-  sa <- sum(rowMeans(W_obs, na.rm = T) * r) #[m2]
+  #then calculate a representative surface area
+  sa <- mean(W_obs, na.rm = T) * r #[m2]
 
   #Gather results into single df--------------------------------------------
-  for_plot <- data.frame('river' = name, 'timestep'=1:length(FCO2_BIKER), 'sa'=sa,
+  for_plot <- data.frame('river' = name, 'timestep'=1:length(FCO2_BIKER), 'sa_m2'=rep(sa, length(FCO2_BIKER)),
                         'FCO2_obs'=FCO2_obs,
                         'FCO2_BIKER'=FCO2_BIKER, 'FCO2_BIKER_low'=FCO2_BIKER_low, 'FCO2_BIKER_high'=FCO2_BIKER_high,
                         'FCO2_raymond2012'=FCO2_raymond2012,
@@ -164,8 +167,7 @@ fold <- 'cache/FCO2/by_river'
 
 # get all files in the directories, recursively
 f <- list.files(fold, include.dirs = F, full.names = T, recursive = T)
-# remove the files
-file.remove(f)
+file.remove(f) # remove the files
 
 #create dummy slope df (used in function above)
 s <- data.frame('river'=NA, 'meanS'=NA)
@@ -185,16 +187,19 @@ Data$Water_temp_C <- as.numeric(as.character(Data$Water_temp_C))
 
 #Beaulieu timeseries unit conversions
 Data$CO2_mol_L <- as.numeric(as.character(Data$CO2_umol_L))*0.000001 #mol/L to mol/m3
-Data$CO2_uatm <- (Data$CO2_mol_L*1e6) * 1/(exp(henrys_law_func(Data$Water_temp_C))*998*0.001) #mol/m3 to uatm
+Data$CO2_uatm <- (Data$CO2_mol_L*1e6) * 1/(henry_func(Data$Water_temp_C)) #mol/m3 to uatm
 
 #(((((quick detour to make beaulieu timeseries plot for supplement)))))))))
 beaulieu <- ggplot(data=Data, aes(y=CO2_uatm, x=Date)) +
-  geom_point(size=6, color='darkgreen') +
+  geom_point(size=7, color='darkgreen') +
+  geom_hline(yintercept = 390, linetype='dashed', size=3)+
+  ylim(0,2750)+
   ylab('Water-Side CO2 [uatm]') +
   theme(legend.position = "none",
-        axis.text.y=element_text(size=20),
+        axis.text=element_text(size=20),
         axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17))
+        legend.text = element_text(size=17),
+        axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
 ggsave('cache/FCO2/Beaulieu_timeseries.jpg', beaulieu, width=15, height=6)
 
 #BIKER results for the SWOT rivers (only those with no measurement error)--------------------------------------------
@@ -210,10 +215,11 @@ files <- c(files, files2)
 ##RUN FCO2 ANALYSIS IN PARALLEL------------------------------
 ##########################
 sink("cache/fco2_text_dump.txt") #send all stan outputs to a dump file so they don't muck up the console output
-results <- mclapply(files, fun_FCO2_analysis, mc.cores=cores)
+results <- mclapply(files, fun_FCO2_analysis, mc.cores=1)
 
 #debugging option
-#results <- fun_FCO2_analysis(files[14])
+#results <- fun_FCO2_analysis(i)
+
 
 #########################
 ##MAKE FULL RESULTS FILE----------------------------
@@ -222,4 +228,6 @@ df_fin <- list.files(path='cache/FCO2/by_river', full.names = TRUE) %>%
   lapply(read_csv) %>%
   bind_rows()
 write.csv(df_fin, 'cache/FCO2/CO2_results.csv')
+
 sink()
+closeAllConnections()

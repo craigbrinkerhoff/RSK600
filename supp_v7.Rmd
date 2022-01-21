@@ -105,15 +105,15 @@ $$log_{k_{600}} \sim normal \left[ log(\beta_1), log(\sigma_{\beta_1}) \right] +
 ## Table S1
 *Table S1: Studies that gas exchange velocity measurements come from. 'Study' refers to the paper from which these measurements were taken. Any data wrangling was done by those authors. 'Field Workers' refers to who actually made the measurements. The Raymond et al. (2012) dataset is itself a meta-analysis. Please see that paper for how those measurements were collected. We used the set of measurements ultimately published by Ulseth et al. 2019.*
 
-|**Study**|**Workers**|**Number of measurements**|
+|**Study**|**Workers**|**Additional studies**|
 |---------|-------------|--------------------------|
-|@ulsethDistinctAirWater2019|@ulsethDistinctAirWater2019|
-|@ulsethDistinctAirWater2019|@hallUseArgonMeasure2018|
-|@ulsethDistinctAirWater2019|@schelkerCO2EvasionSteep2016|
-|@ulsethDistinctAirWater2019|@mauriceInfluenceFlowBed2017|
-|@ulsethDistinctAirWater2019|@raymondScalingGasTransfer2012|
-|@churchillPredictionStreamReaeration1964|@churchillPredictionStreamReaeration1964|
-|@owensReaerationStudiesStreams1964|@owensReaerationStudiesStreams1964|
+|@ulsethDistinctAirWater2019|@ulsethDistinctAirWater2019|NA|
+|@ulsethDistinctAirWater2019|@hallUseArgonMeasure2018|NA|
+|@ulsethDistinctAirWater2019|@schelkerCO2EvasionSteep2016|NA|
+|@ulsethDistinctAirWater2019|@mauriceInfluenceFlowBed2017|NA|
+|@ulsethDistinctAirWater2019|@raymondScalingGasTransfer2012|@melchingReaerationEquationsDerived1999; @bottEcosystemMetabolismStreams2006; @bottEcosystemMetabolismPiedmont2006; @mulhollandInterbiomeComparisonFactors2001; @bernotInterregionalComparisonLanduse2010; @tsivoglouCharacterizationStreamReaeration1972|
+|@churchillPredictionStreamReaeration1964|@churchillPredictionStreamReaeration1964|NA|
+|@owensReaerationStudiesStreams1964|@owensReaerationStudiesStreams1964|NA|
 
 ## Table S2
 *Table S2: Validation metrics used in this study, where Nt is number of observations and i is the specific observation. σ refers to the variance of the sample and μ refers to the mean of the sample. As is standard, a carrot accent indicates the predicted value.*

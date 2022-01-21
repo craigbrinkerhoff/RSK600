@@ -1,4 +1,5 @@
 #packages--------------------------------------------------------------------
+library(BIKER)
 library(ncdf4)
 library(dplyr)
 
@@ -11,7 +12,7 @@ files2 <- list.files('C:/Users/craig/Documents/OneDrive - University of Massachu
 files <- c(files, files2)
 
 #grab a dummy river
-currPepsi <- files[22]
+currPepsi <- files[2]
 
 #extract river name-----------------------------------------------------------
 name <- substr(currPepsi, 40, nchar(currPepsi))
@@ -27,12 +28,11 @@ area = ncvar_get(data_in, 'Reach_Timeseries/A')
 Q_obs=ncvar_get(data_in,'Reach_Timeseries/Q')
 priorQ <- ncvar_get(data_in, 'River_Info/QWBM')
 
-W_obs=W_obs[1:3,2:5]
-H_obs=H_obs[1:3,2:5]
-S_obs = S_obs[1:3,2:5]
-area = area[1:3,2:5]
-Q_obs= Q_obs[1:3,2:5]
-priorQ <- ncvar_get(data_in, 'River_Info/QWBM')
+W_obs=W_obs[1:3,1:4]
+H_obs=H_obs[1:3,1:4]
+S_obs = S_obs[1:3,1:4]
+area = area[1:3,1:4]
+Q_obs= Q_obs[1:3,1:4]
 
 #prep river hydraulics-----------------------------------------------------------
 S_obs[S_obs<=0]=NA
@@ -91,12 +91,6 @@ calcdA_vec <- function(w, h) {
   dA
 }
 
-#' #k600 function using craig's model
-k600_ustar_craig <- function(Rh, slope) {
- Ustar <- sqrt(g*Rh*slope)
- return(56.0294*Ustar)
-}
-
 #' #Calculate 'observed' k600 via the hydraulically-wide chainsaw model (see '~src\swot_k_model.R' for its validation)
 k600_model <- function(depth, slope, vel) {
   #return(76.4*(g*slope)^(9/16)*(depth)^(11/16)) #CHAINSAW MODEL FOR ES
@@ -106,21 +100,24 @@ k600_model <- function(depth, slope, vel) {
  D_obs <- area/W_obs #[m]
  V_obs <- Q_obs/area #[m/s]
  dA_obs <- calcdA_mat(W_obs,H_obs) #[m2]
-
  k_obs <- k600_model(D_obs, S_obs, V_obs) #k600 equation
  k_obs <- colMeans(k_obs, na.rm=T)
 
 #run BIKER------------------------------------------
 data <- biker_data(w=W_obs, s=S_obs, dA=dA_obs, priorQ=as.matrix(priorQ))
 priors <- biker_priors(data)
+#priors$river_type_priors$logk_hat <- rep(log(6.5), ncol(S_obs))
 priors$river_type_priors$logk_sd <- rep(0.30, ncol(W_obs)) #0.748
 priors$sigma_model$sigma_post = matrix(uncertainity, nrow=nrow(W_obs), ncol=ncol(W_obs)) #For this validation, we only want Rh uncertainty. Real implementation would use full model uncertainty (calculate in '~src\swot_k_model.R')
 posterior <- biker_estimate(bikerdata = data, bikerpriors = priors, meas_err=F,iter = 3000L) #meas err needs to be removed
 out <- biker_extract(posterior)
 
 #reconstruct posterior k600
-reconstructed_k600 <- colMeans(62.82*g^(7/16)*S_obs^(9/16)*(1/out$n$mean)^(1/4)*((out$A0$mean+dA_obs)/W_obs)^(35/48))
+n <- colMeans(matrix(out$n$mean, ncol=ncol(S_obs), nrow=nrow(S_obs), byrow = F))
+A0 <- colMeans(matrix(out$A0$mean, ncol=ncol(S_obs), nrow=nrow(S_obs), byrow = F))
+reconstructed_k600 <- 61.82*g^(7/16)*colMeans(S_obs, na.rm=T)^(9/16)*(1/n)^(1/4)*((A0+colMeans(dA_obs, na.rm=T))/colMeans(W_obs, na.rm=T))^(35/48)
 
-k_obs
-out$k600$mean
 reconstructed_k600
+k_obs
+out$k600
+

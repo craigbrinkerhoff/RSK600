@@ -8,8 +8,19 @@ sumsq <- function(x) sum(x^2)
 #Schmidt number for CO2------------------------------------------
 Sc_co2_func <- function(t){1742 + (-91.24*t) + (2.208*t^2) + (-0.0219*t^3)} #Raymond etal 2012
 
-#Henry's law function--------------------------------------------
-henrys_law_func <- function(t) {-60.2409+93.4517*(100/(t+273.15))+23.3585*log((t+273.15)/100)} #Weiss 1974
+#Henry's law constant as a function of water temperature [mol/L*atm]
+henry_func <- function(temp) {
+  A <- 108.3865 #constant
+  B <- 0.01985076 #constant
+  C <- -6919.53 #constant
+  D <- -40.4515 #constant
+  E <- 669365 #constant
+  
+  temp_k <- temp + 273.15 #[kelvin]
+  output <- 10^(A + B*temp_k + C/temp_k + D*log10(temp_k) + E/temp_k^2)
+  
+  return(output)
+}
 
 #functions to calculate dA from W and H-----------------------------------------
 #' @param w Matrix of widths

@@ -93,6 +93,6 @@ boxPlots <- ggplot(plot_stats, aes(x=key2, y=value2, fill=key))+
 #######################
 #BRING VARIOUS FCO2 FIGURES TOGETHER INTO SINGLE FILE AND WRITE TO DISK-----------------------------
 #######################
-FCO2_models <- plot_grid(boxPlots, barPlot, ncol=2, labels=c('a', 'b'), label_size=18)
-ggsave('cache/FCO2/FCO2_models.jpg', FCO2_models, width=12, height=7)
+#FCO2_models <- plot_grid(boxPlots, barPlot, ncol=2, labels=c('a', 'b'), label_size=18)
+ggsave('cache/FCO2/FCO2_models.jpg', barPlot, width=8, height=8)
 write.csv(stats, 'cache/FCO2/results_by_riv.csv')

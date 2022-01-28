@@ -11,7 +11,8 @@ legend_labels <- c('BIKER',
                    'Model using observed \ndepth')
 
 #This model specifically predicts w and d from HG and then obtains velocity by continuity. The model fit for velocity was notably worse.
-Brinkerhoff2019_AHG <- read.csv('cache/AHG.csv')
+widAHG <- read_rds('cache/widAHG.rds')
+depAHG <- read_rds('cache/depAHG.rds')
 
 ###################
 ##FUNCTION TO GENERATE FCO2 FROM ALL DEPTH MODELS AND ALL SWOT RIVERS--------------------------------
@@ -85,7 +86,8 @@ fun_FCO2_analysis <- function(river) {
     }
   }
   D_raymond2013 <- d
-  D_brinkerhoff2019 <- Brinkerhoff2019_AHG[2,]$coef*Q_obs^(Brinkerhoff2019_AHG[2,]$slope) #Brinkerhoff etal 2019, estimated in CONUS_CO2 code
+  D_brinkerhoff2019 <- exp(summary(depAHG)$coefficient[1])*Q_obs^(summary(depAHG)$coefficient[2]) #Brinkerhoff etal 2019, estimated in CONUS_CO2 code
+  D_brinkerhoff2019 <- predict(depAHG, newdata=)
 
   #Calculate velocity rating curves following suite of rating curve models [m/s]
   V_raymond2012 <- exp(-1.64)*Q_obs^0.285
@@ -98,7 +100,7 @@ fun_FCO2_analysis <- function(river) {
   }
 
   V_raymond2013 <- v
-  V_brinkerhoff2019 <- (1/(Brinkerhoff2019_AHG[2,]$coef*Brinkerhoff2019_AHG[1,]$coef))*Q_obs^(1-Brinkerhoff2019_AHG[2,]$slope-Brinkerhoff2019_AHG[1,]$slope) #Brinkerhoff etal 2019, estimated in CONUS_CO2 code
+  V_brinkerhoff2019 <- exp(1/(summary(widAHG)$coefficient[1]*summary(depAHG)$coefficient[1]))*Q_obs^(1-summary(widAHG)$coefficient[2]-summary(depAHG)$coefficient[2]) #Brinkerhoff etal 2019, estimated in CONUS_CO2 code
 
   #Generate k600 estimates [m/dy]---------------------------
   k600_obs <- k600_model(D_obs, S_obs, V_obs)

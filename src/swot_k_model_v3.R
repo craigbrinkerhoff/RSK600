@@ -15,10 +15,8 @@ library(tidyr)
 library(ggplot2)
 library(colorspace)
 library(cowplot)
+library(readr)
 theme_set(theme_classic())
-
-#setwd('C:\\Users\\cbrinkerhoff\\OneDrive - University of Massachusetts\\Ongoing Projects\\RSK600')
-setwd('C:\\Users\\craig\\Documents\\OneDrive - University of Massachusetts\\Ongoing Projects\\RSK600')
 
 #some constants
 g <- 9.8 #gravitational acceleration [m/s2]
@@ -100,8 +98,8 @@ data <- rbind(data, ulseth_data_s, usgs_data_s)
 num <- nrow(data)
 wid <- lm(log(width)~log(Qm3s), data=data)
 dep <- lm(log(depth)~log(Qm3s), data=data)
-models <- data.frame('model' = c('width', 'depth'), 'r2'=c(summary(wid)$r.squared, summary(dep)$r.squared), 'coef'=c(exp(wid$coefficient[1]), exp(dep$coefficient[1])), 'slope'=c(wid$coefficient[2], dep$coefficient[2]))
-write.csv(models, 'cache\\AHG.csv')
+write_rds(wid, 'cache/widAHG.rds')
+write_rds(dep, 'cache/depAHG.rds')
 
 #######CALCULATE CHANNEL GEOMETRY---------------------------------------------------------
 data$Rh <- (data$depth*data$width)/(data$width + 2*data$depth) #hydraulic radius, assuming rectangular channel [m]
@@ -133,9 +131,9 @@ hydraulicallyWide$k600_pred_wideHydraulics <- predict(lm_hydraulicallyWide_small
 
 #plot model
 plot_smallEddy_eS <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
-  geom_point(size=5, color='#bebada') +
+  geom_point(size=5, color='#377eb8') +
   geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
-  annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_smallEddy_eS)$r.squared,2)), x = 1, y = 100, size = 8, colour = "purple")+
+  annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_smallEddy_eS)$r.squared,2)), x = 1, y = 100, size = 8, colour = "#377eb8")+
   labs(x = expression(bold(paste(alpha*(gS)^{3/8}*H^{1/8}, ' [', m, '/', dy, ']'))),
        y = expression(bold(paste(k[600], ' [', m, '/', dy, ']'))))+
   scale_y_log10(limits=c(10^-1,10^2),
@@ -159,9 +157,9 @@ hydraulicallyWide$k600_pred_wideHydraulics <- (predict(lm_hydraulicallyWide_reyn
 
 #plot model
 plot_reynolds_eS <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
-  geom_point(size=5, color='#bebada') +
+  geom_point(size=5, color='#377eb8') +
   geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
-  annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_reynolds_eS)$r.squared,2)), x = 1, y = 100, size = 8, colour = "purple")+
+  annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_reynolds_eS)$r.squared,2)), x = 1, y = 100, size = 8, colour = "#377eb8")+
   labs(x = expression(bold(paste(beta*(gS)^{9/16}*H^{11/16}, ' [', m, '/', dy, ']'))),
        y = '')+
   scale_y_log10(limits=c(10^-1,10^2),
@@ -185,9 +183,9 @@ hydraulicallyWide$k600_pred_wideHydraulics <- predict(lm_hydraulicallyWide_small
 
 #plot model
 plot_smallEddy_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
-  geom_point(size=5, color='#bebada') +
+  geom_point(size=5, color='#377eb8') +
   geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
-  annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_smallEddy_eD)$r.squared,2)), x = 1, y = 100, size = 8, colour = "purple")+
+  annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_smallEddy_eD)$r.squared,2)), x = 1, y = 100, size = 8, colour = "#377eb8")+
   labs(x = expression(bold(paste(alpha[1]*(gSU)^{1/4}, ' [', m, '/', dy, ']'))),
        y = expression(bold(paste(k[600], ' [', m, '/', dy, ']'))))+
   scale_y_log10(limits=c(10^-1,10^2),
@@ -211,9 +209,9 @@ hydraulicallyWide$k600_pred_wideHydraulics <- (predict(lm_hydraulicallyWide_reyn
 
 #plot model
 plot_reynolds_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
-  geom_point(size=5, color='#bebada') +
+  geom_point(size=5, color='#377eb8') +
   geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
-  annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_reynolds_eD)$r.squared,2)), x = 1, y = 100, size = 8, colour = "purple")+
+  annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_reynolds_eD)$r.squared,2)), x = 1, y = 100, size = 8, colour = "#377eb8")+
   labs(x = expression(bold(paste(beta[1]*(gS)^{7/16}*U^{1/4}*H^{9/16}, ' [', m, '/', dy, ']'))),
        y = '')+
   scale_y_log10(limits=c(10^-1,10^2),
@@ -230,9 +228,30 @@ plot_reynolds_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=
         legend.title = element_text(size=17, face='bold'),
         legend.position = 'none')
 
-k600_modelPlot <- plot_grid(plot_smallEddy_eS, plot_reynolds_eS, plot_smallEddy_eD, plot_reynolds_eD, ncol=2, label_size = 18, labels=c('a', 'b', 'c', 'd'))
+k600_modelPlot_SI <- plot_grid(plot_smallEddy_eS, plot_reynolds_eS, plot_smallEddy_eD, plot_reynolds_eD, ncol=2, label_size = 18, labels=c('a', 'b', 'c', 'd'))
 
-ggsave('cache\\k600_theory\\k600Plot.jpg', k600_modelPlot, height=9, width=10)
+ggsave('cache\\k600_theory\\k600Plot_SI.jpg', k600_modelPlot_SI, height=9, width=10)
+
+#### SAVE JUST THE FINAL MODEL---------------------------------------
+plot_reynolds_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
+  geom_point(size=5, color='#377eb8') +
+  geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
+  annotate("text", label = expression(paste(r^2, ': 0.70')), x = 1, y = 100, size = 8, colour = "#377eb8")+
+  labs(x = expression(bold(paste(beta[1]*(gS)^{7/16}*U^{1/4}*H^{9/16}, ' [', m, '/', dy, ']'))),
+       y = expression(bold(paste(k[600], ' [', m, '/', dy, ']'))))+
+  scale_y_log10(limits=c(10^-1,10^2),
+                breaks=c(0.1, 1, 10, 100),
+                labels=c('0.1', '1', '10', '100'))+
+  scale_x_log10(limits=c(10^-1,10^2),
+                breaks=c(0.1, 1, 10, 100),
+                labels=c('0.1', '1', '10', '100'))+
+  annotation_logticks()+
+  theme(axis.text=element_text(size=19),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        legend.position = 'none')
+ggsave('cache\\k600_theory\\k600Plot.jpg', plot_reynolds_eD, height=6, width=6)
 
 #######WRITE reynolds MODEL TO FILE-------------------------------
 models <- data.frame('name'=c('reynolds-eS', 'Small-eddy-eS', 'reynolds-eD', 'Small-eddy-eD'),
@@ -248,6 +267,15 @@ models <- data.frame('name'=c('reynolds-eS', 'Small-eddy-eS', 'reynolds-eD', 'Sm
 write.csv(models, 'cache\\k600_theory\\hydraulicWide_models.csv')
 
 
+
+
+
+
+
+
+
+
+
 #######MONTE CARLO PROPOGATION OF UNCERTANTIES-------------------------
 beta_sigma <- summary(lm_hydraulicallyWide_reynolds_eD)$sigma
 u_sigma <- 0.3
@@ -261,6 +289,7 @@ for (i in output) {
   log_k600_pred <- rnorm(n, log(summary(lm_hydraulicallyWide_reynolds_eD)$coefficient[1]), log(beta_sigma)) + log_knowns + (1/4)*rnorm(n, log(hydraulicallyWide[i,]$Vms), u_sigma)
   output[i] <- sd(log_k600_pred)
 }
+
 
 mean(output)
 hist(output)

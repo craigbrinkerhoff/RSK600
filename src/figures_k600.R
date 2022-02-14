@@ -21,9 +21,13 @@ full_output <- filter(results, errFlag == 0) #remove results with SWOT measureme
 ########################
 stats_by_river <- group_by(results, river, errFlag) %>%
   summarise(r = sqrt(summary(lm(kest_mean~kobs))$r.squared),
-            NRMSE = sqrt(mean((kobs - kest_mean)^2, na.rm=T)) / mean(kobs, na.rm=T),
+            NRMSE = sqrt(mean((kest_mean - kobs)^2, na.rm=T)) / mean(kobs, na.rm=T),
             rBIAS =   mean(kest_mean- kobs, na.rm=T) / mean(kobs, na.rm=T),
             KGE = KGE(kest_mean, kobs),
+            r_prior = sqrt(summary(lm(kprior~kobs))$r.squared),
+            NRMSE_prior = sqrt(mean((kprior - kobs)^2, na.rm=T)) / mean(kobs, na.rm=T),
+            rBIAS_prior =   mean(kprior- kobs, na.rm=T) / mean(kobs, na.rm=T),
+            KGE_prior = KGE(kprior, kobs),
             obsCV = sd(kobs)/mean(kobs),
             meanKobs = mean(kobs, na.rm=T),
             meanWobs = mean(Wobs, na.rm=T),
@@ -37,28 +41,8 @@ plot_stats <- gather(stats_by_river, key=key, value=value, c('NRMSE', 'rBIAS', '
 plot_stats <- filter(plot_stats, key %in% c('NRMSE', 'KGE', 'rBIAS', 'r'))
 
 ########################
-##PLOT BY-RIVER ERROR METRICS---------------------------------------
+##PLOT BY-RIVER ERROR METRICS w/ eCDFs---------------------------------------
 ########################
-# lowKGE_0 <- nrow(plot_stats[plot_stats$key == 'KGE' & plot_stats$value < -2 & plot_stats$errFlag==0,])
-# lowKGE_1 <- nrow(plot_stats[plot_stats$key == 'KGE' & plot_stats$value < -2 & plot_stats$errFlag==1,])
-# plotSWOTreaches <- ggplot(plot_stats, aes(x=key, y=value, fill=factor(errFlag))) +
-#   geom_boxplot(size=1, alpha=0.75) +
-#   geom_hline(yintercept=1, linetype='dashed') +
-#   geom_hline(yintercept=0, linetype='dashed') +
-#   geom_hline(yintercept=0.50, linetype='dashed') +
-#   xlab('Metric') +
-#   ylab('Value') +
-#   coord_cartesian(ylim=c(-2,2))+
-#   annotate("text", x = 'KGE', y = -2, label = paste0('# rivers \n< -2: ', lowKGE_0), size=5, color='#7fc97f')+
-#   annotate("text", x = 'KGE', y = -1.6, label = paste0('# rivers \n< -2: ', lowKGE_1), size=5, color='#beaed4')+
-#   scale_fill_brewer(palette = 'Accent', name='', labels=c('No Error', 'SWOT Measurement Error')) +
-#   theme(legend.position = "bottom",
-#         axis.text=element_text(size=20),
-#         axis.title=element_text(size=24,face="bold"),
-#         legend.text = element_text(size=17),
-#         legend.title = element_text(size=17, face='bold'))
-
-#do it with CDFs...
 kge_cdf <- ggplot(stats_by_river[stats_by_river$errFlag==0,], aes(x=KGE)) +
   stat_ecdf(size=3, color='#1c9099') +
   geom_hline(yintercept = 0.5, linetype='dashed', size=1) +
@@ -107,6 +91,86 @@ statsPlot <- plot_grid(kge_cdf, nrmse_cdf, r_cdf, rbias_cdf, ncol=2, labels = NA
 ggsave('cache/validation/validation_by_river.jpg', statsPlot, width=10, height=10)
 
 ########################
+##PRIOR/POSTERIOR COMPARISON------------------------------------
+#########################
+
+ggplot()+
+  geom_histogram(data=stats_by_river[stats_by_river$errFlag==0,], aes(x=NRMSE_prior), binwidth = 0.2, color='darkorange', fill='darkorange', size=2) +
+  geom_histogram(data=stats_by_river[stats_by_river$errFlag==0,], aes(x=NRMSE), binwidth = 0.2, alpha=0.05, size=2, color='black')
+
+
+kge_scatter <- ggplot(stats_by_river[stats_by_river$errFlag ==0,], aes(x=KGE_prior, y=KGE)) +
+  geom_polygon(data = data.frame(x = c(-5, 1, -5), y = c(-5,1,1)), aes(x = x, y = y), fill = "#8dd3c7" )+  # better triangle
+  geom_polygon(data = data.frame(x = c(-5, 1, 1), y = c(-5,1,-5)), aes(x = x, y = y), fill = "#bebada" )+  # worse triangle
+  geom_point(size=8, color='#386cb0') +
+  geom_smooth(method='lm', se=F, color='black', size=3)+
+  #geom_abline(linetype='dashed', color='darkgrey', size=2) +  xlim(-5,1)+
+  ylim(-5,1) +
+  xlab('')+
+  ylab('Posterior')+
+  ggtitle('KGE')+
+  theme(axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        plot.title = element_text(size = 30, face = "bold"))
+
+#r
+r_scatter <- ggplot(stats_by_river[stats_by_river$errFlag ==0,], aes(x=r_prior, y=r)) +
+  geom_polygon(data = data.frame(x = c(0, 1, 0), y = c(0,1,1)), aes(x = x, y = y), fill = "#8dd3c7" )+  # better triangle
+  geom_polygon(data = data.frame(x = c(0, 1, 1), y = c(0,1,0)), aes(x = x, y = y), fill = "#bebada" )+  # worse triangle
+  geom_point(size=8, color='#386cb0') +
+  geom_smooth(method='lm', se=F, color='black', size=3)+
+  #geom_abline(linetype='dashed', color='darkgrey', size=2) +
+  xlim(0,1)+
+  ylim(0,1) +
+  xlab('Prior')+
+  ylab('Posterior')+
+  ggtitle('r')+
+  theme(axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        plot.title = element_text(size = 30, face = "bold"))
+
+#NRMSE
+NRMSE_scatter <- ggplot(stats_by_river[stats_by_river$errFlag ==0,], aes(x=NRMSE_prior, y=NRMSE)) +
+  geom_polygon(data = data.frame(x = c(3, 0, 3), y = c(3,0,0)), aes(x = x, y = y), fill = "#8dd3c7" )+  # better triangle
+  geom_polygon(data = data.frame(x = c(3, 0, 0), y = c(3,0,3)), aes(x = x, y = y), fill = "#bebada" )+  # worse triangle
+  geom_point(size=8, color='#386cb0') +
+  geom_smooth(method='lm', se=F, color='black', size=3)+
+  #geom_abline(linetype='dashed', color='darkgrey', size=2) +  xlim(2,0)+
+  ylim(3,0) +
+  xlim(3,0)+
+  xlab('')+
+  ylab('')+
+  ggtitle('NRMSE')+
+  theme(axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        plot.title = element_text(size = 30, face = "bold"))
+
+#rBIAS
+rbias_scatter <- ggplot(stats_by_river[stats_by_river$errFlag ==0,], aes(x=abs(rBIAS_prior), y=abs(rBIAS))) +
+  geom_polygon(data = data.frame(x = c(3, 0, 3), y = c(3,0,0)), aes(x = x, y = y), fill = "#8dd3c7" )+  # better triangle
+  geom_polygon(data = data.frame(x = c(3, 0, 0), y = c(3,0,3)), aes(x = x, y = y), fill = "#bebada" )+  # worse triangle
+  geom_point(size=8, color='#386cb0') +
+  geom_smooth(method='lm', se=F, color='black', size=3)+
+  #geom_abline(linetype='dashed', color='darkgrey', size=2) +
+  xlim(3,0)+
+  ylim(3,0) +
+  xlab('Prior')+
+  ylab('')+
+  ggtitle('|rBIAS|')+
+  theme(axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        plot.title = element_text(size = 30, face = "bold"))
+
+priorPosterPlot <- plot_grid(kge_scatter, NRMSE_scatter, r_scatter, rbias_scatter, ncol=2, labels=NA)
+ggsave('cache/validation/priorPosteriorPlot.jpg', priorPosterPlot, width=10, height=10)
+
+########################
 ##ERROR/NO ERROR COMPARISON------------------------------------
 #########################
 forError <- filter(stats_by_river, errFlag==1)
@@ -120,10 +184,11 @@ forError_KGE <- pivot_wider(forError, names_from=errFlag, values_from = KGE) %>%
             KGE_err = sum(`1`, na.rm=T))
 
 kge_scatter <- ggplot(forError_KGE, aes(x=KGE_no_err, y=KGE_err)) +
-  geom_point(size=8, color='#2ca25f') +
-  geom_smooth(method='lm', se=F, size=3, color='black')+
-  geom_abline(linetype='dashed', color='darkgrey', size=2) +
-  xlim(-5,1)+
+  geom_polygon(data = data.frame(x = c(-5, 1, -5), y = c(-5,1,1)), aes(x = x, y = y), fill = "#8dd3c7" )+  # better triangle
+  geom_polygon(data = data.frame(x = c(-5, 1, 1), y = c(-5,1,-5)), aes(x = x, y = y), fill = "#bebada" )+  # worse triangle
+  geom_point(size=8, color='#386cb0') +
+  geom_smooth(method='lm', se=F, color='black', size=3)+
+  #geom_abline(linetype='dashed', color='darkgrey', size=2) +  xlim(-5,1)+
   ylim(-5,1) +
   xlab('')+
   ylab('Error')+
@@ -140,9 +205,11 @@ forError_r <- pivot_wider(forError, names_from=errFlag, values_from = r) %>%
             r_err = sum(`1`, na.rm=T))
 
 r_scatter <- ggplot(forError_r, aes(x=r_no_err, y=r_err)) +
-  geom_point(size=8, color='#2ca25f') +
-  geom_smooth(method='lm', se=F, size=3, color='black')+
-  geom_abline(linetype='dashed', color='darkgrey', size=2) +
+  geom_polygon(data = data.frame(x = c(0, 1, 0), y = c(0,1,1)), aes(x = x, y = y), fill = "#8dd3c7" )+  # better triangle
+  geom_polygon(data = data.frame(x = c(0, 1, 1), y = c(0,1,0)), aes(x = x, y = y), fill = "#bebada" )+  # worse triangle
+  geom_point(size=8, color='#386cb0') +
+  geom_smooth(method='lm', se=F, color='black', size=3)+
+  #geom_abline(linetype='dashed', color='darkgrey', size=2) +
   xlim(0,1)+
   ylim(0,1) +
   xlab('No Error')+
@@ -160,11 +227,13 @@ forError_NRMSE <- pivot_wider(forError, names_from=errFlag, values_from = NRMSE)
             NRMSE_err = sum(`1`, na.rm=T))
 
 NRMSE_scatter <- ggplot(forError_NRMSE, aes(x=NRMSE_no_err, y=NRMSE_err)) +
-  geom_point(size=8, color='#2ca25f') +
-  geom_smooth(method='lm', se=F, size=3, color='black')+
-  geom_abline(linetype='dashed', color='darkgrey', size=2) +
-  xlim(0,2)+
-  ylim(0,2) +
+  geom_polygon(data = data.frame(x = c(2, 0, 2), y = c(2,0,0)), aes(x = x, y = y), fill = "#8dd3c7" )+  # better triangle
+  geom_polygon(data = data.frame(x = c(2, 0, 0), y = c(2,0,2)), aes(x = x, y = y), fill = "#bebada" )+  # worse triangle
+  geom_point(size=8, color='#386cb0') +
+  geom_smooth(method='lm', se=F, color='black', size=3)+
+  #geom_abline(linetype='dashed', color='darkgrey', size=2) +  xlim(2,0)+
+  ylim(2,0) +
+  xlim(2,0)+
   xlab('')+
   ylab('')+
   ggtitle('NRMSE')+
@@ -180,15 +249,17 @@ forError_rbias <- pivot_wider(forError, names_from=errFlag, values_from = rBIAS)
   summarise(rbias_no_err = sum(`0`, na.rm=T),
             rbias_err = sum(`1`, na.rm=T))
 
-rbias_scatter <- ggplot(forError_rbias, aes(x=rbias_no_err, y=rbias_err)) +
-  geom_point(size=8, color='#2ca25f') +
-  geom_smooth(method='lm', se=F, size=3, color='black')+
-  geom_abline(linetype='dashed', color='darkgrey', size=2) +
-  xlim(-1,2)+
-  ylim(-1,2) +
+rbias_scatter <- ggplot(forError_rbias, aes(x=abs(rbias_no_err), y=abs(rbias_err))) +
+  geom_polygon(data = data.frame(x = c(2, 0, 2), y = c(2,0,0)), aes(x = x, y = y), fill = "#8dd3c7" )+  # better triangle
+  geom_polygon(data = data.frame(x = c(2, 0, 0), y = c(2,0,2)), aes(x = x, y = y), fill = "#bebada" )+  # worse triangle
+  geom_point(size=8, color='#386cb0') +
+  geom_smooth(method='lm', se=F, color='black', size=3)+
+  #geom_abline(linetype='dashed', color='darkgrey', size=2) +
+  xlim(2,0)+
+  ylim(2,0) +
   xlab('No Error')+
   ylab('')+
-  ggtitle('rBIAS')+
+  ggtitle('|rBIAS|')+
   theme(axis.text=element_text(size=20),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
@@ -236,10 +307,11 @@ CVPlot <- ggplot(forPlot, aes(x=value, color=key)) +
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
-
 temporalPlot <- plot_grid(dynamicsPlot_stats, CVPlot, labels='auto', label_size=18)
 ggsave('cache/validation/validation_temporal.jpg', temporalPlot, width=12, height=7)
+
 break
+
 ####################
 ##SAVE ALL TIMESERIES FOR THE SUPPLEMENT
 ####################
@@ -367,7 +439,7 @@ plotTimeseries <- gridExtra::grid.arrange(gridExtra::arrangeGrob(plotTimeseries,
 
 #write to file
 ggsave('cache/validation/timeseries_err.jpg', plotTimeseries, width = 13, height = 13)
-
+break
 #################
 ##GRAB REPRESENTIVE TIMESERIES FOR THE MAIN TEXT-----------------------
 ##################
@@ -376,49 +448,44 @@ quantiles <- quantile(stats_by_river[stats_by_river$errFlag == 0,]$KGE, c(0.33, 
 
 stats_by_river$river <- as.character(stats_by_river$river)
 
-temp <- stats_by_river[stats_by_river$errFlag==0 & stats_by_river$KGE < quantiles[1],]
-first_tertile <- temp[sample(nrow(temp), 2), ]$river
-
-temp <- stats_by_river[stats_by_river$errFlag==0 & stats_by_river$KGE >= quantiles[1] & stats_by_river$KGE < quantiles[2],]
-second_tertile <- temp[sample(nrow(temp), 2), ]$river
-
-temp <- stats_by_river[stats_by_river$errFlag==0 & stats_by_river$KGE >= quantiles[2],]
-third_tertile <- temp[sample(nrow(temp), 2), ]$river
+temp <- stats_by_river[stats_by_river$errFlag==0 & stats_by_river$KGE < quantiles[1],] #low skill
+temp2 <- stats_by_river[stats_by_river$errFlag==0 & stats_by_river$KGE >= quantiles[1] & stats_by_river$KGE < quantiles[2],] #med skill
+temp3 <- stats_by_river[stats_by_river$errFlag==0 & stats_by_river$KGE >= quantiles[2],] #high skill
 
 plotGrid_short <- plot_grid(
-  pltList[[first_tertile[1]]]+ ggtitle('Sacramento Upstream')+ theme(legend.position='none',
+  pltList[[temp[13,]$river]]+ ggtitle('Sacramento River (upstream)')+ theme(legend.position='none',
                                      axis.text=element_text(size=20),
                                      axis.title=element_text(size=24,face="bold"),
                                      legend.text = element_text(size=17),
                                      legend.title = element_text(size=17, face='bold')),
-  pltList[[first_tertile[2]]]+ ggtitle('Ohio')+ theme(legend.position='none',
+  pltList[[temp[9,]$river]]+ ggtitle('Ohio')+ theme(legend.position='none',
                                       axis.text=element_text(size=20),
                                       axis.title=element_text(size=24,face="bold"),
                                       legend.text = element_text(size=17),
                                       legend.title = element_text(size=17, face='bold')),
-  textGrob('Low KGE', y=0.6, gp=gpar(fontface="bold", col="black", fontsize=30)),
-  pltList[[second_tertile[1]]]+ ggtitle('Po') + theme(legend.position='none',
+  textGrob('Low Skill', y=0.6, gp=gpar(fontface="bold", col="black", fontsize=30)),
+  pltList[[temp2[7,]$river]]+ ggtitle('Iowa River') + theme(legend.position='none',
                                      axis.text=element_text(size=20),
                                      axis.title=element_text(size=24,face="bold"),
                                      legend.text = element_text(size=17),
                                      legend.title = element_text(size=17, face='bold')),
-  pltList[[second_tertile[2]]]+ggtitle('Chowchilla Canal')+ theme(legend.position='none',
+  pltList[[temp2[4,]$river]]+ggtitle('Connecticut River')+ theme(legend.position='none',
                                       axis.text=element_text(size=20),
                                       axis.title=element_text(size=24,face="bold"),
                                       legend.text = element_text(size=17),
                                       legend.title = element_text(size=17, face='bold')),
-  textGrob('Middle KGE', y=0.6, gp=gpar(fontface="bold", col="black", fontsize=30)),
-  pltList[[third_tertile[1]]]+ ggtitle('Tuolumne River')+theme(legend.position='none',
+  textGrob('Middle Skill', y=0.6, gp=gpar(fontface="bold", col="black", fontsize=30)),
+  pltList[[temp3[5,]$river]]+ ggtitle('Missouri River (midsection)')+theme(legend.position='none',
                                         axis.text=element_text(size=20),
                                         axis.title=element_text(size=24,face="bold"),
                                         legend.text = element_text(size=17),
                                         legend.title = element_text(size=17, face='bold')),
-  pltList[[third_tertile[2]]]+ggtitle('Sacramento Downstream')+theme(legend.position='none',
+  pltList[[temp3[12,]$river]]+ggtitle('Sacramento River (downstream)')+theme(legend.position='none',
                                         axis.text=element_text(size=20),
                                         axis.title=element_text(size=24,face="bold"),
                                         legend.text = element_text(size=17),
                                         legend.title = element_text(size=17, face='bold')),
-  textGrob('High KGE', y=0.6, gp=gpar(fontface="bold", col="black", fontsize=30)),
+  textGrob('High Skill', y=0.6, gp=gpar(fontface="bold", col="black", fontsize=30)),
   ncol=3,
   label_size = 18,
   labels=c('a', 'b', NA, 'c', 'd', NA, 'e', 'f', NA))

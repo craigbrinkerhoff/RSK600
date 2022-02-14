@@ -109,9 +109,10 @@ data$ustar <- sqrt(g*data$Rh*data$slope) #friction/shear velocity [m/s]
 data$flag_swot <- ifelse(data$width >= 100, 'SWOT', 'Small')
 
 #########HYDRAULIC GEOMETRY OF SWOT-OBSERVABLE FLOWS
-HG_swot <- round(mean((data[data$flag_swot == 'SWOT',]$Rh/data[data$flag_swot == 'SWOT',]$depth)),2)
+HG_swot_mean <- round(mean((data[data$flag_swot == 'SWOT',]$Rh/data[data$flag_swot == 'SWOT',]$depth)),2)
+HG_swot_sd <- round(sd((data[data$flag_swot == 'SWOT',]$Rh/data[data$flag_swot == 'SWOT',]$depth)),2)
 n <- nrow(data[data$flag_swot == 'SWOT',])
-df <- data.frame('mean'=HG_swot, 'n'=n)
+df <- data.frame('mean'=HG_swot_mean, 'sd'=HG_swot_sd, 'n'=n)
 write.csv(df, 'cache/k600_theory/HG_swot.csv')
 
 #######LOG TRANSFORM SOME VARIABLES-----------------------------------------------------------
@@ -237,7 +238,7 @@ plot_reynolds_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=
   geom_point(size=5, color='#377eb8') +
   geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
   annotate("text", label = expression(paste(r^2, ': 0.70')), x = 1, y = 100, size = 8, colour = "#377eb8")+
-  labs(x = expression(bold(paste(beta[1]*(gS)^{7/16}*U^{1/4}*H^{9/16}, ' [', m, '/', dy, ']'))),
+  labs(x = expression(bold(paste(beta[1]*(gS)^{7/16}*U^{1/4}*H^{9/16}, ' [', m, '/', dy, ']', ' (eq. 7)'))),
        y = expression(bold(paste(k[600], ' [', m, '/', dy, ']'))))+
   scale_y_log10(limits=c(10^-1,10^2),
                 breaks=c(0.1, 1, 10, 100),

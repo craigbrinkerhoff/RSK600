@@ -24,10 +24,7 @@ stats_by_river <- group_by(results, river, errFlag) %>%
             NRMSE = sqrt(mean((kest_mean - kobs)^2, na.rm=T)) / mean(kobs, na.rm=T),
             rBIAS =   mean(kest_mean- kobs, na.rm=T) / mean(kobs, na.rm=T),
             KGE = KGE(kest_mean, kobs),
-            r_prior = sqrt(summary(lm(kprior~kobs))$r.squared),
-            NRMSE_prior = sqrt(mean((kprior - kobs)^2, na.rm=T)) / mean(kobs, na.rm=T),
-            rBIAS_prior =   mean(kprior- kobs, na.rm=T) / mean(kobs, na.rm=T),
-            KGE_prior = KGE(kprior, kobs),
+            rBIAS_prior =  (mean(kprior, na.rm=T) - mean(kobs, na.rm=T)) / mean(kobs, na.rm=T),
             obsCV = sd(kobs)/mean(kobs),
             meanKobs = mean(kobs, na.rm=T),
             meanWobs = mean(Wobs, na.rm=T),
@@ -36,6 +33,9 @@ stats_by_river <- group_by(results, river, errFlag) %>%
             n_data=n(),
             priorCV = sd(kprior)/mean(kprior),
             posteriorCV = sd(kest_mean)/mean(kest_mean))
+
+print(stats_by_river[stats_by_river$errFlag == 0 & (stats_by_river$rBIAS - stats_by_river$rBIAS_prior) < -0.5,])
+print(stats_by_river[stats_by_river$errFlag == 0 & (stats_by_river$rBIAS - stats_by_river$rBIAS_prior) > 0.5,])
 
 plot_stats <- gather(stats_by_river, key=key, value=value, c('NRMSE', 'rBIAS', 'KGE', 'r'))
 plot_stats <- filter(plot_stats, key %in% c('NRMSE', 'KGE', 'rBIAS', 'r'))
@@ -93,82 +93,46 @@ ggsave('cache/validation/validation_by_river.jpg', statsPlot, width=10, height=1
 ########################
 ##PRIOR/POSTERIOR COMPARISON------------------------------------
 #########################
-
-ggplot()+
-  geom_histogram(data=stats_by_river[stats_by_river$errFlag==0,], aes(x=NRMSE_prior), binwidth = 0.2, color='darkorange', fill='darkorange', size=2) +
-  geom_histogram(data=stats_by_river[stats_by_river$errFlag==0,], aes(x=NRMSE), binwidth = 0.2, alpha=0.05, size=2, color='black')
-
-
-kge_scatter <- ggplot(stats_by_river[stats_by_river$errFlag ==0,], aes(x=KGE_prior, y=KGE)) +
-  geom_polygon(data = data.frame(x = c(-5, 1, -5), y = c(-5,1,1)), aes(x = x, y = y), fill = "#8dd3c7" )+  # better triangle
-  geom_polygon(data = data.frame(x = c(-5, 1, 1), y = c(-5,1,-5)), aes(x = x, y = y), fill = "#bebada" )+  # worse triangle
-  geom_point(size=8, color='#386cb0') +
-  geom_smooth(method='lm', se=F, color='black', size=3)+
-  #geom_abline(linetype='dashed', color='darkgrey', size=2) +  xlim(-5,1)+
-  ylim(-5,1) +
-  xlab('')+
-  ylab('Posterior')+
-  ggtitle('KGE')+
-  theme(axis.text=element_text(size=20),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        plot.title = element_text(size = 30, face = "bold"))
-
-#r
-r_scatter <- ggplot(stats_by_river[stats_by_river$errFlag ==0,], aes(x=r_prior, y=r)) +
-  geom_polygon(data = data.frame(x = c(0, 1, 0), y = c(0,1,1)), aes(x = x, y = y), fill = "#8dd3c7" )+  # better triangle
-  geom_polygon(data = data.frame(x = c(0, 1, 1), y = c(0,1,0)), aes(x = x, y = y), fill = "#bebada" )+  # worse triangle
-  geom_point(size=8, color='#386cb0') +
-  geom_smooth(method='lm', se=F, color='black', size=3)+
-  #geom_abline(linetype='dashed', color='darkgrey', size=2) +
-  xlim(0,1)+
-  ylim(0,1) +
-  xlab('Prior')+
-  ylab('Posterior')+
-  ggtitle('r')+
-  theme(axis.text=element_text(size=20),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        plot.title = element_text(size = 30, face = "bold"))
-
-#NRMSE
-NRMSE_scatter <- ggplot(stats_by_river[stats_by_river$errFlag ==0,], aes(x=NRMSE_prior, y=NRMSE)) +
-  geom_polygon(data = data.frame(x = c(3, 0, 3), y = c(3,0,0)), aes(x = x, y = y), fill = "#8dd3c7" )+  # better triangle
-  geom_polygon(data = data.frame(x = c(3, 0, 0), y = c(3,0,3)), aes(x = x, y = y), fill = "#bebada" )+  # worse triangle
-  geom_point(size=8, color='#386cb0') +
-  geom_smooth(method='lm', se=F, color='black', size=3)+
-  #geom_abline(linetype='dashed', color='darkgrey', size=2) +  xlim(2,0)+
-  ylim(3,0) +
-  xlim(3,0)+
-  xlab('')+
-  ylab('')+
-  ggtitle('NRMSE')+
+stats_by_river$n_flag <- ifelse(stats_by_river$n_data == 12, '12 days', '> 12 days')
+priorPosterPlot <- ggplot(stats_by_river[stats_by_river$errFlag ==0,], aes(x=rBIAS_prior, y=rBIAS, color=n_flag)) +
+  #geom_polygon(data = data.frame(x = c(3, 0, 3), y = c(3,0,0)), aes(x = x, y = y), fill = "#8dd3c7" )+  # better triangle
+  #geom_polygon(data = data.frame(x = c(3, 0, 0), y = c(3,0,3)), aes(x = x, y = y), fill = "#bebada" )+  # worse triangle
+  geom_point(size=8)+#, color='#386cb0') +
+  scale_color_brewer(palette='Dark2')+
+  geom_abline(color='darkgrey', linetype='dashed', size=3)+
+  xlim(-1,4)+
+  ylim(-1,4) +
+  xlab('Prior rBIAS')+
+  ylab('Posterior rBIAS')+
   theme(axis.text=element_text(size=20),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'),
         plot.title = element_text(size = 30, face = "bold"))
-
-#rBIAS
-rbias_scatter <- ggplot(stats_by_river[stats_by_river$errFlag ==0,], aes(x=abs(rBIAS_prior), y=abs(rBIAS))) +
-  geom_polygon(data = data.frame(x = c(3, 0, 3), y = c(3,0,0)), aes(x = x, y = y), fill = "#8dd3c7" )+  # better triangle
-  geom_polygon(data = data.frame(x = c(3, 0, 0), y = c(3,0,3)), aes(x = x, y = y), fill = "#bebada" )+  # worse triangle
-  geom_point(size=8, color='#386cb0') +
-  geom_smooth(method='lm', se=F, color='black', size=3)+
-  #geom_abline(linetype='dashed', color='darkgrey', size=2) +
-  xlim(3,0)+
-  ylim(3,0) +
-  xlab('Prior')+
-  ylab('')+
-  ggtitle('|rBIAS|')+
-  theme(axis.text=element_text(size=20),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'),
-        plot.title = element_text(size = 30, face = "bold"))
-
-priorPosterPlot <- plot_grid(kge_scatter, NRMSE_scatter, r_scatter, rbias_scatter, ncol=2, labels=NA)
 ggsave('cache/validation/priorPosteriorPlot.jpg', priorPosterPlot, width=10, height=10)
+
+files <- list.files('data/Frasson_etal_2021/IdealDataxxxxxx', pattern="*.nc", full.names = TRUE) #pepsi 2
+names <- rep(NA, length(files))
+for(i in files){
+  names[i] <- substr(i, 40, nchar(i))
+  names[i] <- substr(names[i],1,nchar(names[i])-3)
+}
+
+t <- filter(stats_by_river, river %in% names)
+priorPosterPlot2 <- ggplot(t[t$errFlag ==0,], aes(x=rBIAS_prior, y=rBIAS, color=n_flag)) +
+  geom_point(size=8)+#, color='#386cb0') +
+  scale_color_brewer(palette='Dark2')+
+  geom_abline(color='darkgrey', linetype='dashed', size=3)+
+  xlim(-1,4)+
+  ylim(-1,4) +
+  xlab('Prior rBIAS')+
+  ylab('Posterior rBIAS')+
+  theme(axis.text=element_text(size=20),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        plot.title = element_text(size = 30, face = "bold"))
+ggsave('cache/validation/priorPosteriorPlot_pepsi2.jpg', priorPosterPlot2, width=10, height=10)
 
 ########################
 ##ERROR/NO ERROR COMPARISON------------------------------------
@@ -310,8 +274,6 @@ CVPlot <- ggplot(forPlot, aes(x=value, color=key)) +
 temporalPlot <- plot_grid(dynamicsPlot_stats, CVPlot, labels='auto', label_size=18)
 ggsave('cache/validation/validation_temporal.jpg', temporalPlot, width=12, height=7)
 
-break
-
 ####################
 ##SAVE ALL TIMESERIES FOR THE SUPPLEMENT
 ####################
@@ -432,14 +394,14 @@ plotgrid_err <- plot_grid(pltList$MissouriDownstream_err + theme(legend.position
                       pltList$Jamuna_err+ theme(legend.position='none'),
                       pltList$Padma_err+ theme(legend.position='none'),
                       ncol=3)
-                      
+
 #draw legend in remaining empty space in figure
 plotTimeseries <- plotgrid_err + draw_grob(legend, 0.6, -0.15, 0.5, 0.5)
 plotTimeseries <- gridExtra::grid.arrange(gridExtra::arrangeGrob(plotTimeseries, left = yTitleCombo, bottom = xTitleCombo))
 
 #write to file
 ggsave('cache/validation/timeseries_err.jpg', plotTimeseries, width = 13, height = 13)
-break
+
 #################
 ##GRAB REPRESENTIVE TIMESERIES FOR THE MAIN TEXT-----------------------
 ##################

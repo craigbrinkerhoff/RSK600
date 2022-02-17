@@ -24,7 +24,7 @@ total_sa <-sum(total_sa$sa)
 output <- drop_na(output)
 
 #Calculate total mass fluxes of CO2 from rivers------------------------------------------------
-massFluxes <- gather(output, key=key, value=value, c(FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_BIKER_high, FCO2_raymond2012, FCO2_raymond2013, FCO2_brinkerhoff2019)) %>%
+massFluxes <- gather(output, key=key, value=value, c(FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_BIKER_high, FCO2_raymond2012, FCO2_raymond2013, FCO2_brinkerhoff2019, FCO2_brinkerhoff2019_low, FCO2_brinkerhoff2019_high)) %>%
   group_by(river, key) %>%
   summarise(yearlyCFux_byriv = mean(value*1e-12*sa_m2, na.rm=T)) %>% #tG-C/yr from all rivers
   group_by(key) %>%
@@ -37,11 +37,20 @@ write.csv(massFluxes, 'cache/FCO2/massFluxes.csv')
 #bar plots of mass fluxes----------------------------------------
 lowCI_sum <- massFluxes[massFluxes$key == 'FCO2_BIKER_low',]$yearlyCFux
 highCI_sum <- massFluxes[massFluxes$key == 'FCO2_BIKER_high',]$yearlyCFux
-
 massFluxes <- massFluxes[massFluxes$key != 'FCO2_BIKER_low' & massFluxes$key != 'FCO2_BIKER_high',]
 
-massFluxes$lowCI_sum <- c(lowCI_sum, NA, NA, NA, NA)
-massFluxes$highCI_sum <- c(highCI_sum, NA, NA, NA, NA)
+lowCI_sum_brink <- massFluxes[massFluxes$key == 'FCO2_brinkerhoff2019_low',]$yearlyCFux
+highCI_sum_brink <- massFluxes[massFluxes$key == 'FCO2_brinkerhoff2019_high',]$yearlyCFux
+massFluxes <- massFluxes[massFluxes$key != 'FCO2_brinkerhoff2019_low' & massFluxes$key != 'FCO2_brinkerhoff2019_high',]
+
+#MAKE ANOTHER COLUMN FOR BRINK 2019 ci AND THENADD IT
+massFluxes$lowCI_sum <- c(lowCI_sum, lowCI_sum_brink, NA, NA, NA)
+massFluxes$highCI_sum <- c(highCI_sum, highCI_sum_brink, NA, NA, NA)
+
+
+#massFluxes$lowCI_sum_brink <- c(NA, NA, NA, lowCI_sum_brink, NA, NA, NA)
+#massFluxes$highCI_sum_brink <- c(NA, NA, NA, highCI_sum_brink, NA, NA, NA)
+#print(massFluxes)
 massFluxes$key <- factor(massFluxes$key,levels = c("FCO2_BIKER", "FCO2_brinkerhoff2019", "FCO2_raymond2012", "FCO2_raymond2013", "FCO2_obs"))
 
 barPlot <- ggplot(massFluxes, aes(y=yearlyCFux, x=key, fill=key)) +

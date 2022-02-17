@@ -15,10 +15,10 @@ henry_func <- function(temp) {
   C <- -6919.53 #constant
   D <- -40.4515 #constant
   E <- 669365 #constant
-  
+
   temp_k <- temp + 273.15 #[kelvin]
   output <- 10^(A + B*temp_k + C/temp_k + D*log10(temp_k) + E/temp_k^2)
-  
+
   return(output)
 }
 
@@ -51,6 +51,5 @@ calcdA_vec <- function(w, h) {
 
 #Calculate 'observed' k600 via the hydraulically-wide chainsaw model (see '~src\swot_k_model.R' for its validation)
 k600_model <- function(depth, slope, vel) {
-  #return(76.4*(g*slope)^(9/16)*(depth)^(11/16)) #CHAINSAW MODEL FOR ES
   return(62.82*(g*colMeans(slope, na.rm=T))^(7/16)*colMeans(vel,na.rm=T)^(1/4)*colMeans(depth,na.rm=T)^(9/16)) #CHAINSAW MODEL FOR ED
 }

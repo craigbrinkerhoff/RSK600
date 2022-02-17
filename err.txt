@@ -112,7 +112,981 @@ Autoloading data
  Loading cached data set: additional_USGS_reaeration_data
  Loading cached data set: dataLocations
 Munging data
+New names:
+* `` -> ...1
+Rows: 12 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 12 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 107 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 107 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 12 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 209 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 162 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 12 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 365 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 365 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 365 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 12 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 366 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 366 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 250 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 250 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 162 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 366 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 366 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 12 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 12 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 12 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 162 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 162 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 162 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 595 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 595 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 595 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 595 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 595 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 220 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 220 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 220 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 220 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 220 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 220 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 220 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 220 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 220 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 220 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 220 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 220 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 220 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 220 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 220 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 13 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 366 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 366 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 22 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 367 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 154 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 305 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 12 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 12 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 365 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 365 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 365 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 365 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 365 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 88 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 12 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 12 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 162 Columns: 14
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 8 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 15 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 12 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 27 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 27 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 27 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 27 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 18 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 12 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 27 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 12 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 12 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 12 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 43 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 43 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 43 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 16 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 16 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 16 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 16 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 16 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 16 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 16 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 16 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 27 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 2 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 27 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 11 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 22 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 27 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 27 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 27 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 7 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+New names:
+* `` -> ...1
+Rows: 12 Columns: 13
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): river
+dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 `summarise()` has grouped output by 'river'. You can override using the `.groups` argument.
-`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-There were 48 warnings (use warnings() to see them)
+`geom_smooth()` using formula 'y ~ x'
+`geom_smooth()` using formula 'y ~ x'
+`geom_smooth()` using formula 'y ~ x'
+`geom_smooth()` using formula 'y ~ x'
+There were 50 or more warnings (use warnings() to see the first 50)
+`summarise()` has grouped output by 'river'. You can override using the `.groups` argument.
 `summarise()` has grouped output by 'river'. You can override using the `.groups` argument.

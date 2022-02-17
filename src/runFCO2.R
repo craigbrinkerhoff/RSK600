@@ -46,7 +46,7 @@ fun_FCO2_analysis <- function(river) {
   S_obs = S_obs[,seq(river_start_date, ncol(S_obs), samplingRate)]
   Q_obs = Q_obs[,seq(river_start_date, ncol(Q_obs), samplingRate)]
   area = area[,seq(river_start_date, ncol(area), samplingRate)]
-  
+
   if(is.null(dim(W_obs))==1) {
     return(NA)
   }
@@ -78,6 +78,7 @@ fun_FCO2_analysis <- function(river) {
 
   #Calculate depth rating curves following suite of rating curve models [m/s]
   D_raymond2012 <- exp(-0.895)*Q_obs^0.294
+  
   D_raymond2013 <- exp(1/(1.86*-1.06))*Q_obs^(1-0.51-0.12)
   d <- matrix(NA, ncol=ncol(D_obs), nrow=nrow(D_obs))
   for(i in 1:nrow(D_obs)) {
@@ -86,11 +87,14 @@ fun_FCO2_analysis <- function(river) {
     }
   }
   D_raymond2013 <- d
-  D_brinkerhoff2019 <- exp(summary(depAHG)$coefficient[1])*Q_obs^(summary(depAHG)$coefficient[2]) #Brinkerhoff etal 2019, estimated in CONUS_CO2 code
-  D_brinkerhoff2019 <- predict(depAHG, newdata=)
+
+  D_brinkerhoff2019 <- exp(depAHG$coefficients[1])*Q_obs^(depAHG$coefficients[2]) #Brinkerhoff etal 2019
+  D_brinkerhoff2019_low <- exp(depAHG$coefficients[1])*Q_obs^(depAHG$coefficients[2]) - 1.96*summary(depAHG)$sigma #exp(confint(depAHG)[1,1])*Q_obs^(confint(depAHG)[2,1]) #Brinkerhoff etal 2019
+  D_brinkerhoff2019_high <- exp(depAHG$coefficients[1])*Q_obs^(depAHG$coefficients[2]) + 1.96*summary(depAHG)$sigma #exp(confint(depAHG)[1,2])*Q_obs^(confint(depAHG)[2,2]) #Brinkerhoff etal 2019
 
   #Calculate velocity rating curves following suite of rating curve models [m/s]
   V_raymond2012 <- exp(-1.64)*Q_obs^0.285
+
   V_raymond2013 <- exp(-1.06)*V_obs^(0.12)
   v <- matrix(NA, ncol=ncol(V_obs), nrow=nrow(V_obs))
   for(i in 1:nrow(V_obs)) {
@@ -98,9 +102,11 @@ fun_FCO2_analysis <- function(river) {
       v[i,k] <- mean(c(V_raymond2012[i,k], V_raymond2013[i,k]))
     }
   }
-
   V_raymond2013 <- v
-  V_brinkerhoff2019 <- exp(1/(summary(widAHG)$coefficient[1]*summary(depAHG)$coefficient[1]))*Q_obs^(1-summary(widAHG)$coefficient[2]-summary(depAHG)$coefficient[2]) #Brinkerhoff etal 2019, estimated in CONUS_CO2 code
+
+  V_brinkerhoff2019 <- exp(1/(widAHG$coefficients[1]*depAHG$coefficients[1]))*Q_obs^(1-widAHG$coefficients[2]-depAHG$coefficients[2]) #Brinkerhoff etal 2019, estimated in CONUS_CO2 code
+  V_brinkerhoff2019_low <- exp(1/(widAHG$coefficients[1]*depAHG$coefficients[1]))*Q_obs^(1-widAHG$coefficients[2]-depAHG$coefficients[2]) - 1.96*mean(c(summary(depAHG)$sigma, summary(widAHG)$sigma)) #exp(1/(confint(depAHG)[1,1]*confint(widAHG)[1,1]))*Q_obs^(1-confint(depAHG)[2,1]-confint(widAHG)[2,1])
+  V_brinkerhoff2019_high <- exp(1/(widAHG$coefficients[1]*depAHG$coefficients[1]))*Q_obs^(1-widAHG$coefficients[2]-depAHG$coefficients[2]) + 1.96*mean(c(summary(depAHG)$sigma, summary(widAHG)$sigma)) #exp(1/(confint(depAHG)[1,2]*confint(widAHG)[1,2]))*Q_obs^(1-confint(depAHG)[2,2]-confint(widAHG)[2,2])
 
   #Generate k600 estimates [m/dy]---------------------------
   k600_obs <- k600_model(D_obs, S_obs, V_obs)
@@ -113,6 +119,8 @@ fun_FCO2_analysis <- function(river) {
   k600_raymond2012 <- k600_model(D_raymond2012, S_obs, V_raymond2012)
   k600_raymond2013 <- k600_model(D_raymond2013, S_obs, V_raymond2013)
   k600_brinkerhoff2019 <- k600_model(D_brinkerhoff2019, S_obs, V_brinkerhoff2019)
+  k600_brinkerhoff2019_low <- k600_model(D_brinkerhoff2019_low, S_obs, V_brinkerhoff2019_low)
+  k600_brinkerhoff2019_high <- k600_model(D_brinkerhoff2019_high, S_obs, V_brinkerhoff2019_high)
 
   #Calculate FCO2 and Sc using Beauliu data-------------------------------------------
   #sort by starting month here
@@ -131,6 +139,8 @@ fun_FCO2_analysis <- function(river) {
   kco2_raymond2012 <- (600/Sc_co2)^(1/2)*k600_raymond2012
   kco2_raymond2013 <- (600/Sc_co2)^(1/2)*k600_raymond2013
   kco2_brinkerhoff2019 <- (600/Sc_co2)^(1/2)*k600_brinkerhoff2019
+  kco2_brinkerhoff2019_low <- (600/Sc_co2)^(1/2)*k600_brinkerhoff2019_low
+  kco2_brinkerhoff2019_high <- (600/Sc_co2)^(1/2)*k600_brinkerhoff2019_high
 
   #Calculate actual CO2 fluxes--------------------------------------------
   FCO2_obs <- kco2_obs*((co2-pCO2_a)*(1/1e6)*henrys_law)*(1/0.001)*molarMass*(365)  #[g-C/m2*yr]
@@ -140,6 +150,8 @@ fun_FCO2_analysis <- function(river) {
   FCO2_raymond2012 <- kco2_raymond2012*((co2-pCO2_a)*(1/1e6)*henrys_law)*(1/0.001)*molarMass*(365) #[g-C/m2*yr]
   FCO2_raymond2013 <- kco2_raymond2013*((co2-pCO2_a)*(1/1e6)*henrys_law)*(1/0.001)*molarMass*(365) #[g-C/m2*yr]
   FCO2_brinkerhoff2019 <- kco2_brinkerhoff2019*((co2-pCO2_a)*(1/1e6)*henrys_law)*(1/0.001)*molarMass*(365) #[g-C/m2*yr]
+  FCO2_brinkerhoff2019_low <- kco2_brinkerhoff2019_low*((co2-pCO2_a)*(1/1e6)*henrys_law)*(1/0.001)*molarMass*(365) #[g-C/m2*yr]
+  FCO2_brinkerhoff2019_high <- kco2_brinkerhoff2019_high*((co2-pCO2_a)*(1/1e6)*henrys_law)*(1/0.001)*molarMass*(365) #[g-C/m2*yr]
 
   #Calculate river surface areas per subreach and timestep--------------------------------------------
   #first, get reach lengths from the cumulative reach lengths in river data
@@ -154,13 +166,15 @@ fun_FCO2_analysis <- function(river) {
                         'FCO2_BIKER'=FCO2_BIKER, 'FCO2_BIKER_low'=FCO2_BIKER_low, 'FCO2_BIKER_high'=FCO2_BIKER_high,
                         'FCO2_raymond2012'=FCO2_raymond2012,
                         'FCO2_raymond2013'=FCO2_raymond2013,
-                        'FCO2_brinkerhoff2019'=FCO2_brinkerhoff2019)
+                        'FCO2_brinkerhoff2019'=FCO2_brinkerhoff2019, 'FCO2_brinkerhoff2019_low'=FCO2_brinkerhoff2019_low, 'FCO2_brinkerhoff2019_high'=FCO2_brinkerhoff2019_high)
 
     #save results to file--------------------------------------------
     write.csv(for_plot, paste0('cache/FCO2/by_river/results_', name, '.csv'))
 }
 
 #...................................................................................................................................
+set.seed(143)
+
 
 ###########
 ##MAKE SURE BY RIVER RESULTS ARE FOR THIS SESSION--------------
@@ -217,10 +231,11 @@ files <- c(files, files2)
 ##RUN FCO2 ANALYSIS IN PARALLEL------------------------------
 ##########################
 sink("cache/fco2_text_dump.txt") #send all stan outputs to a dump file so they don't muck up the console output
-results <- mclapply(files, fun_FCO2_analysis, mc.cores=1)
+results <- mclapply(files, fun_FCO2_analysis, mc.cores=cores)
 
 #debugging option
-#results <- fun_FCO2_analysis(i)
+#results <- fun_FCO2_analysis(files[32])
+#break
 
 
 #########################

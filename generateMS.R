@@ -10,7 +10,6 @@ HG_swot <- read.csv('cache\\k600_theory\\HG_swot.csv')
 
 results_dynamics <- read.csv('cache/validation/results_dynamics.csv')
 results_k600_rivs <- read.csv('cache//validation//results_by_riv.csv')
-results_fco2_rivs <- read.csv('cache//FCO2//results_by_riv.csv')
 results_fco2_bulk <- read.csv('cache//FCO2//massFluxes.csv')
 results_fco2_bulk$key <- as.character(results_fco2_bulk$key)
 

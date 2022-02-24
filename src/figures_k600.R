@@ -22,23 +22,17 @@ full_output <- filter(results, errFlag == 0) #remove results with SWOT measureme
 stats_by_river <- group_by(results, river, errFlag) %>%
   summarise(r = sqrt(summary(lm(kest_mean~kobs))$r.squared),
             NRMSE = sqrt(mean((kest_mean - kobs)^2, na.rm=T)) / mean(kobs, na.rm=T),
-            rBIAS =   mean(kest_mean- kobs, na.rm=T) / mean(kobs, na.rm=T),
             KGE = KGE(kest_mean, kobs),
-            rBIAS_prior =  (mean(kprior, na.rm=T) - mean(kobs, na.rm=T)) / mean(kobs, na.rm=T),
-            obsCV = sd(kobs)/mean(kobs),
+            MAE = mean(abs(kest_mean-kobs), na.rm=T),
+            MAE_prior = mean(abs(kprior - kobs), na.rm=T),
             meanKobs = mean(kobs, na.rm=T),
             meanWobs = mean(Wobs, na.rm=T),
             meanSobs = mean(Sobs, na.rm=T),
             meanDobs = mean(Dobs, na.rm=T),
-            n_data=n(),
-            priorCV = sd(kprior)/mean(kprior),
-            posteriorCV = sd(kest_mean)/mean(kest_mean))
+            n_data=n())
 
-print(stats_by_river[stats_by_river$errFlag == 0 & (stats_by_river$rBIAS - stats_by_river$rBIAS_prior) < -0.5,])
-print(stats_by_river[stats_by_river$errFlag == 0 & (stats_by_river$rBIAS - stats_by_river$rBIAS_prior) > 0.5,])
-
-plot_stats <- gather(stats_by_river, key=key, value=value, c('NRMSE', 'rBIAS', 'KGE', 'r'))
-plot_stats <- filter(plot_stats, key %in% c('NRMSE', 'KGE', 'rBIAS', 'r'))
+plot_stats <- gather(stats_by_river, key=key, value=value, c('NRMSE', 'MAE', 'KGE', 'r'))
+plot_stats <- filter(plot_stats, key %in% c('NRMSE', 'KGE', 'MAE', 'r'))
 
 ########################
 ##PLOT BY-RIVER ERROR METRICS w/ eCDFs---------------------------------------
@@ -76,70 +70,68 @@ nrmse_cdf <- ggplot(stats_by_river[stats_by_river$errFlag==0,], aes(x=NRMSE)) +
         legend.text = element_text(size=17),
         plot.title = element_text(size = 30, face = "bold"))
 
-rbias_cdf <- ggplot(stats_by_river[stats_by_river$errFlag==0,], aes(x=rBIAS)) +
+mae_cdf <- ggplot(stats_by_river[stats_by_river$errFlag==0,], aes(x=MAE)) +
   stat_ecdf(size=3, color='#1c9099') +
+  scale_x_log10()+
   geom_hline(yintercept = 0.5, linetype='dashed', size=1) +
   xlab('Value')+
   ylab('')+
-  ggtitle('rBIAS')+
+  ggtitle('MAE')+
   theme(axis.text=element_text(size=20),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         plot.title = element_text(size = 30, face = "bold"))
 
-statsPlot <- plot_grid(kge_cdf, nrmse_cdf, r_cdf, rbias_cdf, ncol=2, labels = NA)
-ggsave('cache/validation/validation_by_river.jpg', statsPlot, width=10, height=10)
+statsPlot <- plot_grid(kge_cdf, nrmse_cdf, r_cdf, mae_cdf, ncol=2, labels = NA)
+ggsave('cache/validation/fig5.jpg', statsPlot, width=10, height=10)
 
 ########################
 ##PRIOR/POSTERIOR COMPARISON------------------------------------
 #########################
-stats_by_river$n_flag <- ifelse(stats_by_river$n_data == 12, '12 days', '> 12 days')
-priorPosterPlot <- ggplot(stats_by_river[stats_by_river$errFlag ==0,], aes(x=rBIAS_prior, y=rBIAS, color=n_flag)) +
-  #geom_polygon(data = data.frame(x = c(3, 0, 3), y = c(3,0,0)), aes(x = x, y = y), fill = "#8dd3c7" )+  # better triangle
-  #geom_polygon(data = data.frame(x = c(3, 0, 0), y = c(3,0,3)), aes(x = x, y = y), fill = "#bebada" )+  # worse triangle
-  geom_point(size=8)+#, color='#386cb0') +
-  scale_color_brewer(palette='Dark2')+
-  geom_abline(color='darkgrey', linetype='dashed', size=3)+
-  xlim(-1,4)+
-  ylim(-1,4) +
-  xlab('Prior rBIAS')+
-  ylab('Posterior rBIAS')+
-  theme(axis.text=element_text(size=20),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'),
-        plot.title = element_text(size = 30, face = "bold"))
-ggsave('cache/validation/priorPosteriorPlot.jpg', priorPosterPlot, width=10, height=10)
+# forPlot$n_flag <- ifelse(forPlot$n_data == 12, 'short', 'long')
+# priorPosterPlot <- ggplot(forPlot, aes(x=rBIAS_prior, y=rBIAS)) +
+#   geom_point(size=8, color='#386cb0') +
+#   geom_abline(color='darkgrey', linetype='dashed', size=3)+
+#   xlim(-1,4)+
+#   ylim(-1,4) +
+#   xlab('|Prior rBIAS|')+
+#   ylab('|Posterior rBIAS|')+
+#   theme(axis.text=element_text(size=20),
+#         axis.title=element_text(size=24,face="bold"),
+#         legend.text = element_text(size=17),
+#         legend.title = element_text(size=17, face='bold'),
+#         plot.title = element_text(size = 30, face = "bold"))
 
-files <- list.files('data/Frasson_etal_2021/IdealDataxxxxxx', pattern="*.nc", full.names = TRUE) #pepsi 2
-names <- rep(NA, length(files))
-for(i in files){
-  names[i] <- substr(i, 40, nchar(i))
-  names[i] <- substr(names[i],1,nchar(names[i])-3)
-}
 
-t <- filter(stats_by_river, river %in% names)
-priorPosterPlot2 <- ggplot(t[t$errFlag ==0,], aes(x=rBIAS_prior, y=rBIAS, color=n_flag)) +
-  geom_point(size=8)+#, color='#386cb0') +
-  scale_color_brewer(palette='Dark2')+
-  geom_abline(color='darkgrey', linetype='dashed', size=3)+
-  xlim(-1,4)+
-  ylim(-1,4) +
-  xlab('Prior rBIAS')+
-  ylab('Posterior rBIAS')+
-  theme(axis.text=element_text(size=20),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'),
-        plot.title = element_text(size = 30, face = "bold"))
-ggsave('cache/validation/priorPosteriorPlot_pepsi2.jpg', priorPosterPlot2, width=10, height=10)
+# files <- list.files('data/Frasson_etal_2021/IdealDataxxxxxx', pattern="*.nc", full.names = TRUE) #pepsi 2
+# names <- rep(NA, length(files))
+# for(i in files){
+#   names[i] <- substr(i, 40, nchar(i))
+#   names[i] <- substr(names[i],1,nchar(names[i])-3)
+# }
+# 
+# t <- filter(stats_by_river, river %in% names)
+# priorPosterPlot2 <- ggplot(t[t$errFlag ==0,], aes(x=rBIAS_prior, y=rBIAS)) +
+#   geom_point(size=8, color='#386cb0') +
+#   scale_color_brewer(palette='Dark2')+
+#   geom_abline(color='darkgrey', linetype='dashed', size=3)+
+#   xlim(-1,4)+
+#   ylim(-1,4) +
+#   xlab('Prior rBIAS')+
+#   ylab('Posterior rBIAS')+
+#   theme(axis.text=element_text(size=20),
+#         axis.title=element_text(size=24,face="bold"),
+#         legend.text = element_text(size=17),
+#         legend.title = element_text(size=17, face='bold'),
+#         plot.title = element_text(size = 30, face = "bold"))
+# ggsave('cache/validation/priorPosteriorPlot_pepsi2.jpg', priorPosterPlot2, width=10, height=10)
 
 ########################
 ##ERROR/NO ERROR COMPARISON------------------------------------
 #########################
 forError <- filter(stats_by_river, errFlag==1)
 forError <- stats_by_river[stats_by_river$river %in% forError$river,]
-forError <- select(forError, c('river', 'errFlag', 'NRMSE', 'rBIAS', 'KGE', 'r'))
+forError <- select(forError, c('river', 'errFlag', 'NRMSE', 'MAE', 'KGE', 'r'))
 
 #KGE
 forError_KGE <- pivot_wider(forError, names_from=errFlag, values_from = KGE) %>%
@@ -207,31 +199,30 @@ NRMSE_scatter <- ggplot(forError_NRMSE, aes(x=NRMSE_no_err, y=NRMSE_err)) +
         legend.title = element_text(size=17, face='bold'),
         plot.title = element_text(size = 30, face = "bold"))
 
-#rBIAS
-forError_rbias <- pivot_wider(forError, names_from=errFlag, values_from = rBIAS) %>%
+#MAE
+forError_mae <- pivot_wider(forError, names_from=errFlag, values_from = MAE) %>%
   group_by(river) %>%
-  summarise(rbias_no_err = sum(`0`, na.rm=T),
-            rbias_err = sum(`1`, na.rm=T))
+  summarise(mae_no_err = sum(`0`, na.rm=T),
+            mae_err = sum(`1`, na.rm=T))
 
-rbias_scatter <- ggplot(forError_rbias, aes(x=abs(rbias_no_err), y=abs(rbias_err))) +
-  geom_polygon(data = data.frame(x = c(2, 0, 2), y = c(2,0,0)), aes(x = x, y = y), fill = "#8dd3c7" )+  # better triangle
-  geom_polygon(data = data.frame(x = c(2, 0, 0), y = c(2,0,2)), aes(x = x, y = y), fill = "#bebada" )+  # worse triangle
+mae_scatter <- ggplot(forError_mae, aes(x=abs(mae_no_err), y=abs(mae_err))) +
+  geom_polygon(data = data.frame(x = c(13, 0, 13), y = c(13,0,0)), aes(x = x, y = y), fill = "#8dd3c7" )+  # better triangle
+  geom_polygon(data = data.frame(x = c(13, 0, 0), y = c(13,0,13)), aes(x = x, y = y), fill = "#bebada" )+  # worse triangle
   geom_point(size=8, color='#386cb0') +
   geom_smooth(method='lm', se=F, color='black', size=3)+
-  #geom_abline(linetype='dashed', color='darkgrey', size=2) +
-  xlim(2,0)+
-  ylim(2,0) +
+  xlim(13,0)+
+  ylim(13,0) +
   xlab('No Error')+
   ylab('')+
-  ggtitle('|rBIAS|')+
+  ggtitle('MAE')+
   theme(axis.text=element_text(size=20),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'),
         plot.title = element_text(size = 30, face = "bold"))
 
-errorPlot <- plot_grid(kge_scatter, NRMSE_scatter, r_scatter, rbias_scatter, ncol=2, labels=NA)
-ggsave('cache/validation/errorPlot.jpg', errorPlot, width=10, height=10)
+fig6 <- plot_grid(kge_scatter, NRMSE_scatter, r_scatter, mae_scatter, ncol=2, labels=NA)
+ggsave('cache/validation/fig6.jpg', fig6, width=10, height=10)
 
 ###########################
 ## PLOT SCALING DYNAMICS-------------------------------
@@ -255,25 +246,24 @@ dynamicsPlot_stats <- ggplot(forPlot) +
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
 
-#################
-## PLOT TEMPORAL DYNAMICS---------------------
-#################
-forPlot <- gather(stats_by_river[stats_by_river$errFlag == 0,], key=key, value=value, c('obsCV', 'priorCV', 'posteriorCV'))
-forPlot$id <- ifelse(forPlot$key == 'obsCV', 'obs', 'notobs')
-CVPlot <- ggplot(forPlot, aes(x=value, color=key)) +
+#Prior/Posterior bias
+forPlot <- stats_by_river[stats_by_river$errFlag == 0,]
+forPlot2 <- gather(forPlot, key=key, value=value, c('MAE', 'MAE_prior'))
+priorPosterPlot <- ggplot(forPlot2, aes(x=value, color=key)) +
   stat_ecdf(size=2) +
-  scale_color_manual(values=c('#756bb1', '#006d2c', '#74c476'), name='', labels=c('Observed k', 'Posterior k', 'Prior k')) +
-  coord_cartesian(xlim = c(0,1)) +
-  ylab('Density') +
-  xlab('Coefficient of variation')+
-  theme(legend.position=c(.75, .3),
-        axis.text=element_text(size=20),
+  scale_x_log10() +
+  scale_color_brewer(palette = 'Accent', name='', labels=c('Posterior', 'Prior'))+
+  xlab('MAE [m/dy]')+
+  ylab('Percentile')+
+  theme(axis.text=element_text(size=20),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'))
-temporalPlot <- plot_grid(dynamicsPlot_stats, CVPlot, labels='auto', label_size=18)
-ggsave('cache/validation/validation_temporal.jpg', temporalPlot, width=12, height=7)
+        legend.title = element_text(size=17, face='bold'),
+        plot.title = element_text(size = 30, face = "bold"))
 
+fig7 <- plot_grid(dynamicsPlot_stats, priorPosterPlot, labels='auto', label_size = 18, ncol = 2)
+ggsave('cache/validation/fig7.jpg', fig7, width=14, height=7)
+break
 ####################
 ##SAVE ALL TIMESERIES FOR THE SUPPLEMENT
 ####################
@@ -371,7 +361,7 @@ xTitleCombo <- textGrob(expression(Timestep), gp=gpar(fontface="bold", col="blac
 plotTimeseries <- gridExtra::grid.arrange(gridExtra::arrangeGrob(plotTimeseries, left = yTitleCombo, bottom = xTitleCombo))
 
 #write to file
-ggsave('cache/validation/timeseries_noerr.jpg', plotTimeseries, width = 18, height = 24)
+ggsave('cache/validation/figS3.jpg', plotTimeseries, width = 18, height = 24)
 
 ################
 ##TIMERSERIES PLOT WITH SWOT ERRORS-----------------------------------
@@ -400,7 +390,7 @@ plotTimeseries <- plotgrid_err + draw_grob(legend, 0.6, -0.15, 0.5, 0.5)
 plotTimeseries <- gridExtra::grid.arrange(gridExtra::arrangeGrob(plotTimeseries, left = yTitleCombo, bottom = xTitleCombo))
 
 #write to file
-ggsave('cache/validation/timeseries_err.jpg', plotTimeseries, width = 13, height = 13)
+ggsave('cache/validation/figS4.jpg', plotTimeseries, width = 13, height = 13)
 
 #################
 ##GRAB REPRESENTIVE TIMESERIES FOR THE MAIN TEXT-----------------------
@@ -457,7 +447,7 @@ plotTimeseries <- plotGrid_short + draw_grob(legend, 0.6, -0.2, 0.5, 0.5)
 plotTimeseries <- gridExtra::grid.arrange(gridExtra::arrangeGrob(plotTimeseries, left = yTitleCombo, bottom = xTitleCombo))
 
 #write to file
-ggsave('cache/validation/timeseries_noerr_short.jpg', plotTimeseries, width = 13, height = 10)
+ggsave('cache/validation/fig4.jpg', plotTimeseries, width = 13, height = 10)
 
 ####################
 ##SAVE RESULTS TO FILE---------------------------------------------------

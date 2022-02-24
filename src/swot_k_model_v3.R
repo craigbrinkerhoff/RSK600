@@ -231,7 +231,7 @@ plot_reynolds_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=
 
 k600_modelPlot_SI <- plot_grid(plot_smallEddy_eS, plot_reynolds_eS, plot_smallEddy_eD, plot_reynolds_eD, ncol=2, label_size = 18, labels=c('a', 'b', 'c', 'd'))
 
-ggsave('cache\\k600_theory\\k600Plot_SI.jpg', k600_modelPlot_SI, height=9, width=10)
+ggsave('cache\\k600_theory\\figS1.jpg', k600_modelPlot_SI, height=9, width=10)
 
 #### SAVE JUST THE FINAL MODEL---------------------------------------
 plot_reynolds_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
@@ -252,7 +252,7 @@ plot_reynolds_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'),
         legend.position = 'none')
-ggsave('cache\\k600_theory\\k600Plot.jpg', plot_reynolds_eD, height=6, width=6)
+ggsave('cache\\k600_theory\\fig2.jpg', plot_reynolds_eD, height=6, width=6)
 
 #######WRITE reynolds MODEL TO FILE-------------------------------
 models <- data.frame('name'=c('reynolds-eS', 'Small-eddy-eS', 'reynolds-eD', 'Small-eddy-eD'),

@@ -57,7 +57,6 @@ barPlot <- ggplot(massFluxes, aes(y=yearlyCFux, x=key, fill=key)) +
   geom_bar(stat='identity', color='black', size=1.2) +
   geom_errorbar(aes(x=key, ymin=lowCI_sum, ymax=highCI_sum), width=0.4, colour="black", size=1.3)+
   geom_hline(yintercept = massFluxes[massFluxes$key=='FCO2_obs', ]$yearlyCFux, size=1.2, linetype='dashed', color='#ff7f00') +
- # ylim(0,9)+
   ylab('CO2 Flux [Tg-C/yr]') +
   scale_fill_manual(values=c('#e31a1c', '#3f007d', '#6a51a3', '#9e9ac8', '#ff7f00'), name='', labels=c('BIKER \n ', 'Brinkerhoff \n2019', 'Raymond \n2012', 'Raymond \n2013', 'Observed \n ')) +
   theme(legend.position = "right",
@@ -69,39 +68,39 @@ barPlot <- ggplot(massFluxes, aes(y=yearlyCFux, x=key, fill=key)) +
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
 
-stats <- gather(output, key=key, value=value, c(FCO2_BIKER, FCO2_raymond2012, FCO2_raymond2013, FCO2_brinkerhoff2019)) %>%
-  group_by(river) %>%
-  filter(n() >= 3) %>%
-  group_by(river, key) %>%
-  summarise(r = sqrt(summary(lm(value~FCO2_obs))$r.squared),
-            NRMSE = sqrt(mean((FCO2_obs - value)^2, na.rm=T)) / mean(FCO2_obs, na.rm=T),
-            rBIAS =   mean(value- FCO2_obs, na.rm=T) / mean(FCO2_obs, na.rm=T),
-            KGE =   KGE(value, FCO2_obs),
-            n_data=n())
-
-plot_stats <- gather(stats, key=key2, value=value2, c('NRMSE', 'rBIAS', 'KGE', 'r'))
-plot_stats <- filter(plot_stats, key2 %in% c('NRMSE', 'KGE', 'rBIAS', 'r'))
-lowKGE <- nrow(plot_stats[plot_stats$key2 == 'KGE' & plot_stats$value2 < -2,])
-
-boxPlots <- ggplot(plot_stats, aes(x=key2, y=value2, fill=key))+
-  geom_boxplot(size=1, alpha=0.75) +
-  geom_hline(yintercept=1, linetype='dashed') +
-  geom_hline(yintercept=0, linetype='dashed') +
-  geom_hline(yintercept=0.50, linetype='dashed') +
-  xlab('Metric') +
-  ylab('Value') +
-  scale_fill_manual(values=c('#e31a1c', '#3f007d', '#6a51a3', '#9e9ac8'), name='', labels=c('BIKER \n ', 'Brinkerhoff \n2019', 'Raymond \n2012', 'Raymond \n2013')) +
-  annotate("text", x = 'KGE', y = -1.8, label = paste0('# rivers \n< -2: ', lowKGE), size=5)+
-  coord_cartesian(ylim=c(-2,2))+
-  theme(legend.position = "none",
-        axis.text=element_text(size=20),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'))
+# stats <- gather(output, key=key, value=value, c(FCO2_BIKER, FCO2_raymond2012, FCO2_raymond2013, FCO2_brinkerhoff2019)) %>%
+#   group_by(river) %>%
+#   filter(n() >= 3) %>%
+#   group_by(river, key) %>%
+#   summarise(r = sqrt(summary(lm(value~FCO2_obs))$r.squared),
+#             NRMSE = sqrt(mean((FCO2_obs - value)^2, na.rm=T)) / mean(FCO2_obs, na.rm=T),
+#             rBIAS =   mean(value- FCO2_obs, na.rm=T) / mean(FCO2_obs, na.rm=T),
+#             KGE =   KGE(value, FCO2_obs),
+#             n_data=n())
+# 
+# plot_stats <- gather(stats, key=key2, value=value2, c('NRMSE', 'rBIAS', 'KGE', 'r'))
+# plot_stats <- filter(plot_stats, key2 %in% c('NRMSE', 'KGE', 'rBIAS', 'r'))
+# lowKGE <- nrow(plot_stats[plot_stats$key2 == 'KGE' & plot_stats$value2 < -2,])
+# 
+# boxPlots <- ggplot(plot_stats, aes(x=key2, y=value2, fill=key))+
+#   geom_boxplot(size=1, alpha=0.75) +
+#   geom_hline(yintercept=1, linetype='dashed') +
+#   geom_hline(yintercept=0, linetype='dashed') +
+#   geom_hline(yintercept=0.50, linetype='dashed') +
+#   xlab('Metric') +
+#   ylab('Value') +
+#   scale_fill_manual(values=c('#e31a1c', '#3f007d', '#6a51a3', '#9e9ac8'), name='', labels=c('BIKER \n ', 'Brinkerhoff \n2019', 'Raymond \n2012', 'Raymond \n2013')) +
+#   annotate("text", x = 'KGE', y = -1.8, label = paste0('# rivers \n< -2: ', lowKGE), size=5)+
+#   coord_cartesian(ylim=c(-2,2))+
+#   theme(legend.position = "none",
+#         axis.text=element_text(size=20),
+#         axis.title=element_text(size=24,face="bold"),
+#         legend.text = element_text(size=17),
+#         legend.title = element_text(size=17, face='bold'))
 
 #######################
 #BRING VARIOUS FCO2 FIGURES TOGETHER INTO SINGLE FILE AND WRITE TO DISK-----------------------------
 #######################
 #FCO2_models <- plot_grid(boxPlots, barPlot, ncol=2, labels=c('a', 'b'), label_size=18)
-ggsave('cache/FCO2/FCO2_models.jpg', barPlot, width=8, height=8)
-write.csv(stats, 'cache/FCO2/results_by_riv.csv')
+ggsave('cache/FCO2/fig8.jpg', barPlot, width=8, height=8)
+#write.csv(stats, 'cache/FCO2/results_by_riv.csv')

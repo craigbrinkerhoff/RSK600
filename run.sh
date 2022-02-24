@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name='BIKER'
-#SBATCH -p cee_water_cjgleason
+#SBATCH -p cpu
 #SBATCH -c 48  # Number of Cores per Task
 #SBATCH --mem=128000  # Requested Memory
 #SBATCH -t 5:00:00  # Job time limit

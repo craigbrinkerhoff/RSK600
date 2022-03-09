@@ -68,6 +68,14 @@ barPlot <- ggplot(massFluxes, aes(y=yearlyCFux, x=key, fill=key)) +
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'))
 
+#######################
+#BRING VARIOUS FCO2 FIGURES TOGETHER INTO SINGLE FILE AND WRITE TO DISK-----------------------------
+#######################
+#FCO2_models <- plot_grid(boxPlots, barPlot, ncol=2, labels=c('a', 'b'), label_size=18)
+ggsave('cache/FCO2/fig8.jpg', barPlot, width=8, height=8)
+#write.csv(stats, 'cache/FCO2/results_by_riv.csv')
+
+
 # stats <- gather(output, key=key, value=value, c(FCO2_BIKER, FCO2_raymond2012, FCO2_raymond2013, FCO2_brinkerhoff2019)) %>%
 #   group_by(river) %>%
 #   filter(n() >= 3) %>%
@@ -97,10 +105,3 @@ barPlot <- ggplot(massFluxes, aes(y=yearlyCFux, x=key, fill=key)) +
 #         axis.title=element_text(size=24,face="bold"),
 #         legend.text = element_text(size=17),
 #         legend.title = element_text(size=17, face='bold'))
-
-#######################
-#BRING VARIOUS FCO2 FIGURES TOGETHER INTO SINGLE FILE AND WRITE TO DISK-----------------------------
-#######################
-#FCO2_models <- plot_grid(boxPlots, barPlot, ncol=2, labels=c('a', 'b'), label_size=18)
-ggsave('cache/FCO2/fig8.jpg', barPlot, width=8, height=8)
-#write.csv(stats, 'cache/FCO2/results_by_riv.csv')

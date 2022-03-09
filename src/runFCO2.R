@@ -216,7 +216,7 @@ beaulieu <- ggplot(data=Data, aes(y=CO2_uatm, x=Date)) +
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
-ggsave('cache/FCO2/figS2.jpg', beaulieu, width=15, height=6)
+ggsave('cache/FCO2/figS3.jpg', beaulieu, width=15, height=6)
 
 #BIKER results for the SWOT rivers (only those with no measurement error)--------------------------------------------
 BIKER_results <- read.csv('cache/validation/BIKER_validation_results.csv')

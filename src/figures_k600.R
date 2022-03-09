@@ -23,16 +23,17 @@ stats_by_river <- group_by(results, river, errFlag) %>%
   summarise(r = sqrt(summary(lm(kest_mean~kobs))$r.squared),
             NRMSE = sqrt(mean((kest_mean - kobs)^2, na.rm=T)) / mean(kobs, na.rm=T),
             KGE = KGE(kest_mean, kobs),
-            MAE = mean(abs(kest_mean-kobs), na.rm=T),
-            MAE_prior = mean(abs(kprior - kobs), na.rm=T),
+            NMAE = mean(abs(kest_mean-kobs)/mean(kobs, na.rm=T), na.rm=T),
+            NMAE_prior = mean(abs(kprior - kobs), na.rm=T)/mean(kobs, na.rm=T),
             meanKobs = mean(kobs, na.rm=T),
             meanWobs = mean(Wobs, na.rm=T),
             meanSobs = mean(Sobs, na.rm=T),
             meanDobs = mean(Dobs, na.rm=T),
-            n_data=n())
+            n_data=n(),
+            cvObs = sd(kobs, na.rm=T)/mean(kobs))
 
-plot_stats <- gather(stats_by_river, key=key, value=value, c('NRMSE', 'MAE', 'KGE', 'r'))
-plot_stats <- filter(plot_stats, key %in% c('NRMSE', 'KGE', 'MAE', 'r'))
+plot_stats <- gather(stats_by_river, key=key, value=value, c('NRMSE', 'NMAE', 'KGE', 'r'))
+plot_stats <- filter(plot_stats, key %in% c('NRMSE', 'KGE', 'NMAE', 'r'))
 
 ########################
 ##PLOT BY-RIVER ERROR METRICS w/ eCDFs---------------------------------------
@@ -70,68 +71,27 @@ nrmse_cdf <- ggplot(stats_by_river[stats_by_river$errFlag==0,], aes(x=NRMSE)) +
         legend.text = element_text(size=17),
         plot.title = element_text(size = 30, face = "bold"))
 
-mae_cdf <- ggplot(stats_by_river[stats_by_river$errFlag==0,], aes(x=MAE)) +
+nmae_cdf <- ggplot(stats_by_river[stats_by_river$errFlag==0,], aes(x=NMAE)) +
   stat_ecdf(size=3, color='#1c9099') +
   scale_x_log10()+
   geom_hline(yintercept = 0.5, linetype='dashed', size=1) +
   xlab('Value')+
   ylab('')+
-  ggtitle('MAE')+
+  ggtitle('NMAE')+
   theme(axis.text=element_text(size=20),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         plot.title = element_text(size = 30, face = "bold"))
 
-statsPlot <- plot_grid(kge_cdf, nrmse_cdf, r_cdf, mae_cdf, ncol=2, labels = NA)
+statsPlot <- plot_grid(kge_cdf, nrmse_cdf, r_cdf, nmae_cdf, ncol=2, labels = NA)
 ggsave('cache/validation/fig5.jpg', statsPlot, width=10, height=10)
-
-########################
-##PRIOR/POSTERIOR COMPARISON------------------------------------
-#########################
-# forPlot$n_flag <- ifelse(forPlot$n_data == 12, 'short', 'long')
-# priorPosterPlot <- ggplot(forPlot, aes(x=rBIAS_prior, y=rBIAS)) +
-#   geom_point(size=8, color='#386cb0') +
-#   geom_abline(color='darkgrey', linetype='dashed', size=3)+
-#   xlim(-1,4)+
-#   ylim(-1,4) +
-#   xlab('|Prior rBIAS|')+
-#   ylab('|Posterior rBIAS|')+
-#   theme(axis.text=element_text(size=20),
-#         axis.title=element_text(size=24,face="bold"),
-#         legend.text = element_text(size=17),
-#         legend.title = element_text(size=17, face='bold'),
-#         plot.title = element_text(size = 30, face = "bold"))
-
-
-# files <- list.files('data/Frasson_etal_2021/IdealDataxxxxxx', pattern="*.nc", full.names = TRUE) #pepsi 2
-# names <- rep(NA, length(files))
-# for(i in files){
-#   names[i] <- substr(i, 40, nchar(i))
-#   names[i] <- substr(names[i],1,nchar(names[i])-3)
-# }
-# 
-# t <- filter(stats_by_river, river %in% names)
-# priorPosterPlot2 <- ggplot(t[t$errFlag ==0,], aes(x=rBIAS_prior, y=rBIAS)) +
-#   geom_point(size=8, color='#386cb0') +
-#   scale_color_brewer(palette='Dark2')+
-#   geom_abline(color='darkgrey', linetype='dashed', size=3)+
-#   xlim(-1,4)+
-#   ylim(-1,4) +
-#   xlab('Prior rBIAS')+
-#   ylab('Posterior rBIAS')+
-#   theme(axis.text=element_text(size=20),
-#         axis.title=element_text(size=24,face="bold"),
-#         legend.text = element_text(size=17),
-#         legend.title = element_text(size=17, face='bold'),
-#         plot.title = element_text(size = 30, face = "bold"))
-# ggsave('cache/validation/priorPosteriorPlot_pepsi2.jpg', priorPosterPlot2, width=10, height=10)
 
 ########################
 ##ERROR/NO ERROR COMPARISON------------------------------------
 #########################
 forError <- filter(stats_by_river, errFlag==1)
 forError <- stats_by_river[stats_by_river$river %in% forError$river,]
-forError <- select(forError, c('river', 'errFlag', 'NRMSE', 'MAE', 'KGE', 'r'))
+forError <- select(forError, c('river', 'errFlag', 'NRMSE', 'NMAE', 'KGE', 'r'))
 
 #KGE
 forError_KGE <- pivot_wider(forError, names_from=errFlag, values_from = KGE) %>%
@@ -199,71 +159,93 @@ NRMSE_scatter <- ggplot(forError_NRMSE, aes(x=NRMSE_no_err, y=NRMSE_err)) +
         legend.title = element_text(size=17, face='bold'),
         plot.title = element_text(size = 30, face = "bold"))
 
-#MAE
-forError_mae <- pivot_wider(forError, names_from=errFlag, values_from = MAE) %>%
+#NMAE
+forError_nmae <- pivot_wider(forError, names_from=errFlag, values_from = NMAE) %>%
   group_by(river) %>%
-  summarise(mae_no_err = sum(`0`, na.rm=T),
-            mae_err = sum(`1`, na.rm=T))
+  summarise(nmae_no_err = sum(`0`, na.rm=T),
+            nmae_err = sum(`1`, na.rm=T))
 
-mae_scatter <- ggplot(forError_mae, aes(x=abs(mae_no_err), y=abs(mae_err))) +
-  geom_polygon(data = data.frame(x = c(13, 0, 13), y = c(13,0,0)), aes(x = x, y = y), fill = "#8dd3c7" )+  # better triangle
-  geom_polygon(data = data.frame(x = c(13, 0, 0), y = c(13,0,13)), aes(x = x, y = y), fill = "#bebada" )+  # worse triangle
+nmae_scatter <- ggplot(forError_nmae, aes(x=abs(nmae_no_err), y=abs(nmae_err))) +
+  geom_polygon(data = data.frame(x = c(1, 0, 1), y = c(1,0,0)), aes(x = x, y = y), fill = "#8dd3c7" )+  # better triangle
+  geom_polygon(data = data.frame(x = c(1, 0, 0), y = c(1,0,1)), aes(x = x, y = y), fill = "#bebada" )+  # worse triangle
   geom_point(size=8, color='#386cb0') +
   geom_smooth(method='lm', se=F, color='black', size=3)+
-  xlim(13,0)+
-  ylim(13,0) +
+  xlim(1,0)+
+  ylim(1,0) +
   xlab('No Error')+
   ylab('')+
-  ggtitle('MAE')+
+  ggtitle('NMAE')+
   theme(axis.text=element_text(size=20),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'),
         plot.title = element_text(size = 30, face = "bold"))
 
-fig6 <- plot_grid(kge_scatter, NRMSE_scatter, r_scatter, mae_scatter, ncol=2, labels=NA)
+fig6 <- plot_grid(kge_scatter, NRMSE_scatter, r_scatter, nmae_scatter, ncol=2, labels=NA)
 ggsave('cache/validation/fig6.jpg', fig6, width=10, height=10)
 
 ###########################
-## PLOT SCALING DYNAMICS-------------------------------
+## PLOT PRIOR/POSTEROR COMPARISON-------------------------------
 ###########################
-forPlot <- group_by(full_output, river) %>%
-  do(model=lm((kest_mean)~(kobs), data=.)) %>%
-  mutate(Slope = model$coefficients[2]) %>%
-  select('river', 'Slope')
-write.csv(forPlot, 'cache/validation/results_dynamics.csv')
-
-bw <- 0.3
-dynamicsPlot_stats <- ggplot(forPlot) +
-  geom_histogram(aes(x=Slope),color='black', size=1, binwidth=bw) +
-  geom_vline(xintercept=1, size=3, color='darkblue', linetype='dotted') +
-  ylab("Count")+
-  xlab("Regression Slope") +
-  annotate("text", x = 4, y = 10, label = 'Slope of 1: correctly\ninferred temporal dynamics', size=6, color='darkblue')+
-  theme(legend.position = "none",
-        axis.text=element_text(size=20),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'))
 
 #Prior/Posterior bias
-forPlot <- stats_by_river[stats_by_river$errFlag == 0,]
-forPlot2 <- gather(forPlot, key=key, value=value, c('MAE', 'MAE_prior'))
-priorPosterPlot <- ggplot(forPlot2, aes(x=value, color=key)) +
-  stat_ecdf(size=2) +
-  scale_x_log10() +
-  scale_color_brewer(palette = 'Accent', name='', labels=c('Posterior', 'Prior'))+
-  xlab('MAE [m/dy]')+
-  ylab('Percentile')+
-  theme(axis.text=element_text(size=20),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'),
-        plot.title = element_text(size = 30, face = "bold"))
+forPlot <- stats_by_river[stats_by_river$errFlag == 0 & stats_by_river$n_data > 12,]
+forPlot2 <- gather(forPlot, key=key, value=value, c('NMAE', 'NMAE_prior'))
 
-fig7 <- plot_grid(dynamicsPlot_stats, priorPosterPlot, labels='auto', label_size = 18, ncol = 2)
-ggsave('cache/validation/fig7.jpg', fig7, width=14, height=7)
-break
+priorPosterPlot_all <- ggplot(forPlot2, aes(x=value, color=key)) +
+  stat_ecdf(size=3) +
+  scale_color_brewer(palette = 'Accent', name='')+
+  xlab('')+
+  ylab('Percentile')+
+  xlim(0,2.2)+
+  annotate("text", x = 1.25, y = 0.5, label = 'All Rivers\n(n = 47 rivers)', size=8, color='darkblue')+
+  theme(axis.text=element_text(size=22),
+        axis.title=element_text(size=26,face="bold"),
+        plot.title = element_text(size = 30, face = "bold"),
+        legend.position = 'none')
+
+priorPosterPlot_2 <- ggplot(forPlot2[forPlot2$cvObs >= 0.10,], aes(x=value, color=key)) +
+  stat_ecdf(size=3) +
+  scale_color_brewer(palette = 'Accent', name='')+
+  xlab('')+
+  ylab('')+
+  xlim(0,2.2)+
+  annotate("text", x = 1.25, y = 0.5, label = 'Observed CV > 0.10\n(n = 38 rivers)', size=8, color='darkblue')+
+  theme(axis.text=element_text(size=22),
+        axis.title=element_text(size=26,face="bold"),
+        plot.title = element_text(size = 30, face = "bold"),
+        legend.position = 'none')
+
+priorPosterPlot_3 <- ggplot(forPlot2[forPlot2$cvObs >= 0.20,], aes(x=value, color=key)) +
+  stat_ecdf(size=3) +
+  scale_color_brewer(palette = 'Accent', name='')+
+  xlab('NMAE')+
+  ylab('Percentile')+
+  xlim(0,2.2)+
+  annotate("text", x = 1.25, y = 0.5, label = 'Observed CV > 0.20\n(n = 18 rivers)', size=8, color='darkblue')+
+  theme(axis.text=element_text(size=22),
+        axis.title=element_text(size=26,face="bold"),
+        plot.title = element_text(size = 30, face = "bold"),
+        legend.position = 'none')
+
+priorPosterPlot_4 <- ggplot(forPlot2[forPlot2$cvObs >= 0.30,], aes(x=value, color=key)) +
+  stat_ecdf(size=3) +
+  scale_color_brewer(palette = 'Accent', name='', labels=c('Posterior', 'Prior'))+
+  xlab('NMAE')+
+  ylab('')+
+  xlim(0,2.2)+
+  annotate("text", x = 1.25, y = 0.5, label = 'Observed CV > 0.30\n(n = 10 rivers)', size=8, color='darkblue')+
+  theme(axis.text=element_text(size=22),
+        axis.title=element_text(size=26,face="bold"),
+        legend.text = element_text(size=28),
+        legend.title = element_text(size=28, face='bold'),
+        plot.title = element_text(size = 30, face = "bold"),
+        legend.position = c(0.7, 0.8))
+
+
+fig7 <- plot_grid(priorPosterPlot_all, priorPosterPlot_2, priorPosterPlot_3, priorPosterPlot_4, labels='auto', label_size = 18, ncol = 2)
+ggsave('cache/validation/fig7.jpg', fig7, width=12, height=12)
+
 ####################
 ##SAVE ALL TIMESERIES FOR THE SUPPLEMENT
 ####################
@@ -297,59 +279,200 @@ for (i in 1:63){ #47 rivers with no measurement error, 16 with errors modeled vi
   }
 
 #gather and plot all ggplot objects (for no measurement error) as a single image via the cowplot package
-plotgrid <- plot_grid(pltList$AshSlough + theme(legend.position='none'),
-                      pltList$BerendaSlough + theme(legend.position='none'),
-                      pltList$Brahmaputra + theme(legend.position='none'),
-                      pltList$ChowchillaCanal + theme(legend.position='none'),
-                      pltList$Connecticut + theme(legend.position='none'),
-                      pltList$Cumberland + theme(legend.position='none'),
-                      pltList$FresnoRiver + theme(legend.position='none'),
-                      pltList$Ganges + theme(legend.position='none'),
-                      pltList$GaronneDownstream + theme(legend.position='none'),
-                      pltList$GaronneUpstream + theme(legend.position='none'),
-                      pltList$GrantLineCanal + theme(legend.position='none'),
-                      pltList$IowaRiver + theme(legend.position='none'),
-                      pltList$Jamuna + theme(legend.position='none'),
-                      pltList$Kanawha + theme(legend.position='none'),
-                      pltList$Kushiyara + theme(legend.position='none'),
-                      pltList$MariposaBypass + theme(legend.position='none'),
-                      pltList$MercedRiver + theme(legend.position='none'),
-                      pltList$MiddleRiver + theme(legend.position='none'),
-                      pltList$MississippiDownstream + theme(legend.position='none'),
-                      pltList$MississippiIntermediate + theme(legend.position='none'),
-                      pltList$MississippiUpstream + theme(legend.position='none'),
-                      pltList$MissouriDownstream + theme(legend.position='none'),
-                      pltList$MissouriMidsection + theme(legend.position='none'),
-                      pltList$MissouriUpstream + theme(legend.position='none'),
-                      pltList$Ohio + theme(legend.position='none'),
-                      pltList$OhioSection1 + theme(legend.position='none'),
-                      pltList$OhioSection2 + theme(legend.position='none'),
-                      pltList$OhioSection3 + theme(legend.position='none'),
-                      pltList$OhioSection4 + theme(legend.position='none'),
-                      pltList$OhioSection5 + theme(legend.position='none'),
-                      pltList$OhioSection7 + theme(legend.position='none'),
-                      pltList$OhioSection8 + theme(legend.position='none'),
-                      pltList$Olentangy + theme(legend.position='none'),
-                      pltList$Padma + theme(legend.position='none'),
-                      pltList$Platte + theme(legend.position='none'),
-                      pltList$Po + theme(legend.position='none'),
-                      pltList$SacramentoDownstream + theme(legend.position='none'),
-                      pltList$SacramentoUpstream + theme(legend.position='none'),
-                      pltList$SanJoaquin + theme(legend.position='none'),
-                      pltList$SanJoaquinRiver2 + theme(legend.position='none'),
-                      pltList$Seine + theme(legend.position='none'),
-                      pltList$SeineDownstream + theme(legend.position='none'),
-                      pltList$SeineUpstream + theme(legend.position='none'),
-                      pltList$Severn + theme(legend.position='none'),
-                      pltList$StanislausRiver + theme(legend.position='none'),
-                      pltList$TuolumneRiver + theme(legend.position='none'),
-                      pltList$Wabash + theme(legend.position='none'),
+plotgrid <- plot_grid(pltList$AshSlough + theme(legend.position='none',
+                                                plot.title = element_text(size = 25, face = "bold"),
+                                                axis.text=element_text(size=17),
+                                                axis.title=element_text(size=17,face="bold")),
+                      pltList$BerendaSlough + theme(legend.position='none',
+                                                    plot.title = element_text(size = 25, face = "bold"),
+                                                    axis.text=element_text(size=17),
+                                                    axis.title=element_text(size=17,face="bold")),
+                      pltList$Brahmaputra + theme(legend.position='none',
+                                                  plot.title = element_text(size = 25, face = "bold"),
+                                                  axis.text=element_text(size=17),
+                                                  axis.title=element_text(size=17,face="bold")),
+                      pltList$ChowchillaCanal + theme(legend.position='none',
+                                                      plot.title = element_text(size = 25, face = "bold"),
+                                                      axis.text=element_text(size=17),
+                                                      axis.title=element_text(size=17,face="bold")),
+                      pltList$Connecticut + theme(legend.position='none',
+                                                  plot.title = element_text(size = 25, face = "bold"),
+                                                  axis.text=element_text(size=17),
+                                                  axis.title=element_text(size=17,face="bold")),
+                      pltList$Cumberland + theme(legend.position='none',
+                                                 plot.title = element_text(size = 25, face = "bold"),
+                                                 axis.text=element_text(size=17),
+                                                 axis.title=element_text(size=17,face="bold")),
+                      pltList$FresnoRiver + theme(legend.position='none',
+                                                  plot.title = element_text(size = 25, face = "bold"),
+                                                  axis.text=element_text(size=17),
+                                                  axis.title=element_text(size=17,face="bold")),
+                      pltList$Ganges + theme(legend.position='none',
+                                             plot.title = element_text(size = 25, face = "bold"),
+                                             axis.text=element_text(size=17),
+                                             axis.title=element_text(size=17,face="bold")),
+                      pltList$GaronneDownstream + theme(legend.position='none',
+                                                        plot.title = element_text(size = 25, face = "bold"),
+                                                        axis.text=element_text(size=17),
+                                                        axis.title=element_text(size=17,face="bold")),
+                      pltList$GaronneUpstream + theme(legend.position='none',
+                                                      plot.title = element_text(size = 25, face = "bold"),
+                                                      axis.text=element_text(size=17),
+                                                      axis.title=element_text(size=17,face="bold")),
+                      pltList$GrantLineCanal + theme(legend.position='none',
+                                                     plot.title = element_text(size = 25, face = "bold"),
+                                                     axis.text=element_text(size=17),
+                                                     axis.title=element_text(size=17,face="bold")),
+                      pltList$IowaRiver + theme(legend.position='none',
+                                                plot.title = element_text(size = 25, face = "bold"),
+                                                axis.text=element_text(size=17),
+                                                axis.title=element_text(size=17,face="bold")),
+                      pltList$Jamuna + theme(legend.position='none',
+                                             plot.title = element_text(size = 25, face = "bold"),
+                                             axis.text=element_text(size=17),
+                                             axis.title=element_text(size=17,face="bold")),
+                      pltList$Kanawha + theme(legend.position='none',
+                                              plot.title = element_text(size = 25, face = "bold"),
+                                              axis.text=element_text(size=17),
+                                              axis.title=element_text(size=17,face="bold")),
+                      pltList$Kushiyara + theme(legend.position='none',
+                                                plot.title = element_text(size = 25, face = "bold"),
+                                                axis.text=element_text(size=17),
+                                                axis.title=element_text(size=17,face="bold")),
+                      pltList$MariposaBypass + theme(legend.position='none',
+                                                     plot.title = element_text(size = 25, face = "bold"),
+                                                     axis.text=element_text(size=17),
+                                                     axis.title=element_text(size=17,face="bold")),
+                      pltList$MercedRiver + theme(legend.position='none',
+                                                  plot.title = element_text(size = 25, face = "bold"),
+                                                  axis.text=element_text(size=17),
+                                                  axis.title=element_text(size=17,face="bold")),
+                      pltList$MiddleRiver + theme(legend.position='none',
+                                                  plot.title = element_text(size = 25, face = "bold"),
+                                                  axis.text=element_text(size=17),
+                                                  axis.title=element_text(size=17,face="bold")),
+                      pltList$MississippiDownstream + theme(legend.position='none',
+                                                            plot.title = element_text(size = 25, face = "bold"),
+                                                            axis.text=element_text(size=17),
+                                                            axis.title=element_text(size=17,face="bold")),
+                      pltList$MississippiIntermediate + theme(legend.position='none',
+                                                              plot.title = element_text(size = 25, face = "bold"),
+                                                              axis.text=element_text(size=17),
+                                                              axis.title=element_text(size=17,face="bold")),
+                      pltList$MississippiUpstream + theme(legend.position='none',
+                                                          plot.title = element_text(size = 25, face = "bold"),
+                                                          axis.text=element_text(size=17),
+                                                          axis.title=element_text(size=17,face="bold")),
+                      pltList$MissouriDownstream + theme(legend.position='none',
+                                                         plot.title = element_text(size = 25, face = "bold"),
+                                                         axis.text=element_text(size=17),
+                                                         axis.title=element_text(size=17,face="bold")),
+                      pltList$MissouriMidsection + theme(legend.position='none',
+                                                         plot.title = element_text(size = 25, face = "bold"),
+                                                         axis.text=element_text(size=17),
+                                                         axis.title=element_text(size=17,face="bold")),
+                      pltList$MissouriUpstream + theme(legend.position='none',
+                                                       plot.title = element_text(size = 25, face = "bold"),
+                                                       axis.text=element_text(size=17),
+                                                       axis.title=element_text(size=17,face="bold")),
+                      pltList$Ohio + theme(legend.position='none',
+                                           plot.title = element_text(size = 25, face = "bold"),
+                                           axis.text=element_text(size=17),
+                                           axis.title=element_text(size=17,face="bold")),
+                      pltList$OhioSection1 + theme(legend.position='none',
+                                                   plot.title = element_text(size = 25, face = "bold"),
+                                                   axis.text=element_text(size=17),
+                                                   axis.title=element_text(size=17,face="bold")),
+                      pltList$OhioSection2 + theme(legend.position='none',
+                                                   plot.title = element_text(size = 25, face = "bold"),
+                                                   axis.text=element_text(size=17),
+                                                   axis.title=element_text(size=17,face="bold")),
+                      pltList$OhioSection3 + theme(legend.position='none',
+                                                   plot.title = element_text(size = 25, face = "bold"),
+                                                   axis.text=element_text(size=17),
+                                                   axis.title=element_text(size=17,face="bold")),
+                      pltList$OhioSection4 + theme(legend.position='none',
+                                                   plot.title = element_text(size = 25, face = "bold"),
+                                                   axis.text=element_text(size=17),
+                                                   axis.title=element_text(size=17,face="bold")),
+                      pltList$OhioSection5 + theme(legend.position='none',
+                                                   plot.title = element_text(size = 25, face = "bold"),
+                                                   axis.text=element_text(size=17),
+                                                   axis.title=element_text(size=17,face="bold")),
+                      pltList$OhioSection7 + theme(legend.position='none',
+                                                   plot.title = element_text(size = 25, face = "bold"),
+                                                   axis.text=element_text(size=17),
+                                                   axis.title=element_text(size=17,face="bold")),
+                      pltList$OhioSection8 + theme(legend.position='none',
+                                                   plot.title = element_text(size = 25, face = "bold"),
+                                                   axis.text=element_text(size=17),
+                                                   axis.title=element_text(size=17,face="bold")),
+                      pltList$Olentangy + theme(legend.position='none',
+                                                plot.title = element_text(size = 25, face = "bold"),
+                                                axis.text=element_text(size=17),
+                                                axis.title=element_text(size=17,face="bold")),
+                      pltList$Padma + theme(legend.position='none',
+                                            plot.title = element_text(size = 25, face = "bold"),
+                                            axis.text=element_text(size=17),
+                                            axis.title=element_text(size=17,face="bold")),
+                      pltList$Platte + theme(legend.position='none',
+                                             plot.title = element_text(size = 25, face = "bold"),
+                                             axis.text=element_text(size=17),
+                                             axis.title=element_text(size=17,face="bold")),
+                      pltList$Po + theme(legend.position='none',
+                                         plot.title = element_text(size = 25, face = "bold"),
+                                         axis.text=element_text(size=17),
+                                         axis.title=element_text(size=17,face="bold")),
+                      pltList$SacramentoDownstream + theme(legend.position='none',
+                                                           plot.title = element_text(size = 25, face = "bold"),
+                                                           axis.text=element_text(size=17),
+                                                           axis.title=element_text(size=17,face="bold")),
+                      pltList$SacramentoUpstream + theme(legend.position='none',
+                                                         plot.title = element_text(size = 25, face = "bold"),
+                                                         axis.text=element_text(size=17),
+                                                         axis.title=element_text(size=17,face="bold")),
+                      pltList$SanJoaquin + theme(legend.position='none',
+                                                 plot.title = element_text(size = 25, face = "bold"),
+                                                 axis.text=element_text(size=17),
+                                                 axis.title=element_text(size=17,face="bold")),
+                      pltList$SanJoaquinRiver2 + theme(legend.position='none',
+                                                       plot.title = element_text(size = 25, face = "bold"),
+                                                       axis.text=element_text(size=17),
+                                                       axis.title=element_text(size=17,face="bold")),
+                      pltList$Seine + theme(legend.position='none',
+                                            plot.title = element_text(size = 25, face = "bold"),
+                                            axis.text=element_text(size=17),
+                                            axis.title=element_text(size=17,face="bold")),
+                      pltList$SeineDownstream + theme(legend.position='none',
+                                                      plot.title = element_text(size = 25, face = "bold"),
+                                                      axis.text=element_text(size=17),
+                                                      axis.title=element_text(size=17,face="bold")),
+                      pltList$SeineUpstream + theme(legend.position='none',
+                                                    plot.title = element_text(size = 25, face = "bold"),
+                                                    axis.text=element_text(size=17),
+                                                    axis.title=element_text(size=17,face="bold")),
+                      pltList$Severn + theme(legend.position='none',
+                                             plot.title = element_text(size = 25, face = "bold"),
+                                             axis.text=element_text(size=17),
+                                             axis.title=element_text(size=17,face="bold")),
+                      pltList$StanislausRiver + theme(legend.position='none',
+                                                      plot.title = element_text(size = 25, face = "bold"),
+                                                      axis.text=element_text(size=17),
+                                                      axis.title=element_text(size=17,face="bold")),
+                      pltList$TuolumneRiver + theme(legend.position='none',
+                                                    plot.title = element_text(size = 25, face = "bold"),
+                                                    axis.text=element_text(size=17),
+                                                    axis.title=element_text(size=17,face="bold")),
+                      pltList$Wabash + theme(legend.position='none',
+                                             plot.title = element_text(size = 25, face = "bold"),
+                                             axis.text=element_text(size=17),
+                                             axis.title=element_text(size=17,face="bold")),
                       ncol=4)
 
 #grab legend from one of these plots
 legend <- get_legend(
   # create some space to the left of the legend
-  pltList$Wabash + theme(legend.text=element_text(size=18))
+  pltList$Wabash + theme(legend.text=element_text(size=25))
 )
 
 #draw legend in remaining empty space in figure
@@ -361,28 +484,76 @@ xTitleCombo <- textGrob(expression(Timestep), gp=gpar(fontface="bold", col="blac
 plotTimeseries <- gridExtra::grid.arrange(gridExtra::arrangeGrob(plotTimeseries, left = yTitleCombo, bottom = xTitleCombo))
 
 #write to file
-ggsave('cache/validation/figS3.jpg', plotTimeseries, width = 18, height = 24)
+ggsave('cache/validation/figS4.jpg', plotTimeseries, width = 20, height = 26)
 
 ################
 ##TIMERSERIES PLOT WITH SWOT ERRORS-----------------------------------
 #################
 #gather and plot all ggplot objects (for no measurement error) as a single image via the cowplot package
-plotgrid_err <- plot_grid(pltList$MissouriDownstream_err + theme(legend.position='none'),
-                      pltList$MissouriUpstream_err + theme(legend.position='none'),
-                      pltList$OhioSection8_err+ theme(legend.position='none'),
-                      pltList$OhioSection7_err+ theme(legend.position='none'),
-                      pltList$OhioSection5_err+ theme(legend.position='none'),
-                      pltList$OhioSection4_err+ theme(legend.position='none'),
-                      pltList$OhioSection3_err+ theme(legend.position='none'),
-                      pltList$OhioSection2_err+ theme(legend.position='none'),
-                      pltList$OhioSection1_err+ theme(legend.position='none'),
-                      pltList$SeineDownstream_err+ theme(legend.position='none'),
-                      pltList$Brahmaputra_err+ theme(legend.position='none'),
-                      pltList$IowaRiver_err+ theme(legend.position='none'),
-                      pltList$SeineUpstream_err+ theme(legend.position='none'),
-                      pltList$Kushiyara_err+ theme(legend.position='none'),
-                      pltList$Jamuna_err+ theme(legend.position='none'),
-                      pltList$Padma_err+ theme(legend.position='none'),
+plotgrid_err <- plot_grid(pltList$MissouriDownstream_err + theme(legend.position='none',
+                                                                 plot.title = element_text(size = 25, face = "bold"),
+                                                                 axis.text=element_text(size=17),
+                                                                 axis.title=element_text(size=17,face="bold")),
+                      pltList$MissouriUpstream_err + theme(legend.position='none',
+                                                           plot.title = element_text(size = 25, face = "bold"),
+                                                           axis.text=element_text(size=17),
+                                                           axis.title=element_text(size=17,face="bold")),
+                      pltList$OhioSection8_err+ theme(legend.position='none',
+                                                      plot.title = element_text(size = 25, face = "bold"),
+                                                      axis.text=element_text(size=17),
+                                                      axis.title=element_text(size=17,face="bold")),
+                      pltList$OhioSection7_err+ theme(legend.position='none',
+                                                      plot.title = element_text(size = 25, face = "bold"),
+                                                      axis.text=element_text(size=17),
+                                                      axis.title=element_text(size=17,face="bold")),
+                      pltList$OhioSection5_err+ theme(legend.position='none',
+                                                      plot.title = element_text(size = 25, face = "bold"),
+                                                      axis.text=element_text(size=17),
+                                                      axis.title=element_text(size=17,face="bold")),
+                      pltList$OhioSection4_err+ theme(legend.position='none',
+                                                      plot.title = element_text(size = 25, face = "bold"),
+                                                      axis.text=element_text(size=17),
+                                                      axis.title=element_text(size=17,face="bold")),
+                      pltList$OhioSection3_err+ theme(legend.position='none',
+                                                      plot.title = element_text(size = 25, face = "bold"),
+                                                      axis.text=element_text(size=17),
+                                                      axis.title=element_text(size=17,face="bold")),
+                      pltList$OhioSection2_err+ theme(legend.position='none',
+                                                      plot.title = element_text(size = 25, face = "bold"),
+                                                      axis.text=element_text(size=17),
+                                                      axis.title=element_text(size=17,face="bold")),
+                      pltList$OhioSection1_err+ theme(legend.position='none',
+                                                      plot.title = element_text(size = 25, face = "bold"),
+                                                      axis.text=element_text(size=17),
+                                                      axis.title=element_text(size=17,face="bold")),
+                      pltList$SeineDownstream_err+ theme(legend.position='none',
+                                                         plot.title = element_text(size = 25, face = "bold"),
+                                                         axis.text=element_text(size=17),
+                                                         axis.title=element_text(size=17,face="bold")),
+                      pltList$Brahmaputra_err+ theme(legend.position='none',
+                                                     plot.title = element_text(size = 25, face = "bold"),
+                                                     axis.text=element_text(size=17),
+                                                     axis.title=element_text(size=17,face="bold")),
+                      pltList$IowaRiver_err+ theme(legend.position='none',
+                                                   plot.title = element_text(size = 25, face = "bold"),
+                                                   axis.text=element_text(size=17),
+                                                   axis.title=element_text(size=17,face="bold")),
+                      pltList$SeineUpstream_err+ theme(legend.position='none',
+                                                       plot.title = element_text(size = 25, face = "bold"),
+                                                       axis.text=element_text(size=17),
+                                                       axis.title=element_text(size=17,face="bold")),
+                      pltList$Kushiyara_err+ theme(legend.position='none',
+                                                   plot.title = element_text(size = 25, face = "bold"),
+                                                   axis.text=element_text(size=17),
+                                                   axis.title=element_text(size=17,face="bold")),
+                      pltList$Jamuna_err+ theme(legend.position='none',
+                                                plot.title = element_text(size = 25, face = "bold"),
+                                                axis.text=element_text(size=17),
+                                                axis.title=element_text(size=17,face="bold")),
+                      pltList$Padma_err+ theme(legend.position='none',
+                                               plot.title = element_text(size = 25, face = "bold"),
+                                               axis.text=element_text(size=17),
+                                               axis.title=element_text(size=17,face="bold")),
                       ncol=3)
 
 #draw legend in remaining empty space in figure
@@ -390,7 +561,7 @@ plotTimeseries <- plotgrid_err + draw_grob(legend, 0.6, -0.15, 0.5, 0.5)
 plotTimeseries <- gridExtra::grid.arrange(gridExtra::arrangeGrob(plotTimeseries, left = yTitleCombo, bottom = xTitleCombo))
 
 #write to file
-ggsave('cache/validation/figS4.jpg', plotTimeseries, width = 13, height = 13)
+ggsave('cache/validation/figS5.jpg', plotTimeseries, width = 13, height = 13)
 
 #################
 ##GRAB REPRESENTIVE TIMESERIES FOR THE MAIN TEXT-----------------------
@@ -405,39 +576,45 @@ temp2 <- stats_by_river[stats_by_river$errFlag==0 & stats_by_river$KGE >= quanti
 temp3 <- stats_by_river[stats_by_river$errFlag==0 & stats_by_river$KGE >= quantiles[2],] #high skill
 
 plotGrid_short <- plot_grid(
-  pltList[[temp[13,]$river]]+ ggtitle('Sacramento River (upstream)')+ theme(legend.position='none',
+  pltList[[temp[13,]$river]]+ ggtitle('Sacramento River \n(upstream)')+ theme(legend.position='none',
                                      axis.text=element_text(size=20),
                                      axis.title=element_text(size=24,face="bold"),
                                      legend.text = element_text(size=17),
-                                     legend.title = element_text(size=17, face='bold')),
+                                     legend.title = element_text(size=17, face='bold'),
+                                     plot.title = element_text(size = 30, face = "bold")),
   pltList[[temp[9,]$river]]+ ggtitle('Ohio')+ theme(legend.position='none',
                                       axis.text=element_text(size=20),
                                       axis.title=element_text(size=24,face="bold"),
                                       legend.text = element_text(size=17),
-                                      legend.title = element_text(size=17, face='bold')),
-  textGrob('Low Skill', y=0.6, gp=gpar(fontface="bold", col="black", fontsize=30)),
+                                      legend.title = element_text(size=17, face='bold'),
+                                      plot.title = element_text(size = 30, face = "bold")),
+  textGrob('Low Skill', y=0.6, gp=gpar(fontface="bold", col="darkblue", fontsize=34)),
   pltList[[temp2[7,]$river]]+ ggtitle('Iowa River') + theme(legend.position='none',
                                      axis.text=element_text(size=20),
                                      axis.title=element_text(size=24,face="bold"),
                                      legend.text = element_text(size=17),
-                                     legend.title = element_text(size=17, face='bold')),
+                                     legend.title = element_text(size=17, face='bold'),
+                                     plot.title = element_text(size = 30, face = "bold")),
   pltList[[temp2[4,]$river]]+ggtitle('Connecticut River')+ theme(legend.position='none',
                                       axis.text=element_text(size=20),
                                       axis.title=element_text(size=24,face="bold"),
                                       legend.text = element_text(size=17),
-                                      legend.title = element_text(size=17, face='bold')),
-  textGrob('Middle Skill', y=0.6, gp=gpar(fontface="bold", col="black", fontsize=30)),
-  pltList[[temp3[5,]$river]]+ ggtitle('Missouri River (midsection)')+theme(legend.position='none',
+                                      legend.title = element_text(size=17, face='bold'),
+                                      plot.title = element_text(size = 30, face = "bold")),
+  textGrob('Middle Skill', y=0.6, gp=gpar(fontface="bold", col="darkblue", fontsize=34)),
+  pltList[[temp3[5,]$river]]+ ggtitle('Missouri River\n(midsection)')+theme(legend.position='none',
                                         axis.text=element_text(size=20),
                                         axis.title=element_text(size=24,face="bold"),
                                         legend.text = element_text(size=17),
-                                        legend.title = element_text(size=17, face='bold')),
-  pltList[[temp3[12,]$river]]+ggtitle('Sacramento River (downstream)')+theme(legend.position='none',
+                                        legend.title = element_text(size=17, face='bold'),
+                                        plot.title = element_text(size = 30, face = "bold")),
+  pltList[[temp3[12,]$river]]+ggtitle('Sacramento River\n(downstream)')+theme(legend.position='none',
                                         axis.text=element_text(size=20),
                                         axis.title=element_text(size=24,face="bold"),
                                         legend.text = element_text(size=17),
-                                        legend.title = element_text(size=17, face='bold')),
-  textGrob('High Skill', y=0.6, gp=gpar(fontface="bold", col="black", fontsize=30)),
+                                        legend.title = element_text(size=17, face='bold'),
+                                        plot.title = element_text(size = 30, face = "bold")),
+  textGrob('High Skill', y=0.6, gp=gpar(fontface="bold", col="darkblue", fontsize=34)),
   ncol=3,
   label_size = 18,
   labels=c('a', 'b', NA, 'c', 'd', NA, 'e', 'f', NA))
@@ -447,7 +624,7 @@ plotTimeseries <- plotGrid_short + draw_grob(legend, 0.6, -0.2, 0.5, 0.5)
 plotTimeseries <- gridExtra::grid.arrange(gridExtra::arrangeGrob(plotTimeseries, left = yTitleCombo, bottom = xTitleCombo))
 
 #write to file
-ggsave('cache/validation/fig4.jpg', plotTimeseries, width = 13, height = 10)
+ggsave('cache/validation/fig4.jpg', plotTimeseries, width = 15, height = 12)
 
 ####################
 ##SAVE RESULTS TO FILE---------------------------------------------------

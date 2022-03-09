@@ -1,6 +1,5 @@
 #################
-#This will grab and store all results in your current RStudio environment so that you can knit the manuscript correctly. It then knits the manuscript to a
-  #word doc that, via the redoc package, can be tracked changed and convert back to Rmd!
+#This will grab and store all results in your current RStudio environment so that you can knit the manuscript correctly. It then knits the manuscript to a word doc
 #################
 
 #Move all results to global environment
@@ -14,8 +13,8 @@ results_fco2_bulk <- read.csv('cache//FCO2//massFluxes.csv')
 results_fco2_bulk$key <- as.character(results_fco2_bulk$key)
 
 #knit manuscript
-rmarkdown::render("manuscript_v9.Rmd")
+rmarkdown::render("manuscript_v10.Rmd")
 print('Manuscript generated.')
 
-rmarkdown::render("supp_v9.Rmd")
+rmarkdown::render("supp_v10.Rmd")
 print('Supplemental Information generated.')

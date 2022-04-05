@@ -14,13 +14,13 @@ theme_set(theme_classic())
 ##READ IN RESULTS----------------------------------
 ###############
 results <- read.csv('cache/validation/BIKER_validation_results.csv')
-full_output <- filter(results, errFlag == 0) #remove results with SWOT measurement error
+full_output <- filter(results, errFlag == 0) #remove results with SWOT measurement error (for now)
 
 ########################
 ##CALCULATE BY-RIVER ERROR METRICS---------------------------------------------
 ########################
 stats_by_river <- group_by(results, river, errFlag) %>%
-  summarise(r = sqrt(summary(lm(kest_mean~kobs))$r.squared),
+  summarise(r = cor(kobs, kest_mean, method='pearson'),
             NRMSE = sqrt(mean((kest_mean - kobs)^2, na.rm=T)) / mean(kobs, na.rm=T),
             KGE = KGE(kest_mean, kobs),
             NMAE = mean(abs(kest_mean-kobs)/mean(kobs, na.rm=T), na.rm=T),
@@ -84,7 +84,7 @@ nmae_cdf <- ggplot(stats_by_river[stats_by_river$errFlag==0,], aes(x=NMAE)) +
         plot.title = element_text(size = 30, face = "bold"))
 
 statsPlot <- plot_grid(kge_cdf, nrmse_cdf, r_cdf, nmae_cdf, ncol=2, labels = NA)
-ggsave('cache/validation/fig5.jpg', statsPlot, width=10, height=10)
+ggsave('cache/validation/fig4.jpg', statsPlot, width=10, height=10)
 
 ########################
 ##ERROR/NO ERROR COMPARISON------------------------------------
@@ -121,13 +121,13 @@ forError_r <- pivot_wider(forError, names_from=errFlag, values_from = r) %>%
             r_err = sum(`1`, na.rm=T))
 
 r_scatter <- ggplot(forError_r, aes(x=r_no_err, y=r_err)) +
-  geom_polygon(data = data.frame(x = c(0, 1, 0), y = c(0,1,1)), aes(x = x, y = y), fill = "#8dd3c7" )+  # better triangle
-  geom_polygon(data = data.frame(x = c(0, 1, 1), y = c(0,1,0)), aes(x = x, y = y), fill = "#bebada" )+  # worse triangle
+  geom_polygon(data = data.frame(x = c(-1, 1, -1), y = c(-1,1,1)), aes(x = x, y = y), fill = "#8dd3c7" )+  # better triangle
+  geom_polygon(data = data.frame(x = c(-1, 1, 1), y = c(-1,1,-1)), aes(x = x, y = y), fill = "#bebada" )+  # worse triangle
   geom_point(size=8, color='#386cb0') +
   geom_smooth(method='lm', se=F, color='black', size=3)+
   #geom_abline(linetype='dashed', color='darkgrey', size=2) +
-  xlim(0,1)+
-  ylim(0,1) +
+  xlim(-1,1)+
+  ylim(-1,1) +
   xlab('No Error')+
   ylab('Error')+
   ggtitle('r')+
@@ -182,14 +182,13 @@ nmae_scatter <- ggplot(forError_nmae, aes(x=abs(nmae_no_err), y=abs(nmae_err))) 
         plot.title = element_text(size = 30, face = "bold"))
 
 fig6 <- plot_grid(kge_scatter, NRMSE_scatter, r_scatter, nmae_scatter, ncol=2, labels=NA)
-ggsave('cache/validation/fig6.jpg', fig6, width=10, height=10)
+ggsave('cache/validation/fig5.jpg', fig6, width=10, height=10)
 
 ###########################
 ## PLOT PRIOR/POSTEROR COMPARISON-------------------------------
 ###########################
-
 #Prior/Posterior bias
-forPlot <- stats_by_river[stats_by_river$errFlag == 0 & stats_by_river$n_data > 12,]
+forPlot <- stats_by_river[stats_by_river$errFlag == 0,]
 forPlot2 <- gather(forPlot, key=key, value=value, c('NMAE', 'NMAE_prior'))
 
 priorPosterPlot_all <- ggplot(forPlot2, aes(x=value, color=key)) +
@@ -244,13 +243,13 @@ priorPosterPlot_4 <- ggplot(forPlot2[forPlot2$cvObs >= 0.30,], aes(x=value, colo
 
 
 fig7 <- plot_grid(priorPosterPlot_all, priorPosterPlot_2, priorPosterPlot_3, priorPosterPlot_4, labels='auto', label_size = 18, ncol = 2)
-ggsave('cache/validation/fig7.jpg', fig7, width=12, height=12)
+ggsave('cache/validation/fig6.jpg', fig7, width=12, height=12)
 
 ####################
-##SAVE ALL TIMESERIES FOR THE SUPPLEMENT
+##SAVE ALL TIMESERIES IN A SINGLE FINGURE FOR THE SUPPLEMENT
 ####################
-files <- list.files('cache/validation/by_river', pattern="*.csv", full.names = FALSE)
-file_paths <- list.files('cache/validation/by_river', pattern="*.csv", full.names = TRUE)
+files <- list.files('cache/validation/by_river', pattern=".csv", full.names = FALSE)
+file_paths <- list.files('cache/validation/by_river', pattern=".csv", full.names = TRUE)
 
 #Save all timeseries plots as a list of ggplot objects
 pltList <- list()
@@ -267,7 +266,8 @@ for (i in 1:63){ #47 rivers with no measurement error, 16 with errors modeled vi
   results$kest_low <- ifelse(results$key == 'kobs', NA, results$kest_low/max(results$value))
   results$kest_high <- ifelse(results$key == 'kobs', NA, results$kest_high/max(results$value))
   riv <- as.character(results[1,]$river)
-
+  
+  #make ggplot object
   pltList[[ river ]]  <- ggplot(results, aes(x=time, y=value/max(value), color=key)) + #model
     geom_ribbon(aes(ymin = kest_low, ymax = kest_high), alpha=0.75, fill='grey')+
     geom_line(size=1.5) +
@@ -276,7 +276,7 @@ for (i in 1:63){ #47 rivers with no measurement error, 16 with errors modeled vi
     ylim(0,1.7)+
     scale_color_brewer(palette='Set2', name='', labels=c('BIKER', 'Model using \nobserved hydraulics')) +
     ggtitle(river)
-  }
+}
 
 #gather and plot all ggplot objects (for no measurement error) as a single image via the cowplot package
 plotgrid <- plot_grid(pltList$AshSlough + theme(legend.position='none',
@@ -470,10 +470,7 @@ plotgrid <- plot_grid(pltList$AshSlough + theme(legend.position='none',
                       ncol=4)
 
 #grab legend from one of these plots
-legend <- get_legend(
-  # create some space to the left of the legend
-  pltList$Wabash + theme(legend.text=element_text(size=25))
-)
+legend <- get_legend(pltList$Wabash + theme(legend.text=element_text(size=25)))
 
 #draw legend in remaining empty space in figure
 plotTimeseries <- plotgrid + draw_grob(legend, 0.65, -0.2, 0.5, 0.5)
@@ -564,7 +561,8 @@ plotTimeseries <- gridExtra::grid.arrange(gridExtra::arrangeGrob(plotTimeseries,
 ggsave('cache/validation/figS5.jpg', plotTimeseries, width = 13, height = 13)
 
 #################
-##GRAB REPRESENTIVE TIMESERIES FOR THE MAIN TEXT-----------------------
+##PLOT REPRESENTIVE TIMESERIES FOR THE MAIN TEXT FIGURE-----------------------
+  #Use KGE quantiles to inform timerseries selection
 ##################
 set.seed(165)
 quantiles <- quantile(stats_by_river[stats_by_river$errFlag == 0,]$KGE, c(0.33, 0.66))
@@ -624,7 +622,7 @@ plotTimeseries <- plotGrid_short + draw_grob(legend, 0.6, -0.2, 0.5, 0.5)
 plotTimeseries <- gridExtra::grid.arrange(gridExtra::arrangeGrob(plotTimeseries, left = yTitleCombo, bottom = xTitleCombo))
 
 #write to file
-ggsave('cache/validation/fig4.jpg', plotTimeseries, width = 15, height = 12)
+ggsave('cache/validation/fig3.jpg', plotTimeseries, width = 15, height = 12)
 
 ####################
 ##SAVE RESULTS TO FILE---------------------------------------------------

@@ -1,6 +1,9 @@
 ###############
-#Set up and run project
+## Set up and run project
+## Creator: Craig Brinkerhoff
+## Winter 2022
 ###############
+
 .libPaths('/nas/cee-water/cjgleason/r-lib')
 library(ProjectTemplate, lib.loc = "/nas/cee-water/cjgleason/r-lib/")
 load.project()

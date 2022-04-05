@@ -1,5 +1,5 @@
 #################
-##Description: Developing gas exchange model for 'hydraulically wide channels'
+##Description: Devolpment of gas exchange velocity model for 'hydraulically wide channels'
               #It also estimates how many SWOT-observable rivers meet this hydraulically-wide condition
 ##Creator: Craig Brinkerhoff
 ##Date: Fall 2021
@@ -21,7 +21,7 @@ theme_set(theme_classic())
 #some constants
 g <- 9.8 #gravitational acceleration [m/s2]
 
-#######READ IN HYDRAULICS DATA FROM BRINKERHOFF ETAL 2019 TO GET SWOT VERSUS INEFFICIENT CHANNELS------------------------------
+#######READ IN HYDRAULICS DATA FROM BRINKERHOFF ETAL 2019 TO GET LARGER HYDRAULICS DATASET------------------------------
 data <- read.csv('data\\Brinkerhoff_etal_2019\\field_measurements.csv')
 
 #some necessary filtering
@@ -33,7 +33,7 @@ data <- filter(data, is.finite(chan_width) ==1) %>%
   filter(chan_velocity > 0) %>%
   filter(chan_discharge > 0) %>%
   filter(chan_area > 0) %>%
-  filter(measured_rating_diff %in% c('Excellent', 'EXCL', 'GOOD', 'Good'))#, 'Fair', 'FAIR'))
+  filter(measured_rating_diff %in% c('Excellent', 'EXCL', 'GOOD', 'Good'))
 
 #imperial to metric
 data$area <- data$chan_area * 0.092903 #ft2 to m2
@@ -79,7 +79,7 @@ usgs_data$k600 <- usgs_data$k20_1_day * usgs_data$depth * (600/530)^(-1/2) #conv
 usgs_data_s <- select(usgs_data, 'width', 'Vms', 'depth', 'slope', 'k600', 'Qm3s', 'study')
 
 #######READ IN FIELD DATA WITH K600-------------------
-#Ulseth etal 2019
+  #Ulseth etal 2019
 ulseth_data <- read.csv('data/Ulseth_etal_2019.csv', fileEncoding="UTF-8-BOM")
 ulseth_data <- ulseth_data[,-8]
 ulseth_data$dataset <- ifelse(ulseth_data$data == 'This Study', 'Ulseth et al. 2019', as.character(ulseth_data$data)) #fix some labeling
@@ -94,7 +94,7 @@ data$k600 <- NA
 data$study <- 'Brinkerhoff_etal_2019'
 data <- rbind(data, ulseth_data_s, usgs_data_s)
 
-#########QUICK DETOUR TO CALCULATE HG MODELS FOR FCO2 CALCULATIONS------------------------------
+#########QUICK DETOUR TO CALCULATE HG MODELS FOR FCO2 CALCULATIONS (DURING BIKER VALIDATION)------------------------------
 num <- nrow(data)
 wid <- lm(log(width)~log(Qm3s), data=data)
 dep <- lm(log(depth)~log(Qm3s), data=data)
@@ -125,7 +125,7 @@ data$flag_hydraulicWide <- ifelse(data$Rh/data$depth >= 0.99, 'Rh=H', 'Rh=/=H')
 
 hydraulicallyWide <- filter(data, flag_hydraulicWide == 'Rh=H')
 
-#fit small-eddy model with surface manifest of bed dissipation
+#fit small-eddy model with log-law-of-the-wall dissipation
 hydraulicallyWide$hydraulicallyWideModel <- g^(3/8)*hydraulicallyWide$slope^(3/8)*hydraulicallyWide$depth^(1/8)
 lm_hydraulicallyWide_smallEddy_eS <- lm(k600~hydraulicallyWideModel+0, data=hydraulicallyWide)
 hydraulicallyWide$k600_pred_wideHydraulics <- predict(lm_hydraulicallyWide_smallEddy_eS, hydraulicallyWide)
@@ -151,7 +151,7 @@ plot_smallEddy_eS <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y
         legend.title = element_text(size=17, face='bold'),
         legend.position = 'none')
 
-#fit reynolds model with surface manifest of bed dissipation
+#fit reynolds model with log-law-of-the-wall dissipation
 hydraulicallyWide$hydraulicallyWideModel <- (g*hydraulicallyWide$slope)^(9/16)*hydraulicallyWide$depth^(11/16)
 lm_hydraulicallyWide_reynolds_eS <- lm(k600~hydraulicallyWideModel+0, data=hydraulicallyWide)
 hydraulicallyWide$k600_pred_wideHydraulics <- (predict(lm_hydraulicallyWide_reynolds_eS, hydraulicallyWide))
@@ -187,7 +187,7 @@ plot_smallEddy_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y
   geom_point(size=5, color='#377eb8') +
   geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
   annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_smallEddy_eD)$r.squared,2)), x = 1, y = 100, size = 8, colour = "#377eb8")+
-  labs(x = expression(bold(paste(alpha[1]*(gSU)^{1/4}, ' [', m, '/', dy, ']'))),
+  labs(x = expression(bold(paste(alpha[1]*(gS*bar(U))^{1/4}, ' [', m, '/', dy, ']'))),
        y = expression(bold(paste(k[600], ' [', m, '/', dy, ']'))))+
   scale_y_log10(limits=c(10^-1,10^2),
                 breaks=c(0.1, 1, 10, 100),
@@ -213,7 +213,7 @@ plot_reynolds_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=
   geom_point(size=5, color='#377eb8') +
   geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
   annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_reynolds_eD)$r.squared,2)), x = 1, y = 100, size = 8, colour = "#377eb8")+
-  labs(x = expression(bold(paste(beta[1]*(gS)^{7/16}*U^{1/4}*H^{9/16}, ' [', m, '/', dy, ']'))),
+  labs(x = expression(bold(paste(beta[1]*(gS)^{7/16}*bar(U)^{1/4}*H^{9/16}, ' [', m, '/', dy, ']'))),
        y = '')+
   scale_y_log10(limits=c(10^-1,10^2),
                 breaks=c(0.1, 1, 10, 100),
@@ -229,17 +229,18 @@ plot_reynolds_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=
         legend.title = element_text(size=17, face='bold'),
         legend.position = 'none')
 
+#combine subplots and write to file
 k600_modelPlot_SI <- plot_grid(plot_smallEddy_eS, plot_reynolds_eS, plot_smallEddy_eD, plot_reynolds_eD, ncol=2, label_size = 18, labels=c('a', 'b', 'c', 'd'))
-
 ggsave('cache\\k600_theory\\figS1.jpg', k600_modelPlot_SI, height=9, width=10)
 
-#### SAVE JUST THE FINAL MODEL---------------------------------------
+#### SAVE JUST THE FINAL MODEL FOR MAIN TEXT FIGURE---------------------------------------
 plot_reynolds_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
   geom_point(size=5, color='#377eb8') +
   geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
   annotate("text", label = expression(paste(r^2, ': 0.70')), x = 1, y = 100, size = 8, colour = "#377eb8")+
-  labs(x = expression(bold(paste(beta[1]*(gS)^{7/16}*U^{1/4}*H^{9/16}, ' [', m, '/', dy, ']', ' (eq. 7)'))),
+  labs(x = expression(bold(paste(beta[1]*(gS)^{7/16}*bar(U)^{1/4}*H^{9/16}, ' [', m, '/', dy, ']', ' (eq. 7)'))),
        y = expression(bold(paste(k[600], ' [', m, '/', dy, ']'))))+
+  annotate("text", label = expression(paste(beta[1], ': 62.8')), x = 1, y = 50, size = 8, colour = "#377eb8")+
   scale_y_log10(limits=c(10^-1,10^2),
                 breaks=c(0.1, 1, 10, 100),
                 labels=c('0.1', '1', '10', '100'))+
@@ -254,7 +255,7 @@ plot_reynolds_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=
         legend.position = 'none')
 ggsave('cache\\k600_theory\\fig2.jpg', plot_reynolds_eD, height=6, width=6)
 
-#######WRITE reynolds MODEL TO FILE-------------------------------
+#######WRITE REYNOLDS MODEL TO FILE-------------------------------
 models <- data.frame('name'=c('reynolds-eS', 'Small-eddy-eS', 'reynolds-eD', 'Small-eddy-eD'),
                      'r2'=c(summary(lm_hydraulicallyWide_reynolds_eS)$r.squared,
                             summary(lm_hydraulicallyWide_smallEddy_eS)$r.squared,
@@ -277,7 +278,7 @@ write.csv(models, 'cache\\k600_theory\\hydraulicWide_models.csv')
 
 
 
-#######MONTE CARLO PROPOGATION OF UNCERTANTIES-------------------------
+#######MONTE CARLO PROPOGATION OF UNCERTANTIES FOR BIKER-------------------------
 beta_sigma <- summary(lm_hydraulicallyWide_reynolds_eD)$sigma
 u_sigma <- 0.3
 

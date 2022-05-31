@@ -36,7 +36,7 @@ knitr::opts_chunk$set(echo = TRUE)
 This supplementary information contains 5 texts, 5 figures and 2 tables.
 
 ## Test S1: Estimating how hydraulically wide SWOT rivers are
-To quantify the prevalence of hydraulically-wide, SWOT-observable rivers, we used the dataset of field-measured river hydraulics outlined in Section 2.1. That dataset has over 500,000 discrete measurements of river width, velocity, area, and discharge that were made by the United States Geological Survey (USGS) to calibrate streamgauge rating curves. Here, we describe how this dataset was filtered down to `r HG_swot$n` rivers.
+To quantify the prevalence of hydraulically-wide, SWOT-observable rivers, we used the dataset of field-measured river hydraulics outlined in Section 2.1. That dataset has over 500,000 discrete measurements of river width, velocity, area, and discharge that were made by the United States Geological Survey (USGS) to calibrate streamgauge rating curves. Here, we describe how this dataset was filtered down to `r HG_swot$n` SWOT-observable rivers.
 
 First, we removed all measurements tagged by the USGS as 'poor', measurements with non-finite values, or measurements of 0. While this would indicate a dry channel, our hydraulic geometry model necessitates within-bank flow. Likewise, because hydraulic geometry only applies to within-bank flows and not flood events, we remove all overbank flows. This was done by first filtering for sites with at least 20 measurements (to build robust estimates of bankfull hydraulics) and then calculating bankfull width and depth as the width or depth with a return period of two years. While the only true way to calculate bankfull hydraulics is manually in the field, this is obviously impractical here. A two-year return period is a standard approximation for determining out-of-bank flow in single-channel meandering rivers and was the method used by @brinkerhoffReconcilingAtaStationAtManyStations2019. We then removed all measurements with a width or depth beyond their respective at-a-station 2 year values.
 
@@ -45,7 +45,7 @@ Finally, we filtered this dataset to only measurements at least 100m wide ('SWOT
 ## Text S2: Gas exchange model derivations
 In this text we provide the full algebra to arrive at the four physically-based gas exchange models we tested in this study. Consult Appendix A for all variable definitions. Note that $\alpha$ and $\beta$ are statistical parameters obtained via least squares regression for the small-eddy and Reynolds-extension models, respectively. Subscripts denote variants of the same parameter, depending on which $\epsilon$ model is employed (see Main Text).
 
-**Small-eddy models (Equation 5 from Main Test)**
+**Small-eddy models (Equation 3 from Main Test)**
 
 *Log-law-of-the-wall model for the turbulent dissipation rate (assume* $\epsilon=\epsilon_S$ *)*
 
@@ -60,7 +60,7 @@ $$k_{600}=\alpha(gS)^{3/8}H^{1/8} \mathbf{(S5)}$$
 $$k_{600}=\alpha_1(\epsilon_D)^{1/4} \mathbf{(S6)}$$
 $$k_{600}=\alpha_1(gS\bar{U})^{1/4} \mathbf{(S7)}$$
 
-**Reynolds extension models (Equation 6 from Main Text)**
+**Reynolds extension models (Equation 4 from Main Text)**
 
 *Log-law-of-the-wall model for the turbulent dissipation rate (assume* $\epsilon=\epsilon_S$ *)*
 
@@ -82,11 +82,11 @@ $$k_{600}=\beta_1(gS)^{7/16}\bar{U}^{1/4}H^{9/16} \mathbf{(S18)}$$
 ## Text S3: BIKER hyperparameterization
 In this text we explain in detail how BIKER's prior distributions were determined for a given river.
 
-Prior distributions are defined by their hyperparameters. For BIKER, prior distributions are formalized as truncated normal distributions of the log-transformed terms such that $log(X) \sim  \mathcal{N}(\mu, \sigma^2)$ for $\lambda < log(X) < \gamma$, using prior hyperparameters mean ($\mu$), standard deviation ($\sigma$), and upper ($\gamma$) and lower bounds ($\lambda$) for any parameter *X*. It is important to again stress, as we do in the main text, that BIKER prior hyperparameters are described using only SWOT data to be completely globally implementable. This use of the data to describe the priors is analogous to the 'empirical Bayes method' [@hoffFirstCourseBayesian2009].
+Prior distributions are defined by their hyperparameters. For BIKER, prior distributions are formalized as truncated normal distributions of the log-transformed terms such that $log(X) \sim  \mathcal{N}(\mu, \sigma^2)$ for $\lambda < log(X) < \gamma$, using prior hyperparameters mean ($\mu$), standard deviation ($\sigma$), and upper ($\gamma$) and lower bounds ($\lambda$) for any parameter *X*. It is important to again stress, as we do in the Main Text, that BIKER prior hyperparameters are described using only SWOT data to be completely globally implementable. This use of the data to describe the priors is analogous to the 'empirical Bayes method' [@hoffFirstCourseBayesian2009].
 
 $A_0_i$ and $n_i$ prior hyperparameters were assigned following @brinkerhoffConstrainingRemoteRiver2020. They developed a set of river channel prior hyperparameters for McFLI algorithms that are entirely RS-able and reflect differential channel hydraulics as a function of river geomorphology. They used an extensive database of field measurements and statistical learning to identify patterns that associate river width with the hydraulic priors needed to run McFLIs so that prior hyperparameters are assigned to rivers using only the remotely sensed measurements. For this study, we extracted $A_0_{\lambda}$ and $A_0_{\gamma}$ as the 5th and 95th percentile values rather than the absolute maximum and minimum values to avoid physically impossible bounds on $A_0$.
 
-This leaves the $k_{600_t}$ hyperparameters to be defined. $k_{600_{\mu}}$ is set by invoking the hydraulic geometry (HG) relationships developed in Section 3.2.3 of the main text and Table S2 using the data from @brinkerhoffReconcilingAtaStationAtManyStations2019. We replaced both depth and velocity terms from our gas exchange model (Equation 7 in the Main Text) with these HG models, resulting in Equation S19 where Q is the mass-conserved streamflow for the river reach.
+This leaves the $k_{600_t}$ hyperparameters to be defined. $k_{600_{\mu}}$ is set by invoking the hydraulic geometry (HG) relationships described in Section 3.2.3 of the main text and Table S2 using the data from @brinkerhoffReconcilingAtaStationAtManyStations2019. We replaced both depth and velocity terms from our gas exchange model (Equation 7 in the Main Text) with these HG models, resulting in Equation S19 where Q is the mass-conserved streamflow for the river reach.
 
 $$k_{600_{\mu}} = 62.82(gS_{i,t})^{7/16}(0.252Q^{0.388})^{9/16}*(0.276Q^{0.164})^{1/4} \mathbf{(S19)}$$
 
@@ -99,9 +99,9 @@ Recall that $\sigma_{k_{600}}$ refers to the total uncertainty inherent in Equat
 
 In the scenario that BIKER is run on real SWOT data, $\sigma_k_{600}$ must reflect the full uncertainty implicit in Equation 9 in the main text. This means we must also account for uncertainty from the $\beta_1$ parameter. Assuming perfect, no-error measurements are made by the SWOT satellite, the full Equation 7 uncertainty is expressed for some set of hydraulic observations as Equation S20. To quantify total uncertainty in $k_{600}$, we push Monte Carlo simulations through Equation S20 and take the mean uncertainty as a reasonable value for $\sigma_{k_{600}}$ once SWOT launches.
 
-More specifically, we use the 166 hydraulically-wide measurements in our field-measured $k_{600}$ dataset (Section 2 in the Main Text) and push 166 different Monte Carlo simulations through Equation S20. Note that each Monte Carlo simulation is itself 10,000 runs in order to obtain a distribution of $k_{600}$ estimates. For each of the 166 distributions of estimated $l_{600}$, we extract the standard deviation as the uncertainty. We then take the average of those standard deviations to be a reasonable estimate of $\sigma_k_{600}$. This ultimately provided a value of 1.1 for the log-transformed $\sigma_k_{600}$ and should be used when running BIKER on real SWOT data.
+More specifically, we use the 166 hydraulically-wide measurements in our field-measured $k_{600}$ dataset (Section 2 in the Main Text) and push 166 different Monte Carlo simulations through Equation S20. Note that each Monte Carlo simulation is itself 10,000 runs in order to obtain a distribution of $k_{600}$ estimates. For each of the 166 distributions of estimated $k_{600}$, we extract the standard deviation as the uncertainty. We then take the average of those standard deviations to be a reasonable estimate of $\sigma_k_{600}$. This ultimately provided a value of 1.1 for the log-transformed $\sigma_k_{600}$ and should be used when running BIKER on real SWOT data.
 
-$$log_{k_{600}} \sim normal \left[ log(\beta_1), log(\sigma_{\beta_1}) \right] + \frac{1}{4}normal\left[log(\bar{U}), log(\sigma_{mannings})\right] \frac{7}{16}log(gS) + \frac{9}{16}log(H)  \mathbf{(S20)}$$
+$$log_{k_{600}} \sim \mathcal{N} \left[ log(\beta_1), log(\sigma_{\beta_1}) \right] + \frac{1}{4}\mathcal{N}\left[log(\bar{U}), log(\sigma_{mannings})\right] \frac{7}{16}log(gS) + \frac{9}{16}log(H)  \mathbf{(S20)}$$
 
 ## Text S5: Literature $CO_2$ flux models
 Here, we describe in more detail the three $CO_2$ flux models used to compare against BIKER in Section 3.2.3. The specific equations used are outlined in Table S2.

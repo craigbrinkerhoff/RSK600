@@ -51,5 +51,6 @@ calcdA_vec <- function(w, h) {
 
 #Calculate 'observed' k600 via the hydraulically-wide chainsaw model (see '~src\swot_k_model.R' for its validation)
 k600_model <- function(depth, slope, vel) {
-  return(62.82*(g*colMeans(slope, na.rm=T))^(7/16)*colMeans(vel,na.rm=T)^(1/4)*colMeans(depth,na.rm=T)^(9/16)) #CHAINSAW MODEL FOR ED
+  return(exp(3.89 + 0.4320*log(g*colMeans(slope, na.rm=T)) + 0.3084*log(colMeans(vel, na.rm=T)) + 0.5226*log(colMeans(depth, na.rm=T))))
+  #return(62.82*(g*colMeans(slope, na.rm=T))^(7/16)*colMeans(vel,na.rm=T)^(1/4)*colMeans(depth,na.rm=T)^(9/16)) #REYNOLDS EXTENSION MODEL FOR ED
 }

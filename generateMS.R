@@ -12,8 +12,8 @@ results_fco2_bulk <- read.csv('cache//FCO2//massFluxes.csv')
 results_fco2_bulk$key <- as.character(results_fco2_bulk$key)
 
 #knit manuscript
-rmarkdown::render("manuscript_v11.Rmd")
+rmarkdown::render("manuscript_r_v1.Rmd")
 print('Manuscript generated.')
 
-rmarkdown::render("supp_v11.Rmd")
+rmarkdown::render("supp_r_v1.Rmd")
 print('Supplemental Information generated.')

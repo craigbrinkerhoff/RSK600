@@ -1,0 +1,11 @@
+study,nReaches,notes
+Ulseth,12,
+Schelker,88,
+Owens,,doesn't say
+Churchill,,doesn'tsay
+Maurice,8,
+Hall_Madinger,5,
+Stroud,10,
+LINX,8,
+Tsivoglou_Wallace,5,
+Melching_Flores,493,raw number, before raymond cleaned and filtered dataset

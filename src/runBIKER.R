@@ -102,7 +102,7 @@ run_BIKER <- function(currPepsi, errFlag) {
   #run BIKER
   data <- biker_data(w=W_obs, s=S_obs, dA=dA_obs, priorQ=as.matrix(priorQ))
   priors <- biker_priors(data)
-  priors$river_type_priors$logk_sd <- rep(0.30, ncol(W_obs))
+  priors$river_type_priors$logk_sd <- rep(0.25, ncol(W_obs)) #obtained from Bayesian linear regression model
   priors$sigma_model$sigma_post = matrix(uncertainity, nrow=nrow(W_obs), ncol=ncol(W_obs)) #For this validation, we only want Rh uncertainty. Real implementation would use full model uncertainty (calculate in '~src\swot_k_model.R')
   kest <- biker_estimate(bikerdata = data, bikerpriors = priors, meas_err=F,iter = 3000L) #measurement error is currently in devolpment, don't use for this study
 

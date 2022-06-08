@@ -16,6 +16,8 @@ library(ggplot2)
 library(colorspace)
 library(cowplot)
 library(readr)
+library(rstanarm)
+library(grid)
 theme_set(theme_classic())
 
 #some constants
@@ -121,181 +123,169 @@ data$log_slope <- log(data$slope)
 ######## K600 MODELS--------------------
 #hydraulically-wide rivers
 data <- filter(data, study %in% c('Ulseth_etal_2019', 'Churchill_etal_1962', 'Owens_etal_1964'))
+out <- data.frame('width_min'=min(data$width),
+                  'width_max'=max(data$width),
+                  'width_mean'=mean(data$width),
+                  'Q_min'=min(data$Qm3s),
+                  'Q_max'=max(data$Qm3s),
+                  'Q_mean'=mean(data$Qm3s),
+                  'k600_min'=min(data$k600),
+                  'k600_max'=max(data$k600),
+                  'k600_mean'=mean(data$k600))
+write.csv(out, 'cache/k600_dataStats.csv') #save dataset stats to file
 
 #determine if hydraulically wide
 data$flag_hydraulicWide <- ifelse(data$Rh/data$depth >= 0.99, 'Rh=H', 'Rh=/=H')
 
 hydraulicallyWide <- filter(data, flag_hydraulicWide == 'Rh=H')
 
-#fit small-eddy model with log-law-of-the-wall dissipation
-hydraulicallyWide$hydraulicallyWideModel <- g^(3/8)*hydraulicallyWide$slope^(3/8)*hydraulicallyWide$depth^(1/8)
-lm_hydraulicallyWide_smallEddy_eS <- lm(k600~hydraulicallyWideModel+0, data=hydraulicallyWide)
-hydraulicallyWide$k600_pred_wideHydraulics <- predict(lm_hydraulicallyWide_smallEddy_eS, hydraulicallyWide)
+#tests for reviewer 1############################################
+#test 1
+hydraulicallyWide$log_hydraulicallyWideModel <- (7/16)*log(g*hydraulicallyWide$slope) + (1/4)*log(hydraulicallyWide$Vms) + (9/16)*log(hydraulicallyWide$depth)
+beta_1 <- mean(c(log(hydraulicallyWide$k600) - hydraulicallyWide$log_hydraulicallyWideModel))
+hydraulicallyWide$logk600_pred_wideHydraulics <- beta_1+hydraulicallyWide$log_hydraulicallyWideModel
+lm_log_hydraulicallyWide_reynolds_eD <- lm(log(k600)~logk600_pred_wideHydraulics, data=hydraulicallyWide)
 
-#plot model
-plot_smallEddy_eS <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
-  geom_point(size=5, color='#377eb8') +
+summary(lm_log_hydraulicallyWide_reynolds_eD)
+
+test1Plot <- ggplot(hydraulicallyWide, aes(y=k600, x=exp(logk600_pred_wideHydraulics)))+
+  geom_point(size=5, color='#377eb8', alpha=0.5) +
   geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
-  annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_smallEddy_eS)$r.squared,2)), x = 1, y = 100, size = 8, colour = "#377eb8")+
-  labs(x = expression(bold(paste(alpha*(gS)^{3/8}*H^{1/8}, ' [', m, '/', dy, ']'))),
-       y = expression(bold(paste(k[600], ' [', m, '/', dy, ']'))))+
+  annotate("text", label = paste0('r2: ', round(summary(lm_log_hydraulicallyWide_reynolds_eD)$r.squared,2)), x = 1, y = 100, size = 8, colour = "#377eb8")+
   scale_y_log10(limits=c(10^-1,10^2),
                 breaks=c(0.1, 1, 10, 100),
                 labels=c('0.1', '1', '10', '100'))+
   scale_x_log10(limits=c(10^-1,10^2),
                 breaks=c(0.1, 1, 10, 100),
                 labels=c('0.1', '1', '10', '100'))+
+  labs(x = '',
+       y = 'Observed k600')+
   annotation_logticks()+
-  ggtitle(expression(bold(paste('Small-eddy, ', epsilon==epsilon[S]))))+
+  ggtitle(expression(bold('Test 1')))+
   theme(axis.text=element_text(size=19),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'),
         legend.position = 'none')
 
-#fit reynolds model with log-law-of-the-wall dissipation
-hydraulicallyWide$hydraulicallyWideModel <- (g*hydraulicallyWide$slope)^(9/16)*hydraulicallyWide$depth^(11/16)
-lm_hydraulicallyWide_reynolds_eS <- lm(k600~hydraulicallyWideModel+0, data=hydraulicallyWide)
-hydraulicallyWide$k600_pred_wideHydraulics <- (predict(lm_hydraulicallyWide_reynolds_eS, hydraulicallyWide))
+#test 2
+hydraulicallyWide$term1 <- log(g*hydraulicallyWide$slope)
+hydraulicallyWide$term2 <- log(hydraulicallyWide$Vms)
+hydraulicallyWide$term3 <- log(hydraulicallyWide$depth)
+lm_log_hydraulicallyWide_reynolds_eD <- lm(log(k600)~term1+term2+term3, data=hydraulicallyWide)
+hydraulicallyWide$logk600_pred_wideHydraulics <- predict(lm_log_hydraulicallyWide_reynolds_eD, hydraulicallyWide)
 
-#plot model
-plot_reynolds_eS <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
-  geom_point(size=5, color='#377eb8') +
+summary(lm_log_hydraulicallyWide_reynolds_eD)
+
+test2Plot <- ggplot(hydraulicallyWide, aes(y=k600, x=exp(logk600_pred_wideHydraulics)))+
+  geom_point(size=5, color='#377eb8', alpha=0.5) +
   geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
-  annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_reynolds_eS)$r.squared,2)), x = 1, y = 100, size = 8, colour = "#377eb8")+
-  labs(x = expression(bold(paste(beta*(gS)^{9/16}*H^{11/16}, ' [', m, '/', dy, ']'))),
+  annotate("text", label = paste0('r2: ', round(summary(lm_log_hydraulicallyWide_reynolds_eD)$r.squared,2)), x = 1, y = 100, size = 8, colour = "#377eb8")+
+  scale_y_log10(limits=c(10^-1,10^2),
+                breaks=c(0.1, 1, 10, 100),
+                labels=c('0.1', '1', '10', '100'))+
+  scale_x_log10(limits=c(10^-1,10^2),
+                breaks=c(0.1, 1, 10, 100),
+                labels=c('0.1', '1', '10', '100'))+
+  labs(x = 'Predicted k600',
        y = '')+
-  scale_y_log10(limits=c(10^-1,10^2),
-                breaks=c(0.1, 1, 10, 100),
-                labels=c('0.1', '1', '10', '100'))+
-  scale_x_log10(limits=c(10^-1,10^2),
-                breaks=c(0.1, 1, 10, 100),
-                labels=c('0.1', '1', '10', '100'))+
   annotation_logticks()+
-  ggtitle(expression(bold(paste('Reynolds extension, ', epsilon==epsilon[S]))))+
+  ggtitle(expression(bold('Test 2')))+
   theme(axis.text=element_text(size=19),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'),
         legend.position = 'none')
 
-#fit small-eddy model with form-drag dissipation
-hydraulicallyWide$hydraulicallyWideModel <- (g*hydraulicallyWide$slope*hydraulicallyWide$Vms)^(1/4)
-lm_hydraulicallyWide_smallEddy_eD <- lm(k600~hydraulicallyWideModel+0, data=hydraulicallyWide)
-hydraulicallyWide$k600_pred_wideHydraulics <- predict(lm_hydraulicallyWide_smallEddy_eD, hydraulicallyWide)
+#test 3
+hydraulicallyWide$logGravitySlope <- log10(g*hydraulicallyWide$slope)
+hydraulicallyWide$logVms <- log10(hydraulicallyWide$Vms)
+hydraulicallyWide$logDepth <- log10(hydraulicallyWide$depth)
+bayeslm_log_hydraulicallyWide_reynolds_eD <- stan_glm(log10(k600)~logGravitySlope+logVms+logDepth, data=hydraulicallyWide,
+                                                      family=gaussian(link='identity'),
+                                                      prior = normal(location=c(7/16, 1/4, 9/16), scale=c(1/8, 1/8,1/8)),
+                                                      prior_intercept = normal(location=0.47, scale=1),#location=0 after internal recentering
+                                                      #intercept prior is left weakly informed using default prior, i.e. normal(0.47, 2.5)
+                                                      #sigma prior is left weakly informed using default prior, i.e. exponential(rate=1)
+                                                      seed=12345)
 
-#plot model
-plot_smallEddy_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
-  geom_point(size=5, color='#377eb8') +
+#calc 'bayesian r2': https://doi.org/10.1080/00031305.2018.1549100
+r2 <- data.frame('r2'=bayes_R2(bayeslm_log_hydraulicallyWide_reynolds_eD))
+r2Plot <- ggplot(r2, aes(x=r2))+
+  geom_density(aes(y=..scaled..),fill='skyblue4', color='black', size=1.25) +
+  geom_vline(xintercept = median(r2$r2), linetype='dotted', size=2)+
+  ylab('Scaled Density')+
+  xlab('Posterior r2')+
+  theme(axis.text=element_text(size=19),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        legend.position = 'none')
+
+#posterior predictive check to give a 'Bayesian' check
+posteriorCheckPlot <- pp_check(bayeslm_log_hydraulicallyWide_reynolds_eD, nreps=100)+
+  xlab('log10 k600 [m/dy]') +
+  theme(axis.text=element_text(size=19),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        legend.position = c(.9, .9))
+
+postVpriorPlot <- posterior_vs_prior(bayeslm_log_hydraulicallyWide_reynolds_eD) +
+  theme(axis.text=element_text(size=19),
+        axis.title=element_text(size=24,face="bold"),
+        legend.text = element_text(size=17),
+        legend.title = element_text(size=17, face='bold'),
+        legend.position = 'none')
+
+#extract posterior
+posterior <- as.data.frame(bayeslm_log_hydraulicallyWide_reynolds_eD)
+
+summary(posterior$logGravitySlope)
+summary(posterior$logVms)
+summary(posterior$logDepth)
+summary(posterior$`(Intercept)`)
+summary(posterior$sigma)
+
+#use posterior predicted distributions to predict k600 for plot
+predicted_distributions <- as.data.frame(t(posterior_predict(bayeslm_log_hydraulicallyWide_reynolds_eD)))
+predicted_distributions$k600_mean <- (apply(predicted_distributions[1:4000], MARGIN =  1, FUN = mean, na.rm = T))
+predicted_distributions$k600_sigma <- (apply(predicted_distributions[1:4000], MARGIN =  1, FUN = sd, na.rm = T))
+predicted_distributions$k600_05 <- (apply(predicted_distributions[1:4000], MARGIN =  1, FUN = function(x){quantile(x, c(0.05))}))
+predicted_distributions$k600_95 <- (apply(predicted_distributions[1:4000], MARGIN =  1, FUN = function(x){quantile(x, c(0.95))}))
+
+#add obs k600 to df
+predicted_distributions$obs_k600 <- log10(hydraulicallyWide$k600)
+
+#plot
+test3Plot <- ggplot(data=predicted_distributions)+
+  geom_pointrange(mapping=aes(y=obs_k600, x=k600_mean, xmin=k600_05, xmax=k600_95), fatten=10, color='#377eb8', alpha=0.5) +
   geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
-  annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_smallEddy_eD)$r.squared,2)), x = 1, y = 100, size = 8, colour = "#377eb8")+
-  labs(x = expression(bold(paste(alpha[1]*(gS*bar(U))^{1/4}, ' [', m, '/', dy, ']'))),
-       y = expression(bold(paste(k[600], ' [', m, '/', dy, ']'))))+
-  scale_y_log10(limits=c(10^-1,10^2),
-                breaks=c(0.1, 1, 10, 100),
-                labels=c('0.1', '1', '10', '100'))+
-  scale_x_log10(limits=c(10^-1,10^2),
-                breaks=c(0.1, 1, 10, 100),
-                labels=c('0.1', '1', '10', '100'))+
+  annotate("text", label = paste0('Posterior mean\nr2: ', round(mean(r2$r2),2)), x = 0, y = 1.75, size = 8, colour = "#377eb8")+
+  scale_y_continuous(limits=c(-1,2),
+                     breaks=c(-1, 0, 1, 2),
+                     labels=c('0.1', '1', '10', '100'))+
+  scale_x_continuous(limits=c(-1,2),
+                     breaks=c(-1, 0, 1, 2),
+                     labels=c('0.1', '1', '10', '100'))+
+  labs(x = 'Predicted k600',
+       y = 'Observed k600')+
   annotation_logticks()+
-  ggtitle(expression(bold(paste('Small-eddy, ', epsilon==epsilon[D]))))+
+  ggtitle(expression(bold('Test 3')))+
   theme(axis.text=element_text(size=19),
         axis.title=element_text(size=24,face="bold"),
         legend.text = element_text(size=17),
         legend.title = element_text(size=17, face='bold'),
         legend.position = 'none')
 
-#fit reynolds model with form-drag dissipation
-hydraulicallyWide$hydraulicallyWideModel <- (g*hydraulicallyWide$slope)^(7/16)*hydraulicallyWide$Vms^(1/4)*hydraulicallyWide$depth^(9/16)
-lm_hydraulicallyWide_reynolds_eD <- lm(k600~hydraulicallyWideModel+0, data=hydraulicallyWide)
-hydraulicallyWide$k600_pred_wideHydraulics <- (predict(lm_hydraulicallyWide_reynolds_eD, hydraulicallyWide))
-
-#plot model
-plot_reynolds_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
-  geom_point(size=5, color='#377eb8') +
-  geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
-  annotate("text", label = paste0('r2: ', round(summary(lm_hydraulicallyWide_reynolds_eD)$r.squared,2)), x = 1, y = 100, size = 8, colour = "#377eb8")+
-  labs(x = expression(bold(paste(beta[1]*(gS)^{7/16}*bar(U)^{1/4}*H^{9/16}, ' [', m, '/', dy, ']'))),
-       y = '')+
-  scale_y_log10(limits=c(10^-1,10^2),
-                breaks=c(0.1, 1, 10, 100),
-                labels=c('0.1', '1', '10', '100'))+
-  scale_x_log10(limits=c(10^-1,10^2),
-                breaks=c(0.1, 1, 10, 100),
-                labels=c('0.1', '1', '10', '100'))+
-  annotation_logticks()+
-  ggtitle(expression(bold(paste('Reynolds extension, ', epsilon==epsilon[D]))))+
-  theme(axis.text=element_text(size=19),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'),
-        legend.position = 'none')
-
-#combine subplots and write to file
-k600_modelPlot_SI <- plot_grid(plot_smallEddy_eS, plot_reynolds_eS, plot_smallEddy_eD, plot_reynolds_eD, ncol=2, label_size = 18, labels=c('a', 'b', 'c', 'd'))
-ggsave('cache\\k600_theory\\figS1.jpg', k600_modelPlot_SI, height=9, width=10)
-
-#### SAVE JUST THE FINAL MODEL FOR MAIN TEXT FIGURE---------------------------------------
-plot_reynolds_eD <- ggplot(hydraulicallyWide, aes(x=k600_pred_wideHydraulics, y=k600)) +
-  geom_point(size=5, color='#377eb8') +
-  geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
-  annotate("text", label = expression(paste(r^2, ': 0.70')), x = 1, y = 100, size = 8, colour = "#377eb8")+
-  labs(x = expression(bold(paste(beta[1]*(gS)^{7/16}*bar(U)^{1/4}*H^{9/16}, ' [', m, '/', dy, ']', ' (eq. 7)'))),
-       y = expression(bold(paste(k[600], ' [', m, '/', dy, ']'))))+
-  annotate("text", label = expression(paste(beta[1], ': 62.8')), x = 1, y = 50, size = 8, colour = "#377eb8")+
-  scale_y_log10(limits=c(10^-1,10^2),
-                breaks=c(0.1, 1, 10, 100),
-                labels=c('0.1', '1', '10', '100'))+
-  scale_x_log10(limits=c(10^-1,10^2),
-                breaks=c(0.1, 1, 10, 100),
-                labels=c('0.1', '1', '10', '100'))+
-  annotation_logticks()+
-  theme(axis.text=element_text(size=19),
-        axis.title=element_text(size=24,face="bold"),
-        legend.text = element_text(size=17),
-        legend.title = element_text(size=17, face='bold'),
-        legend.position = 'none')
-ggsave('cache\\k600_theory\\fig2.jpg', plot_reynolds_eD, height=6, width=6)
-
-#######WRITE REYNOLDS MODEL TO FILE-------------------------------
-models <- data.frame('name'=c('reynolds-eS', 'Small-eddy-eS', 'reynolds-eD', 'Small-eddy-eD'),
-                     'r2'=c(summary(lm_hydraulicallyWide_reynolds_eS)$r.squared,
-                            summary(lm_hydraulicallyWide_smallEddy_eS)$r.squared,
-                            summary(lm_hydraulicallyWide_reynolds_eD)$r.squared,
-                            summary(lm_hydraulicallyWide_smallEddy_eD)$r.squared),
-                     'coef'=c(summary(lm_hydraulicallyWide_reynolds_eS)$coefficient[1],
-                              summary(lm_hydraulicallyWide_smallEddy_eS)$coefficient[1],
-                              summary(lm_hydraulicallyWide_reynolds_eD)$coefficient[1],
-                              summary(lm_hydraulicallyWide_smallEddy_eD)$coefficient[1])
-                     )
-write.csv(models, 'cache\\k600_theory\\hydraulicWide_models.csv')
+#text description
+description <- textGrob('Test 1: linear regression\nusing the logged equation 7\n\nTest 2: linear regression\nusing the logged equation 7 terms,\nbut the exponents can vary\n\nTest 3: Bayesian linear regression\nusing the logged equation 7,\nwhere the theoretically-defensible\nexponents are set as the priors', y=0.5, gp=gpar(fontface="bold", col="darkblue", fontsize=18))
 
 
+#bring it all together
+grid <- plot_grid(test1Plot, test2Plot, test3Plot, description, ncol=2)
+ggsave('docs/review_round2/modelComparsion.jpg', grid, width=10, height=10)
 
-
-
-
-
-
-
-
-
-#######MONTE CARLO PROPOGATION OF UNCERTANTIES FOR BIKER-------------------------
-beta_sigma <- summary(lm_hydraulicallyWide_reynolds_eD)$sigma
-u_sigma <- 0.3 #Manning's equation + rectangular channel assumptions
-
-set.seed(13)
-n <- 10000 #MC sample size
-
-output <- 1:nrow(hydraulicallyWide)
-for (i in output) {
-  #current version
-  log_knowns <- (7/16)*log(g) + (7/16)*log(hydraulicallyWide[i,]$slope) + (9/16)*log(hydraulicallyWide[i,]$depth)
-  log_k600_pred <- rnorm(n, log(summary(lm_hydraulicallyWide_reynolds_eD)$coefficient[1]), log(beta_sigma)) + log_knowns + (1/4)*rnorm(n, log(hydraulicallyWide[i,]$Vms), u_sigma)
-
-  output[i] <- sd(log_k600_pred)
-}
-
-
-mean(output)
-hist(output)
+bayesGrid <- plot_grid(r2Plot, posteriorCheckPlot, ncol=2)
+bayesGrid <- plot_grid(bayesGrid, postVpriorPlot, ncol=1)
+ggsave('docs/review_round2/bayesModelCheck.jpg', bayesGrid, width=10, height=10)

@@ -317,7 +317,7 @@ ggsave('cache\\k600_theory\\figS1.jpg', k600_modelPlot_SI, height=9, width=10)
 plot_reynolds_eD <- ggplot(data=predicted_distributions)+
   geom_pointrange(mapping=aes(y=obs_k600, x=k600_mean, xmin=k600_05, xmax=k600_95), fatten=10, color='#377eb8', alpha=0.5) +
   geom_abline(linetype='dashed', color='darkgrey', size=1.5)+ #1:1 line
-  annotate("text", label = expression(paste(r^2, ': 0.50')), x = 0, y = 1.75, size = 8, colour = "#377eb8")+ #hardcoded here to get the right decimals
+  annotate("text", label = expression(paste('Posterior mean ', r^2, ': 0.50')), x = 0, y = 1.75, size = 8, colour = "#377eb8")+ #hardcoded here to get the right decimals
   scale_y_continuous(limits=c(-1,2),
                      breaks=c(-1, 0, 1, 2),
                      labels=c('0.1', '1', '10', '100'))+

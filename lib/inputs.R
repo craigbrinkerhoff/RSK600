@@ -13,5 +13,5 @@ uncertainity <- 0.30 #see regression model for actual uncertainty
 ###############
 #Implementation settings
 ###############
-cores <- 31 #num cores to run parallel processes on (depends on HPC session setup)
+cores <- 30 #num cores to run parallel processes on (depends on HPC session setup)
 samplingRate <- 14 #sampling frequency used with the pCO2 data from Beaulieu et al. (2012)

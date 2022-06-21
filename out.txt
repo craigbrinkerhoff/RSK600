@@ -1,3 +1,5 @@
 [1] "running BIKER..."
 [1] "starting FCO2..."
 [1] "validating BIKER..."
+[1] "validating BIKER + CO2 data..."
+Time difference of 21.29154 mins

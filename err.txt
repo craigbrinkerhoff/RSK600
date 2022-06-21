@@ -1,3 +1,6 @@
+/var/spool/slurm/slurmd/job3040720/slurm_script: line 10: /home/cbrinkerhoff_umass_edu/.bashrc: No such file or directory
+Loading required package: digest
+Loading required package: tibble
 Project name: RSK600
 Loading project configuration
 Autoloading packages
@@ -51,7 +54,6 @@ Loading required package: readr
 Loading required package: parallel
  Loading package: ncdf4
 Loading required package: ncdf4
- Loading package: lubridate
  Loading package: Metrics
 Loading required package: Metrics
  Loading package: cowplot
@@ -80,11 +82,14 @@ Loading required package: RColorBrewer
 Loading required package: colorspace
  Loading package: ggfortify
 Loading required package: ggfortify
- Loading package: devtools
-Loading required package: devtools
-Loading required package: usethis
  Loading package: BIKER
 Loading required package: BIKER
+code for methods in class "Rcpp_model_base" was not checked for suspicious field assignments (recommended package 'codetools' not available?)
+code for methods in class "Rcpp_model_base" was not checked for suspicious field assignments (recommended package 'codetools' not available?)
+code for methods in class "Rcpp_stan_fit" was not checked for suspicious field assignments (recommended package 'codetools' not available?)
+code for methods in class "Rcpp_stan_fit" was not checked for suspicious field assignments (recommended package 'codetools' not available?)
+code for methods in class "Rcpp_rstantools_model_master" was not checked for suspicious field assignments (recommended package 'codetools' not available?)
+code for methods in class "Rcpp_rstantools_model_master" was not checked for suspicious field assignments (recommended package 'codetools' not available?)
  Loading package: hydroGOF
 Loading required package: hydroGOF
 Loading required package: zoo
@@ -112,8 +117,12 @@ Autoloading data
  Loading cached data set: additional_USGS_reaeration_data
  Loading cached data set: dataLocations
 Munging data
+Warning message:
+In .check.version(config) :
+  Your configuration is compatible with version 0.10.1 of the ProjectTemplate package.
+  Please run ProjectTemplate::migrate.project() to migrate to the installed version 0.10.2.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 12 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -123,7 +132,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 12 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -133,7 +142,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 107 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -143,7 +152,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 107 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -153,7 +162,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 12 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -163,7 +172,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 209 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -173,7 +182,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 162 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -183,7 +192,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 12 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -193,7 +202,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 365 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -203,7 +212,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 365 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -213,7 +222,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 365 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -223,7 +232,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 12 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -233,7 +242,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 366 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -243,7 +252,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 366 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -253,7 +262,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 250 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -263,7 +272,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 250 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -273,7 +282,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 162 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -283,7 +292,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 366 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -293,7 +302,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 366 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -303,7 +312,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 12 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -313,7 +322,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 12 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -323,7 +332,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 12 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -333,7 +342,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 162 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -343,7 +352,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 162 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -353,7 +362,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 162 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -363,7 +372,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 595 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -373,7 +382,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 595 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -383,7 +392,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 595 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -393,7 +402,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 595 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -403,7 +412,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 595 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -413,7 +422,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 220 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -423,7 +432,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 220 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -433,7 +442,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 220 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -443,7 +452,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 220 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -453,7 +462,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 220 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -463,7 +472,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 220 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -473,7 +482,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 220 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -483,7 +492,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 220 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -493,7 +502,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 220 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -503,7 +512,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 220 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -513,7 +522,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 220 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -523,7 +532,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 220 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -533,7 +542,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 220 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -543,7 +552,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 220 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -553,7 +562,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 220 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -563,7 +572,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 13 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -573,7 +582,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 366 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -583,7 +592,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 366 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -593,7 +602,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 22 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -603,7 +612,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 367 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -613,7 +622,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 154 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -623,7 +632,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 305 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -633,7 +642,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 12 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -643,7 +652,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 12 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -653,7 +662,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 365 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -663,7 +672,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 365 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -673,7 +682,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 365 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -683,7 +692,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 365 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -693,7 +702,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 365 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -703,7 +712,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 88 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -713,7 +722,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 12 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -723,7 +732,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 12 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -733,7 +742,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 162 Columns: 14
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -743,7 +752,7 @@ dbl (13): ...1, time, kobs, kest_mean, kest_low, kest_high, kest_sd, kprior,...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 8 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -753,7 +762,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 15 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -763,7 +772,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 12 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -773,7 +782,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 27 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -783,7 +792,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 27 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -793,7 +802,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 27 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -803,7 +812,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 27 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -813,7 +822,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 18 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -823,7 +832,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 12 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -833,7 +842,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 27 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -843,7 +852,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 12 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -853,7 +862,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 12 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -863,7 +872,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 12 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -873,7 +882,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 43 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -883,7 +892,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 43 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -893,7 +902,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 43 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -903,7 +912,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 16 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -913,7 +922,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 16 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -923,7 +932,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 16 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -933,7 +942,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 16 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -943,7 +952,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 16 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -953,7 +962,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 16 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -963,7 +972,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 16 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -973,7 +982,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 16 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -983,7 +992,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 27 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -993,7 +1002,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 2 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -1003,7 +1012,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 27 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -1013,7 +1022,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 11 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -1023,7 +1032,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 22 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -1033,7 +1042,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 27 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -1043,7 +1052,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 27 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -1053,7 +1062,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 27 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -1063,7 +1072,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 7 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -1073,7 +1082,7 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
 New names:
-* `` -> ...1
+* `` -> `...1`
 Rows: 12 Columns: 13
 -- Column specification --------------------------------------------------------
 Delimiter: ","
@@ -1082,14 +1091,12 @@ dbl (12): ...1, timestep, sa_m2, FCO2_obs, FCO2_BIKER, FCO2_BIKER_low, FCO2_...
 
 i Use `spec()` to retrieve the full column specification for this data.
 i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-`summarise()` has grouped output by 'river'. You can override using the `.groups` argument.
+`summarise()` has grouped output by 'river'. You can override using the
+`.groups` argument.
 `geom_smooth()` using formula 'y ~ x'
 `geom_smooth()` using formula 'y ~ x'
 `geom_smooth()` using formula 'y ~ x'
 `geom_smooth()` using formula 'y ~ x'
-Error in eval(ei, envir) : no loop for break/next, jumping to top level
-Calls: source -> withVisible -> eval -> eval
-In addition: Warning messages:
-1: Removed 1 rows containing missing values (geom_text). 
-2: Removed 1 rows containing missing values (geom_text). 
-Execution halted
+There were 50 or more warnings (use warnings() to see the first 50)
+`summarise()` has grouped output by 'river'. You can override using the
+`.groups` argument.

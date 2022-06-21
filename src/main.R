@@ -4,8 +4,7 @@
 ## Winter 2022
 ###############
 
-.libPaths('/nas/cee-water/cjgleason/r-lib')
-library(ProjectTemplate, lib.loc = "/nas/cee-water/cjgleason/r-lib/")
+library(ProjectTemplate)
 load.project()
 
 theme_set(theme_cowplot())

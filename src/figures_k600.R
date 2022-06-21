@@ -181,8 +181,8 @@ nmae_scatter <- ggplot(forError_nmae, aes(x=abs(nmae_no_err), y=abs(nmae_err))) 
         legend.title = element_text(size=17, face='bold'),
         plot.title = element_text(size = 30, face = "bold"))
 
-fig6 <- plot_grid(kge_scatter, NRMSE_scatter, r_scatter, nmae_scatter, ncol=2, labels=NA)
-ggsave('cache/validation/fig5.jpg', fig6, width=10, height=10)
+fig5 <- plot_grid(kge_scatter, NRMSE_scatter, r_scatter, nmae_scatter, ncol=2, labels=NA)
+ggsave('cache/validation/fig5.jpg', fig5, width=10, height=10)
 
 ###########################
 ## PLOT PRIOR/POSTEROR COMPARISON-------------------------------
@@ -242,8 +242,8 @@ priorPosterPlot_4 <- ggplot(forPlot2[forPlot2$cvObs >= 0.30,], aes(x=value, colo
         legend.position = c(0.7, 0.8))
 
 
-fig7 <- plot_grid(priorPosterPlot_all, priorPosterPlot_2, priorPosterPlot_3, priorPosterPlot_4, labels='auto', label_size = 18, ncol = 2)
-ggsave('cache/validation/fig6.jpg', fig7, width=12, height=12)
+fig6 <- plot_grid(priorPosterPlot_all, priorPosterPlot_2, priorPosterPlot_3, priorPosterPlot_4, labels='auto', label_size = 18, ncol = 2)
+ggsave('cache/validation/fig6.jpg', fig6, width=12, height=12)
 
 ####################
 ##SAVE ALL TIMESERIES IN A SINGLE FINGURE FOR THE SUPPLEMENT
@@ -266,7 +266,7 @@ for (i in 1:63){ #47 rivers with no measurement error, 16 with errors modeled vi
   results$kest_low <- ifelse(results$key == 'kobs', NA, results$kest_low/max(results$value))
   results$kest_high <- ifelse(results$key == 'kobs', NA, results$kest_high/max(results$value))
   riv <- as.character(results[1,]$river)
-  
+
   #make ggplot object
   pltList[[ river ]]  <- ggplot(results, aes(x=time, y=value/max(value), color=key)) + #model
     geom_ribbon(aes(ymin = kest_low, ymax = kest_high), alpha=0.75, fill='grey')+

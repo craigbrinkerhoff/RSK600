@@ -54,7 +54,7 @@ barPlot <- ggplot(massFluxes, aes(y=yearlyCFux, x=key, fill=key)) +
   geom_errorbar(aes(x=key, ymin=lowCI_sum, ymax=highCI_sum), width=0.4, colour="black", size=1.3)+
   geom_hline(yintercept = massFluxes[massFluxes$key=='FCO2_obs', ]$yearlyCFux, size=1.2, linetype='dashed', color='#ff7f00') +
   ylab('CO2 Flux [Tg-C/yr]') +
-  scale_fill_manual(values=c('#e31a1c', '#3f007d', '#6a51a3', '#9e9ac8', '#ff7f00'), name='', labels=c('BIKER \n ', 'Brinkerhoff \n2019', 'Raymond \n2012', 'Raymond \n2013', 'Observed \n ')) +
+  scale_fill_manual(values=c('#e31a1c', '#3f007d', '#6a51a3', '#9e9ac8', '#ff7f00'), name='', labels=c('BIKER \n ', 'Brinkerhoff \n2019', 'Raymond \n2012', 'Raymond \n2013', '"Observed" \n ')) +
   theme(legend.position = "right",
         axis.title.x=element_blank(),
         axis.text.x=element_blank(),

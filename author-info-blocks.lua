@@ -12,11 +12,6 @@ OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
 TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
 ]]
-
---[[
-AMENDED BY CRAIG BRINKERHOFF WHERE NOTED SEPTEMEBER 2021
-]]
-
 local List = require 'pandoc.List'
 local utils = require 'pandoc.utils'
 local stringify = utils.stringify
@@ -24,11 +19,11 @@ local stringify = utils.stringify
 local default_marks
 local default_marks = {
   corresponding_author = FORMAT == 'latex'
-    and {pandoc.RawInline('latex', '*')} --[[amended by craig brinkerhoff]]
-    or {pandoc.Str '*'},
+    and {pandoc.RawInline('latex', '*')}
+    or {pandoc.Str '✉'},
   equal_contributor = FORMAT == 'latex'
-    and {pandoc.RawInline('latex', '$\\dagger{}$')} --[[amended by craig brinkerhoff]]
-    or {pandoc.Str '+'},
+    and {pandoc.RawInline('latex', '$\\dagger{}$')}
+    or {pandoc.Str '*'},
 }
 
 local function intercalate(lists, elem)

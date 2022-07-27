@@ -73,7 +73,7 @@ nrmse_cdf <- ggplot(stats_by_river[stats_by_river$errFlag==0,], aes(x=NRMSE)) +
 
 nmae_cdf <- ggplot(stats_by_river[stats_by_river$errFlag==0,], aes(x=NMAE)) +
   stat_ecdf(size=3, color='#1c9099') +
-  scale_x_log10()+
+  scale_x_log10(limits=c(min(stats_by_river[stats_by_river$errFlag==0,]$NMAE),max(stats_by_river[stats_by_river$errFlag==0,]$NMAE)+0.3))+ #kluge to force label to not go off of screen...
   geom_hline(yintercept = 0.5, linetype='dashed', size=1) +
   xlab('Value')+
   ylab('')+
@@ -181,7 +181,7 @@ nmae_scatter <- ggplot(forError_nmae, aes(x=abs(nmae_no_err), y=abs(nmae_err))) 
         legend.title = element_text(size=17, face='bold'),
         plot.title = element_text(size = 30, face = "bold"))
 
-fig5 <- plot_grid(kge_scatter, NRMSE_scatter, r_scatter, nmae_scatter, ncol=2, labels=NA)
+fig5 <- plot_grid(kge_scatter, NRMSE_scatter, r_scatter, nmae_scatter, ncol=2, labels='auto')
 ggsave('cache/validation/fig5.jpg', fig5, width=10, height=10)
 
 ###########################
@@ -209,7 +209,7 @@ priorPosterPlot_2 <- ggplot(forPlot2[forPlot2$cvObs >= 0.10,], aes(x=value, colo
   xlab('')+
   ylab('')+
   xlim(0,2.2)+
-  annotate("text", x = 1.25, y = 0.5, label = 'Observed CV > 0.10\n(n = 38 rivers)', size=8, color='darkblue')+
+  annotate("text", x = 1.25, y = 0.5, label = 'Observed CV > 0.10\n(n = 39 rivers)', size=8, color='darkblue')+
   theme(axis.text=element_text(size=22),
         axis.title=element_text(size=26,face="bold"),
         plot.title = element_text(size = 30, face = "bold"),
@@ -221,7 +221,7 @@ priorPosterPlot_3 <- ggplot(forPlot2[forPlot2$cvObs >= 0.20,], aes(x=value, colo
   xlab('NMAE')+
   ylab('Percentile')+
   xlim(0,2.2)+
-  annotate("text", x = 1.25, y = 0.5, label = 'Observed CV > 0.20\n(n = 18 rivers)', size=8, color='darkblue')+
+  annotate("text", x = 1.25, y = 0.5, label = 'Observed CV > 0.20\n(n = 19 rivers)', size=8, color='darkblue')+
   theme(axis.text=element_text(size=22),
         axis.title=element_text(size=26,face="bold"),
         plot.title = element_text(size = 30, face = "bold"),
@@ -233,7 +233,7 @@ priorPosterPlot_4 <- ggplot(forPlot2[forPlot2$cvObs >= 0.30,], aes(x=value, colo
   xlab('NMAE')+
   ylab('')+
   xlim(0,2.2)+
-  annotate("text", x = 1.25, y = 0.5, label = 'Observed CV > 0.30\n(n = 10 rivers)', size=8, color='darkblue')+
+  annotate("text", x = 1.25, y = 0.5, label = 'Observed CV > 0.30\n(n = 11 rivers)', size=8, color='darkblue')+
   theme(axis.text=element_text(size=22),
         axis.title=element_text(size=26,face="bold"),
         legend.text = element_text(size=28),
@@ -476,7 +476,7 @@ legend <- get_legend(pltList$Wabash + theme(legend.text=element_text(size=25)))
 plotTimeseries <- plotgrid + draw_grob(legend, 0.65, -0.2, 0.5, 0.5)
 
 #create x and y axis labels for entire figure
-yTitleCombo <- textGrob(expression(k[600]/Max~k[600]~(m/dy)), gp=gpar(fontface="bold", col="black", fontsize=30), rot=90)
+yTitleCombo <- textGrob(expression(k[600]/Max~k[600]~(m/d)), gp=gpar(fontface="bold", col="black", fontsize=30), rot=90)
 xTitleCombo <- textGrob(expression(Timestep), gp=gpar(fontface="bold", col="black", fontsize=30))
 plotTimeseries <- gridExtra::grid.arrange(gridExtra::arrangeGrob(plotTimeseries, left = yTitleCombo, bottom = xTitleCombo))
 
@@ -574,39 +574,39 @@ temp2 <- stats_by_river[stats_by_river$errFlag==0 & stats_by_river$KGE >= quanti
 temp3 <- stats_by_river[stats_by_river$errFlag==0 & stats_by_river$KGE >= quantiles[2],] #high skill
 
 plotGrid_short <- plot_grid(
-  pltList[[temp[13,]$river]]+ ggtitle('Sacramento River \n(upstream)')+ theme(legend.position='none',
+  pltList[[temp[14,]$river]]+ ggtitle('Seine River')+ theme(legend.position='none',
                                      axis.text=element_text(size=20),
                                      axis.title=element_text(size=24,face="bold"),
                                      legend.text = element_text(size=17),
                                      legend.title = element_text(size=17, face='bold'),
                                      plot.title = element_text(size = 30, face = "bold")),
-  pltList[[temp[9,]$river]]+ ggtitle('Ohio')+ theme(legend.position='none',
+  pltList[[temp[8,]$river]]+ ggtitle('Ohio River')+ theme(legend.position='none',
                                       axis.text=element_text(size=20),
                                       axis.title=element_text(size=24,face="bold"),
                                       legend.text = element_text(size=17),
                                       legend.title = element_text(size=17, face='bold'),
                                       plot.title = element_text(size = 30, face = "bold")),
   textGrob('Low Skill', y=0.6, gp=gpar(fontface="bold", col="darkblue", fontsize=34)),
-  pltList[[temp2[7,]$river]]+ ggtitle('Iowa River') + theme(legend.position='none',
+  pltList[[temp2[3,]$river]]+ ggtitle('Connecticut River') + theme(legend.position='none',
                                      axis.text=element_text(size=20),
                                      axis.title=element_text(size=24,face="bold"),
                                      legend.text = element_text(size=17),
                                      legend.title = element_text(size=17, face='bold'),
                                      plot.title = element_text(size = 30, face = "bold")),
-  pltList[[temp2[4,]$river]]+ggtitle('Connecticut River')+ theme(legend.position='none',
+  pltList[[temp2[7,]$river]]+ggtitle('Iowa River')+ theme(legend.position='none',
                                       axis.text=element_text(size=20),
                                       axis.title=element_text(size=24,face="bold"),
                                       legend.text = element_text(size=17),
                                       legend.title = element_text(size=17, face='bold'),
                                       plot.title = element_text(size = 30, face = "bold")),
   textGrob('Middle Skill', y=0.6, gp=gpar(fontface="bold", col="darkblue", fontsize=34)),
-  pltList[[temp3[5,]$river]]+ ggtitle('Missouri River\n(midsection)')+theme(legend.position='none',
+  pltList[[temp3[1,]$river]]+ ggtitle('Cumberland River')+theme(legend.position='none',
                                         axis.text=element_text(size=20),
                                         axis.title=element_text(size=24,face="bold"),
                                         legend.text = element_text(size=17),
                                         legend.title = element_text(size=17, face='bold'),
                                         plot.title = element_text(size = 30, face = "bold")),
-  pltList[[temp3[12,]$river]]+ggtitle('Sacramento River\n(downstream)')+theme(legend.position='none',
+  pltList[[temp3[3,]$river]]+ggtitle('Kanawha River')+theme(legend.position='none',
                                         axis.text=element_text(size=20),
                                         axis.title=element_text(size=24,face="bold"),
                                         legend.text = element_text(size=17),

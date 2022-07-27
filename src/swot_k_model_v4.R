@@ -134,9 +134,8 @@ hydraulicallyWide$logDepth <- log10(hydraulicallyWide$depth)
 bayeslm_log_hydraulicallyWide_smallEddy_eS <- stan_glm(log10(k600)~logGravitySlope+logDepth, data=hydraulicallyWide,
                                                       family=gaussian(link='identity'),
                                                       prior = normal(location=c(3/8, 1/8), scale=c(1/8,1/8)),
-                                                      prior_intercept = normal(location=0.47, scale=1),#location=0 after internal recentering
-                                                      #intercept prior is left weakly informed using default prior, i.e. normal(0.47, 2.5)
-                                                      #sigma prior is left weakly informed using default prior, i.e. exponential(rate=1)
+                                                      prior_intercept = normal(location=0, scale=1),
+                                                      prior_aux = exponential(rate = 1),
                                                       seed=12345)
 
 #calc 'bayesian r2': https://doi.org/10.1080/00031305.2018.1549100
@@ -179,9 +178,8 @@ hydraulicallyWide$logDepth <- log10(hydraulicallyWide$depth)
 bayeslm_log_hydraulicallyWide_reynolds_eS <- stan_glm(log10(k600)~logGravitySlope+logDepth, data=hydraulicallyWide,
                                                        family=gaussian(link='identity'),
                                                        prior = normal(location=c(9/16, 11/16), scale=c(1/8,1/8)),
-                                                       prior_intercept = normal(location=0.47, scale=1),#location=0 after internal recentering
-                                                       #intercept prior is left weakly informed using default prior, i.e. normal(0.47, 2.5)
-                                                       #sigma prior is left weakly informed using default prior, i.e. exponential(rate=1)
+                                                       prior_intercept = normal(location=0, scale=1),
+                                                       prior_aux = exponential(rate = 1),
                                                        seed=12345)
 
 #calc 'bayesian r2': https://doi.org/10.1080/00031305.2018.1549100
@@ -224,9 +222,8 @@ hydraulicallyWide$logVms <- log10(hydraulicallyWide$Vms)
 bayeslm_log_hydraulicallyWide_smallEddy_eD <- stan_glm(log10(k600)~logGravitySlope+logVms, data=hydraulicallyWide,
                                                       family=gaussian(link='identity'),
                                                       prior = normal(location=c(1/4, 1/4), scale=c(1/8,1/8)),
-                                                      prior_intercept = normal(location=0.47, scale=1),#location=0 after internal recentering
-                                                      #intercept prior is left weakly informed using default prior, i.e. normal(0.47, 2.5)
-                                                      #sigma prior is left weakly informed using default prior, i.e. exponential(rate=1)
+                                                      prior_intercept = normal(location=0, scale=1),
+                                                      prior_aux = exponential(rate = 1),
                                                       seed=12345)
 
 #calc 'bayesian r2': https://doi.org/10.1080/00031305.2018.1549100
@@ -270,9 +267,8 @@ hydraulicallyWide$logDepth <- log10(hydraulicallyWide$depth)
 bayeslm_log_hydraulicallyWide_reynolds_eD <- stan_glm(log10(k600)~logGravitySlope+logVms+logDepth, data=hydraulicallyWide,
                                                       family=gaussian(link='identity'),
                                                       prior = normal(location=c(7/16, 1/4, 9/16), scale=c(1/8, 1/8,1/8)),
-                                                      prior_intercept = normal(location=0.47, scale=1),#location=0 after internal recentering
-                                                      #intercept prior is left weakly informed using default prior, i.e. normal(0.47, 2.5)
-                                                      #sigma prior is left weakly informed using default prior, i.e. exponential(rate=1)
+                                                      prior_intercept = normal(location=0, scale=1),
+                                                      prior_aux = exponential(rate = 1),
                                                       seed=12345)
 
 #calc 'bayesian r2': https://doi.org/10.1080/00031305.2018.1549100
@@ -389,7 +385,7 @@ output <- 1:nrow(hydraulicallyWide)
 for (i in output) {
   #bayes regression version
   log_knowns <- sample(posterior$logGravitySlope, n, replace = T)*log(g) + sample(posterior$logGravitySlope,n, replace = T)*log(hydraulicallyWide[i,]$slope) + sample(posterior$logDepth,n, replace = T)*log(hydraulicallyWide[i,]$depth)
-  log_k600_pred <- sample(posterior$`(Intercept)`,n, replace = T) + log_knowns + sample(posterior$logVms,n, replace = T)*rnorm(n, log(hydraulicallyWide[i,]$Vms), u_sigma)
+  log_k600_pred <- rnorm(n, log(10^(sample(posterior$`(Intercept)`,n, replace = T))) + log_knowns + sample(posterior$logVms,n, replace = T)*rnorm(n, log(hydraulicallyWide[i,]$Vms), u_sigma), sample(log(10^(posterior$sigma)), n, replace=T))
   
   
   output[i] <- sd(log_k600_pred)

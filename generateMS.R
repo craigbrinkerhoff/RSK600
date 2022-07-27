@@ -4,16 +4,18 @@
 
 #Move all results to global environment
 modelsWIDE <- read.csv('cache\\k600_theory\\hydraulicWide_models.csv')
+modelsSTATS <- read.csv('cache\\k600_theory\\k_stats_models.csv')
 n <- 166 #number of hydraulically wide measurements used in k600 validation
 HG_swot <- read.csv('cache\\k600_theory\\HG_swot.csv')
+global_swot_coverage <- read.csv('cache\\swot_total_comparison.csv')
 
 results_k600_rivs <- read.csv('cache//validation//results_by_riv.csv')
 results_fco2_bulk <- read.csv('cache//FCO2//massFluxes.csv')
 results_fco2_bulk$key <- as.character(results_fco2_bulk$key)
 
 #knit manuscript
-rmarkdown::render("manuscript_r_v1.Rmd")
+rmarkdown::render("manuscript_r2.Rmd")
 print('Manuscript generated.')
 
-rmarkdown::render("supp_r_v1.Rmd")
+rmarkdown::render("supp_r2.Rmd")
 print('Supplemental Information generated.')
